@@ -34,7 +34,7 @@ const SignUp = () => {
       navigate("/login");
     } catch (error) {
       console.error("Registration failed:", error);
-      toast.error("Đăng ký thất bại. Vui lòng thử lại.");
+      toast.error("Đăng ký thất bại. Vui lòng thử lại di, đang test.");
     } finally {
       setIsLoading(false);
     }
