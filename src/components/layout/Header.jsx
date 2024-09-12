@@ -19,6 +19,11 @@ const Header = () => {
             </li>
             <li>
               <a href="#" className="text-white hover:text-gray-200">
+                About
+              </a>
+            </li>
+            <li>
+              <a href="#" className="text-white hover:text-gray-200">
                 Contact
               </a>
             </li>
