@@ -10,9 +10,15 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded shadow-md">
-        <h2 className="text-2xl font-bold text-center">Forgot Password</h2>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
+        <h2 className="text-3xl font-extrabold text-center text-gray-900">
+          Forgot Password
+        </h2>
+        <p className="text-sm text-center text-gray-600">
+          Enter your email address and we&aposll send you a link to reset your
+          password.
+        </p>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
@@ -29,6 +35,7 @@ const ForgotPassword = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder="you@example.com"
             />
           </div>
           <div>
