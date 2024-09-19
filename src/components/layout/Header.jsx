@@ -1,32 +1,36 @@
+import React from "react";
+import FTS_Logo from "../../assets/FTS_Logo.png";
+import None_Avatar from "../../assets/None_Avatar.jpg";
+import { Link } from "react-router-dom";
+import { PiShoppingCartBold } from "react-icons/pi";
 const Header = () => {
   return (
-    <header className="bg-blue-600 p-4">
+    <header className="p-4">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-white text-2xl font-bold">
-          Ticket Resale Platform
-        </h1>
-        <nav>
-          <ul className="flex space-x-4">
+        <div className="flex flex-col justify-center items-center gap-2">
+          <Link to="/" className="h-[50px]">
+            <img src={FTS_Logo} alt="FTS Logo" className="w-full h-full" />
+          </Link>
+          <span className="text-base italic">The best resell ticket</span>
+        </div>
+        <nav className="text-xl w-auto">
+          <ul className="lg:flex lg:justify-center lg:items-center lg:gap-5">
             <li>
-              <a href="#" className="text-white hover:text-gray-200">
-                Home
-              </a>
+              <Link to={"/"}>Your tickets</Link>
             </li>
             <li>
-              <a href="#" className="text-white hover:text-gray-200">
-                About
-              </a>
+              <Link to={"/"}>Wishlist</Link>
             </li>
             <li>
-              <a href="#" className="text-white hover:text-gray-200">
-                About
-              </a>
+              <PiShoppingCartBold />
             </li>
-            <li>
-              <a href="#" className="text-white hover:text-gray-200">
-                Contact
-              </a>
-            </li>
+            <Link>
+              <img
+                src={None_Avatar}
+                alt="Avatar"
+                className="lg:w-[40px] lg:h-[40px] rounded-full"
+              />
+            </Link>
           </ul>
         </nav>
       </div>
