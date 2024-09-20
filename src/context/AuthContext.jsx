@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import axiosInstance from "../api/axiosConfig";
+import Cookies from "js-cookie";
 
 export const AuthContext = createContext(null);
 
@@ -17,7 +18,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axiosInstance.post("/authentication/login", {
         email,
-
         password,
       });
       const { data } = response.data;
@@ -30,8 +30,8 @@ export const AuthProvider = ({ children }) => {
       };
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("refreshToken", data.refreshToken);
+      Cookies.set("token", data.token);
+      Cookies.set("refreshToken", data.refreshToken);
       return userData;
     } catch (error) {
       console.error("Login failed:", error);
@@ -42,8 +42,8 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
+    Cookies.remove("token");
+    Cookies.remove("refreshToken");
   };
 
   return (
