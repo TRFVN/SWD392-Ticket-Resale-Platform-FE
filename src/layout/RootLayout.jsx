@@ -8,7 +8,7 @@ import { HiOutlineBars3 } from "react-icons/hi2";
 function RootLayout() {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
-  const [showSidebar, setShowSidebar] = useState(false);
+
   if (isLoginPage) {
     return (
       //   <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white w-full">
@@ -21,18 +21,10 @@ function RootLayout() {
 
   return (
     <div className="min-h-screen flex bg-white text-black">
-      {showSidebar && (
-        <div className="fixed left-0 top-0 h-full">
-          <Sidebar />
-        </div>
-      )}
-
       <div
-        className={`flex flex-col flex-grow ${
-          showSidebar && "ml-64"
-        } min-h-screen`}
+        className="flex flex-col flex-grow 
+        min-h-screen"
       >
-        {!showSidebar && <HiOutlineBars3 />}
         <div className="">
           <Header />
         </div>
