@@ -21,14 +21,11 @@ function RootLayout() {
 
   return (
     <div className="min-h-screen flex bg-white text-black">
-      <div
-        className="flex flex-col flex-grow 
-        min-h-screen"
-      >
+      <div className="flex flex-col flex-grow min-h-screen">
         <div className="">
           <Header />
         </div>
-        <main className="flex-grow w-full mt-16 overflow-y-auto">
+        <main className="flex-grow w-full mt-8 px-64 overflow-y-auto">
           <Suspense fallback={<Loader />}>
             <Outlet />
           </Suspense>

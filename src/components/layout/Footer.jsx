@@ -1,10 +1,14 @@
+import { Link } from "react-router-dom";
+
 const Footer = () => {
   return (
     <footer className="grid justify-center items-start lg:grid-cols-12 sm:grid-cols-1 lg:py-10 lg:border-t-2">
       <div className="grid justify-center items-start lg:col-span-4 lg:gap-4 sm:col-span-1 sm:gap-4">
         <div className="lg:font-medium lg:text-lg">INFORMATION</div>
-        <ul className="flex flex-col justify-start items-start lg:gap-3">
-          <li>About Us</li>
+        <ul className="flex flex-col justify-start items-start lg:gap-3 cursor-pointer">
+          <li className="hover:text-blue-800">
+            <Link to={"/about"}>About Us</Link>
+          </li>
           <li>How It Works</li>
           <li>Help Center</li>
           <li>Privacy Policy</li>
