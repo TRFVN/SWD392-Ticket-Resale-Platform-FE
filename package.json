@@ -26,6 +26,7 @@
     "react-router-dom": "^6.26.2",
     "react-toastify": "^10.0.5",
     "redux-persist": "^6.0.0",
+    "tailgrids": "^2.2.7",
     "yup": "^1.4.0"
   },
   "devDependencies": {

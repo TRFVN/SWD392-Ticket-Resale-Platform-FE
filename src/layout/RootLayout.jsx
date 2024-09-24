@@ -22,7 +22,7 @@ function RootLayout() {
   return (
     <div className="min-h-screen flex bg-white text-black">
       <div className="flex flex-col flex-grow min-h-screen">
-        <div className="">
+        <div className="sticky top-0 z-50 bg-white ">
           <Header />
         </div>
         <main className="flex-grow w-full mt-8 px-64 overflow-y-auto">
