@@ -1,10 +1,10 @@
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Footer from "../components/layout/Footer";
 import Loader from "../components/common/Loader";
-import Sidebar from "../components/layout/sidebar";
-import Header from "../components/layout/header";
-
+import Sidebar from "../components/layout/Sidebar";
+import Header from "../components/layout/Header";
+import { HiOutlineBars3 } from "react-icons/hi2";
 function RootLayout() {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
@@ -20,15 +20,12 @@ function RootLayout() {
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-900 text-white">
-      <div className="fixed left-0 top-0 h-full">
-        <Sidebar />
-      </div>
-      <div className="flex flex-col flex-grow ml-64 min-h-screen">
-        <div className="fixed top-0 right-0 left-64 z-10">
+    <div className="min-h-screen flex bg-white text-black">
+      <div className="flex flex-col flex-grow min-h-screen">
+        <div className="">
           <Header />
         </div>
-        <main className="flex-grow w-full mt-16 overflow-y-auto">
+        <main className="flex-grow w-full mt-8 px-64 overflow-y-auto">
           <Suspense fallback={<Loader />}>
             <Outlet />
           </Suspense>
