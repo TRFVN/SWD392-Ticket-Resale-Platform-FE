@@ -20,6 +20,24 @@ function About() {
       description: "Founder & CFO",
       img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRY-_R6V-nDMdEKuLC_LNEZG_BJ-6-m74_e1w&s",
     },
+    {
+      id: 4,
+      name: "Tuan Phan",
+      description: "Founder & COO",
+      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcFhKPBv-7Rl3YA31mX4L1B1ghWvVJbZKnw2NNUwJfwdfp-xckfW0dA7kAvtSOT8eie8A&usqp=CAU",
+    },
+    {
+      id: 5,
+      name: "Long Nguyen",
+      description: "Business Analyst",
+      img: "https://cdn.tuoitre.vn/zoom/700_700/471584752817336320/2024/4/11/129160368c101e5fedac273898f1088230ab766de576d4a5000556831321000x563-16799876565071096501530-6-0-517-976-crop-1712806214230929918432.jpg",
+    },
+    {
+      id: 6,
+      name: "Anh Vu",
+      description: "PM",
+      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSN1i7HcGeb-5UJVClL9O39lWhEWF-NyKlWMg&s",
+    },
   ]);
   return (
     <div className="flex flex-col justify-center items-start gap-8 w-full">
@@ -36,14 +54,14 @@ function About() {
         platform for fans wishing to buy and sell tickets globally.
       </div>
       <div className="font-bold text-2xl">FOUNDERS</div>
-      <div className="flex flex-row justify-between items-center">
+      <div className="grid lg:grid-cols-12 sm:grid-cols-2 gridjustify-between items-center">
         {founders &&
           founders.length > 0 &&
           founders.map((founder, index) => {
             return (
               <div
                 key={founder.id}
-                className="flex flex-col justify-start items-center gap-6 h-[300px] w-[300px]"
+                className="lg:col-span-3 sm:col-span-1 flex flex-col justify-start items-center gap-6 h-[300px] w-[300px]"
               >
                 <img
                   src={founder.img}
@@ -51,7 +69,7 @@ function About() {
                   className="w-[150px] h-[150px] object-contain rounded-full"
                 />
                 <span className="text-lg font-semibold italic">
-                  {founder.name}
+                  {founder.name} - {founder.description}
                 </span>
               </div>
             );

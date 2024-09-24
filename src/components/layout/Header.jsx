@@ -4,6 +4,9 @@ import None_Avatar from "../../assets/None_Avatar.jpg";
 import { Link } from "react-router-dom";
 import { PiShoppingCartBold } from "react-icons/pi";
 import Search from "../common/Search";
+import animationData from "../common/NotificationV3/notification-V3.json";
+import Lottie from "lottie-react";
+
 const Header = () => {
   return (
     <header className="my-6">
@@ -24,6 +27,9 @@ const Header = () => {
             </li>
             <li>
               <Link to={"/"}>Wishlist</Link>
+            </li>
+            <li>
+              <Lottie animationData={animationData} loop={true} />
             </li>
             <li>
               <PiShoppingCartBold />

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-
+import animationData from "../common/Alert triangle/alertTriangle.json";
+import Lottie from "lottie-react";
 const Footer = () => {
   return (
     <footer className="grid justify-center items-start lg:grid-cols-12 sm:grid-cols-1 lg:py-10 lg:border-t-2">
@@ -9,6 +10,7 @@ const Footer = () => {
           <li className="hover:text-blue-800">
             <Link to={"/about"}>About Us</Link>
           </li>
+          {/* <Lottie animationData={animationData} loop={true} /> */}
           <li>How It Works</li>
           <li>Help Center</li>
           <li>Privacy Policy</li>
