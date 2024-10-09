@@ -1,5 +1,5 @@
 import React from "react";
-import FTS_Logo from "../../assets/FTS_Logo.png";
+import TicketHub_Logo_R from "../../assets/TicketHub_Logo_R.png";
 import None_Avatar from "../../assets/None_Avatar.jpg";
 import { Link } from "react-router-dom";
 import { PiShoppingCartBold } from "react-icons/pi";
@@ -13,7 +13,11 @@ const Header = () => {
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex flex-col justify-center items-center gap-2">
           <Link to="/" className="h-[50px]">
-            <img src={FTS_Logo} alt="FTS Logo" className="w-full h-full" />
+            <img
+              src={TicketHub_Logo_R}
+              alt="Ticket Hub Logo"
+              className="w-full h-full"
+            />
           </Link>
           <span className="text-base italic">
             The best resell ticket platform
@@ -23,7 +27,7 @@ const Header = () => {
         <nav className="text-xl w-auto">
           <ul className="lg:flex lg:justify-center lg:items-center lg:gap-5">
             <li>
-              <Link to={"/"}>Your tickets</Link>
+              <Link to={"/tickets"}>Your tickets</Link>
             </li>
             <li>
               <Link to={"/"}>Wishlist</Link>

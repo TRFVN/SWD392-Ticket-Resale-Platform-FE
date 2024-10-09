@@ -1,8 +1,8 @@
 import React from "react";
 
-function Search() {
+function SearchEvent() {
   return (
-    <form className="w-1/2 mx-auto">
+    <form className="w-1/3 mx-auto">
       <label
         htmlFor="default-search"
         className="mb-2 text-sm font-medium text-gray-900 sr-only"
@@ -31,7 +31,7 @@ function Search() {
           type="search"
           id="default-search"
           className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none"
-          placeholder="Search for an event, artist, venue or city..."
+          placeholder="Search By Name ..."
           required
         />
         <button
@@ -45,4 +45,4 @@ function Search() {
   );
 }
 
-export default Search;
+export default SearchEvent;
