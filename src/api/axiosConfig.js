@@ -10,8 +10,9 @@ const axiosInstance = axios.create({
 });
 
 const publicEndpoints = [
+  "/Auth/sign-up",
   "/Auth/sign-in",
-  // "/Auth/sign-in-google",
+  "/Auth/sign-in-google",
   "/Auth/forgot-password",
   "/Auth/send-verify-email",
 ];
@@ -22,7 +23,18 @@ axiosInstance.interceptors.request.use(
       config.url.endsWith(endpoint),
     );
 
-    if (!isPublicEndpoint) {
+    if (config.url.endsWith("/Auth/sign-in-google")) {
+      const googleToken = localStorage.getItem("googleToken");
+
+      if (googleToken) {
+        if (config.method === "post") {
+          config.data = {
+            ...config.data,
+            token: googleToken,
+          };
+        }
+      }
+    } else if (!isPublicEndpoint) {
       const token = Cookies.get("accessToken");
       if (token) {
         config.headers["Authorization"] = `Bearer ${token}`;
