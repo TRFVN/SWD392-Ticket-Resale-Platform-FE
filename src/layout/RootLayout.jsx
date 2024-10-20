@@ -6,6 +6,7 @@ import Sidebar from "../components/layout/Sidebar";
 import Header from "../components/layout/Header";
 import { HiOutlineBars3 } from "react-icons/hi2";
 import Banner from "../components/common/Banner";
+import BreadCrumb from "../components/common/BreadCrumb";
 function RootLayout() {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
@@ -26,9 +27,9 @@ function RootLayout() {
         <div className="sticky top-0 z-50 bg-white ">
           <Header />
         </div>
-        <Banner />
-        <main className="flex-grow w-full mt-8 px-64 overflow-y-auto">
+        <main className="flex-grow w-full px-72 overflow-y-auto">
           <Suspense fallback={<Loader />}>
+            <BreadCrumb />
             <Outlet />
           </Suspense>
         </main>
