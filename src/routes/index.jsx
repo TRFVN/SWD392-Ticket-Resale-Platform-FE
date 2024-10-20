@@ -7,6 +7,7 @@ import Home from "../pages/home/Home";
 import About from "../pages/About/About";
 import Ticket from "../pages/seller/ticket";
 import NotFound from "../pages/auth/NotFound";
+import Profile from "../pages/userprofile/Profile";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -17,6 +18,8 @@ export const router = createBrowserRouter([
       { path: "signup", element: <SignUp /> },
       { path: "about", element: <About /> },
       { path: "tickets", element: <Ticket /> },
+      { path: "notfound", element: <NotFound /> },
+      { path: "profile", element: <Profile /> },
     ],
   },
   {

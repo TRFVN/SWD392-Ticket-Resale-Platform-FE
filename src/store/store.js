@@ -10,6 +10,7 @@ import {
   REGISTER,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
+import authReducer from "./slice/authSlice"; // Đảm bảo đường dẫn này chính xác
 
 const persistConfig = {
   key: "root",
@@ -17,7 +18,12 @@ const persistConfig = {
   whitelist: ["auth", "theme", "profile"],
 };
 
-const rootReducer = combineReducers({});
+const rootReducer = combineReducers({
+  auth: authReducer,
+  // Thêm các reducer khác ở đây nếu có
+  // theme: themeReducer,
+  // profile: profileReducer,
+});
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 

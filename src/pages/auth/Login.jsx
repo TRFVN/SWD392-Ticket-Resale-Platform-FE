@@ -1,208 +1,299 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
-import { motion, AnimatePresence } from "framer-motion";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useGoogleLogin } from "@react-oauth/google";
 import {
   FaEnvelope,
-  FaLock,
   FaEye,
   FaEyeSlash,
-  FaUserGraduate,
-  FaChalkboardTeacher,
-  FaFacebook,
+  FaLock,
+  FaChevronRight,
   FaGoogle,
+  FaFacebook,
 } from "react-icons/fa";
-import { useAuth } from "../../hooks/useAuth"; // Assuming useAuth is defined in a hooks directory
 import { FaX } from "react-icons/fa6";
-import { PiFacebookLogoThin } from "react-icons/pi";
+import { AuthContext } from "../../context/AuthContext";
 
-const loginSchema = Yup.object().shape({
-  email: Yup.string().email("Invalid email").required("Email is required"),
-  password: Yup.string().required("Password is required"),
-});
+const InputField = ({
+  icon,
+  label,
+  name,
+  type,
+  placeholder,
+  errors,
+  touched,
+}) => (
+  <motion.div
+    className="mb-6"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+  >
+    <label
+      htmlFor={name}
+      className="block text-white text-sm font-medium mb-2 flex items-center opacity-80"
+    >
+      {icon}
+      <span className="ml-2">{label}</span>
+    </label>
+    <div className="relative group">
+      <Field
+        name={name}
+        type={type}
+        placeholder={placeholder}
+        className={`w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-400 
+                   focus:outline-none focus:ring-2 focus:ring-[#af1f24] focus:bg-white/15
+                   transition-all duration-300 backdrop-blur-sm
+                   border ${
+                     errors[name] && touched[name]
+                       ? "border-red-500"
+                       : "border-white/10 hover:border-white/20"
+                   }`}
+      />
+      {errors[name] && touched[name] && (
+        <p className="mt-1 text-red-500 text-sm">{errors[name]}</p>
+      )}
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10" />
+    </div>
+  </motion.div>
+);
 
-export default function Login() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
+const PasswordField = ({
+  label,
+  name,
+  placeholder,
+  showPassword,
+  togglePasswordVisibility,
+  errors,
+  touched,
+}) => (
+  <motion.div
+    className="mb-6"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+  >
+    <label
+      htmlFor={name}
+      className="block text-white text-sm font-medium mb-2 flex items-center opacity-80"
+    >
+      <FaLock className="text-white" />
+      <span className="ml-2">{label}</span>
+    </label>
+    <div className="relative group">
+      <Field
+        name={name}
+        type={showPassword ? "text" : "password"}
+        placeholder={placeholder}
+        className={`w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-400 
+                   focus:outline-none focus:ring-2 focus:ring-[#af1f24] focus:bg-white/15
+                   transition-all duration-300 backdrop-blur-sm
+                   border ${
+                     errors[name] && touched[name]
+                       ? "border-red-500"
+                       : "border-white/10 hover:border-white/20"
+                   }`}
+      />
+      <button
+        type="button"
+        onClick={togglePasswordVisibility}
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white transition-colors duration-200"
+      >
+        {showPassword ? <FaEyeSlash /> : <FaEye />}
+      </button>
+      {errors[name] && touched[name] && (
+        <p className="mt-1 text-red-500 text-sm">{errors[name]}</p>
+      )}
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10" />
+    </div>
+  </motion.div>
+);
+
+const Login = () => {
   const navigate = useNavigate();
-  const { login, loginWithGoogle, loginAsInstructorWithGoogle } = useAuth(); // Using the login functions from useAuth
+  const {
+    login,
+    error: authError,
+    loading,
+    clearError,
+  } = useContext(AuthContext);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = async (values, { setSubmitting }) => {
+  const validationSchema = Yup.object().shape({
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Email is required"),
+    password: Yup.string().required("Password is required"),
+    rememberMe: Yup.boolean(),
+  });
+
+  const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {
-      await login(values.email, values.password);
-      navigate("/dashboard"); // Assuming there's a dashboard route
-    } catch (error) {
-      toast.error("Login failed. Please try again.");
+      const response = await login(values.email, values.password);
+      if (response && response.result) {
+        if (values.rememberMe) {
+          localStorage.setItem("rememberMe", "true");
+        } else {
+          localStorage.removeItem("rememberMe");
+        }
+
+        const role = response.result.role?.toLowerCase();
+        switch (role) {
+          case "admin":
+            navigate("/admin/dashboard");
+            break;
+          case "user":
+            navigate("/dashboard");
+            break;
+          default:
+            navigate("/dashboard");
+        }
+      }
+    } catch (err) {
+      setFieldError("submit", err.message);
+    } finally {
       setSubmitting(false);
     }
   };
 
-  const handleGoogleLoginSuccess = async (codeResponse, role) => {
-    try {
-      await loginWithGoogle(codeResponse, role);
-      navigate("/dashboard"); // Assuming there's a dashboard route
-    } catch (error) {
-      toast.error("Google login failed. Please try again.");
-    }
-  };
-
-  const googleLogin = useGoogleLogin({
-    onSuccess: (codeResponse) =>
-      handleGoogleLoginSuccess(codeResponse, "STUDENT"),
-    onError: () => {
-      toast.error("Google login failed. Please try again.");
-    },
-  });
-
-  const instructorGoogleLogin = useGoogleLogin({
-    onSuccess: (codeResponse) =>
-      handleGoogleLoginSuccess(codeResponse, "INSTRUCTOR"),
-    onError: () => {
-      toast.error("Google login failed. Please try again.");
-    },
-  });
-
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
+      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5"></div>
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="m-auto w-full max-w-md p-8 bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-700"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-lg mx-4 relative z-10"
       >
-        <h1 className="text-3xl font-bold mb-6 text-white text-center">
-          Login
-        </h1>
-        <AnimatePresence mode="wait">
-          <Formik
-            initialValues={{ email: "", password: "" }}
-            validationSchema={loginSchema}
-            onSubmit={handleSubmit}
-          >
-            {({ errors, touched, isSubmitting }) => (
-              <Form className="space-y-4">
-                <div className="relative">
-                  <FaEnvelope
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={18}
-                  />
-                  <Field
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="backdrop-blur-xl bg-black/30 rounded-3xl shadow-2xl overflow-hidden border border-white/10"
+        >
+          <div className="p-8 lg:p-12">
+            <motion.div
+              initial={{ y: -20 }}
+              animate={{ y: 0 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+              className="text-center mb-12"
+            >
+              <motion.img
+                src="/logo.png"
+                alt="Logo"
+                className="h-16 w-auto mx-auto mb-6"
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+              />
+              <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">
+                Welcome Back
+              </h1>
+              <p className="text-gray-400">Sign in to continue your journey</p>
+            </motion.div>
+
+            <Formik
+              initialValues={{ email: "", password: "", rememberMe: false }}
+              validationSchema={validationSchema}
+              onSubmit={handleSubmit}
+            >
+              {({ errors, touched, isSubmitting }) => (
+                <Form className="space-y-4">
+                  <InputField
+                    icon={<FaEnvelope className="text-white" />}
+                    label="Email"
                     name="email"
                     type="email"
-                    placeholder="Email"
-                    className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                    placeholder="Enter your email"
+                    errors={errors}
+                    touched={touched}
                   />
-                </div>
-                {touched.email && errors.email && (
-                  <div className="text-red-500 text-sm mt-1">
-                    {errors.email}
-                  </div>
-                )}
 
-                <div className="relative">
-                  <FaLock
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={18}
-                  />
-                  <Field
+                  <PasswordField
+                    label="Password"
                     name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    className="w-full pl-10 pr-10 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                    placeholder="Enter your password"
+                    showPassword={showPassword}
+                    togglePasswordVisibility={() =>
+                      setShowPassword(!showPassword)
+                    }
+                    errors={errors}
+                    touched={touched}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-200"
+
+                  {/* Display global error if any */}
+                  {(authError || errors.submit) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-red-500 text-sm text-center"
+                    >
+                      {authError || errors.submit}
+                    </motion.div>
+                  )}
+
+                  <motion.div
+                    className="flex items-center justify-between text-sm"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
                   >
-                    {showPassword ? (
-                      <FaEyeSlash size={18} />
-                    ) : (
-                      <FaEye size={18} />
-                    )}
-                  </button>
-                </div>
-                {touched.password && errors.password && (
-                  <div className="text-red-500 text-sm mt-1">
-                    {errors.password}
-                  </div>
-                )}
+                    <label className="flex items-center space-x-2 text-gray-400 hover:text-white cursor-pointer">
+                      <Field
+                        type="checkbox"
+                        name="rememberMe"
+                        className="rounded border-gray-600 text-[#af1f24] focus:ring-[#af1f24]"
+                      />
+                      <span>Remember me</span>
+                    </label>
+                    <Link
+                      to="/forgot-password"
+                      className="text-[#af1f24] hover:text-[#d4363c] transition-colors duration-200"
+                    >
+                      Forgot password?
+                    </Link>
+                  </motion.div>
 
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  type="submit"
-                  className={`w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-all duration-300 ${
-                    isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Logging in..." : "Login"}
-                </motion.button>
-              </Form>
-            )}
-          </Formik>
-        </AnimatePresence>
-
-        <div className="mt-6 space-y-4">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-600"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gray-800 text-gray-400">
-                Or continue with
-              </span>
-            </div>
+                  <motion.div
+                    className="mt-8"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      type="submit"
+                      disabled={isSubmitting || loading}
+                      className={`w-full px-6 py-4 bg-gradient-to-r from-[#af1f24] to-[#d4363c] text-white rounded-xl
+                               hover:from-[#9a1b1f] hover:to-[#bf2f34]
+                               focus:outline-none focus:ring-2 focus:ring-[#af1f24] focus:ring-offset-2 
+                               transition-all duration-200 text-sm font-semibold
+                               flex items-center justify-center space-x-2 group
+                               ${
+                                 isSubmitting || loading
+                                   ? "opacity-70 cursor-not-allowed"
+                                   : ""
+                               }`}
+                    >
+                      {isSubmitting || loading ? (
+                        <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      ) : (
+                        <>
+                          <span>Sign In</span>
+                          <FaChevronRight className="transition-transform duration-200 group-hover:translate-x-1" />
+                        </>
+                      )}
+                    </motion.button>
+                  </motion.div>
+                </Form>
+              )}
+            </Formik>
           </div>
-          <div className="flex flex-wrap justify-center gap-4 mt-6">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => googleLogin()}
-              className="flex items-center justify-center px-4 py-2 border border-gray-600 rounded-lg shadow-sm text-sm font-medium text-white bg-gray-700 hover:bg-gray-600"
-            >
-              <FaGoogle className="w-5 h-5 mr-2" />
-              Google
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => PiFacebookLogoThin()}
-              className="flex items-center justify-center px-4 py-2 border border-gray-600 rounded-lg shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-400"
-            >
-              <FaFacebook className="w-5 h-5 mr-2" />
-              Facebook
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => xLogin()}
-              className="flex items-center justify-center px-4 py-2 border border-gray-600 rounded-lg shadow-sm text-sm font-medium text-white bg-red-500 hover:bg-red-400"
-            >
-              <FaX className="w-5 h-5 mr-2" />X
-            </motion.button>
-          </div>
-        </div>
-
-        <p className="text-center text-sm text-gray-400 mt-6">
-          Don&apos;t have an account?{" "}
-          <button
-            type="button"
-            onClick={() => navigate("/signup")}
-            className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
-          >
-            Sign up
-          </button>
-        </p>
+        </motion.div>
       </motion.div>
-      <ToastContainer theme="dark" />
     </div>
   );
-}
+};
+
+export default Login;

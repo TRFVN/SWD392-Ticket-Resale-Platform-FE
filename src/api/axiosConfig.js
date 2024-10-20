@@ -1,88 +1,95 @@
 import axios from "axios";
 import Cookies from "js-cookie";
+
+const CORS_PROXY = "https://cors-anywhere.herokuapp.com/";
+const BASE_URL =
+  "https://tickethub-f6gxgnhngpbue9gs.southeastasia-01.azurewebsites.net/api";
+
 const axiosInstance = axios.create({
-  baseURL:
-    "https://tickethub-f6gxgnhngpbue9gs.southeastasia-01.azurewebsites.net/api",
-  timeout: 5000,
+  baseURL: `${CORS_PROXY}${BASE_URL}`,
+  timeout: 10000,
   headers: {
     "Content-Type": "application/json",
+    "X-Requested-With": "XMLHttpRequest",
   },
 });
 
-const publicEndpoints = [
-  "/Auth/sign-up",
-  "/Auth/sign-in",
-  "/Auth/sign-in-google",
-  "/Auth/forgot-password",
-  "/Auth/send-verify-email",
-];
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const isPublicEndpoint = publicEndpoints.some((endpoint) =>
-      config.url.endsWith(endpoint),
-    );
-
-    if (config.url.endsWith("/Auth/sign-in-google")) {
-      const googleToken = localStorage.getItem("googleToken");
-
-      if (googleToken) {
-        if (config.method === "post") {
-          config.data = {
-            ...config.data,
-            token: googleToken,
-          };
-        }
-      }
-    } else if (!isPublicEndpoint) {
-      const token = Cookies.get("accessToken");
-      if (token) {
-        config.headers["Authorization"] = `Bearer ${token}`;
-      }
+    const token = Cookies.get("accessToken");
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
-
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
-// Response interceptor
 axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      const refreshToken = localStorage.getItem("refreshToken");
-
-      try {
-        const res = await axiosInstance.post("/Auth/refresh-token", {
-          refreshToken,
-        });
-
-        if (res.status === 200) {
-          Cookies.set("accessToken", res.result.accessToken, {
-            secure: true,
-            sameSite: "strict",
-          });
-
-          localStorage.setItem("refreshToken", res.result.refreshToken);
-
-          axiosInstance.defaults.headers.common[
-            "Authorization"
-          ] = `Bearer ${res.result.token}`;
-
-          return axiosInstance(originalRequest);
-        }
-      } catch (refreshError) {
-        console.error("Error refreshing token:", refreshError);
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers["Authorization"] = "Bearer " + token;
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
       }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      return new Promise((resolve, reject) => {
+        const refreshToken = localStorage.getItem("refreshToken");
+        axiosInstance
+          .post("/Auth/refresh-token", { refreshToken })
+          .then((res) => {
+            if (res.data?.result?.accessToken) {
+              const newAccessToken = res.data.result.accessToken;
+              Cookies.set("accessToken", newAccessToken, {
+                secure: true,
+                sameSite: "strict",
+              });
+              axiosInstance.defaults.headers.common["Authorization"] =
+                "Bearer " + newAccessToken;
+              originalRequest.headers["Authorization"] =
+                "Bearer " + newAccessToken;
+              processQueue(null, newAccessToken);
+              resolve(axiosInstance(originalRequest));
+            } else {
+              processQueue(new Error("Failed to refresh token"), null);
+              reject(error);
+            }
+          })
+          .catch((refreshError) => {
+            processQueue(refreshError, null);
+            reject(refreshError);
+          })
+          .finally(() => {
+            isRefreshing = false;
+          });
+      });
     }
 
     return Promise.reject(error);

@@ -1,42 +1,43 @@
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Footer from "../components/layout/Footer";
 import Loader from "../components/common/Loader";
-import Sidebar from "../components/layout/Sidebar";
 import Header from "../components/layout/Header";
-import { HiOutlineBars3 } from "react-icons/hi2";
-import Banner from "../components/common/Banner";
 import BreadCrumb from "../components/common/BreadCrumb";
-function RootLayout() {
-  const location = useLocation();
-  const isLoginPage = location.pathname === "/login";
 
-  if (isLoginPage) {
-    return (
-      //   <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white w-full">
-      <Suspense fallback={<Loader />}>
-        <Outlet />
-      </Suspense>
-      //   </div>
-    );
-  }
+const AuthLayout = () => (
+  <Suspense fallback={<Loader />}>
+    <Outlet />
+  </Suspense>
+);
+
+const MainLayout = () => {
+  const location = useLocation();
+  const isProfilePage = location.pathname.startsWith("/profile");
 
   return (
-    <div className="min-h-screen flex bg-white text-black">
-      <div className="flex flex-col flex-grow min-h-screen">
-        <div className="sticky top-0 z-50 bg-white ">
-          <Header />
-        </div>
-        <main className="flex-grow w-full px-72 overflow-y-auto">
-          <Suspense fallback={<Loader />}>
-            <BreadCrumb />
-            <Outlet />
-          </Suspense>
-        </main>
-        <Footer />
-      </div>
+    <div className="min-h-screen flex flex-col bg-white text-black">
+      <Header />
+      <main
+        className={`flex-grow w-full ${
+          isProfilePage ? "" : "container mx-auto px-4 sm:px-6 lg:px-8"
+        } pt-24`}
+      >
+        <Suspense fallback={<Loader />}>
+          {!isProfilePage && <BreadCrumb />}
+          <Outlet />
+        </Suspense>
+      </main>
+      <Footer />
     </div>
   );
-}
+};
+
+const RootLayout = () => {
+  const { pathname } = useLocation();
+  const isAuthPage = ["/login", "/signup"].includes(pathname);
+
+  return isAuthPage ? <AuthLayout /> : <MainLayout />;
+};
 
 export default RootLayout;
