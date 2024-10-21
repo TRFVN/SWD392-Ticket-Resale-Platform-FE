@@ -1,20 +1,17 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
-import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import Cookies from "js-cookie";
 
 function PrivateRoute({ allowedRoles }) {
-  const { decodedToken } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     const checkAuth = () => {
-      const isAuthenticated = !!decodedToken?.role;
-      const hasRequiredRole = allowedRoles
-        ? allowedRoles.includes(decodedToken?.role)
-        : true;
+      const accessToken = Cookies.get("accessToken");
+      const isAuthenticated = !!accessToken;
 
       if (!isAuthenticated) {
         toast.error("You need to log in to access this page.", {
@@ -29,21 +26,12 @@ function PrivateRoute({ allowedRoles }) {
           state: { from: location.pathname },
           replace: true,
         });
-      } else if (!hasRequiredRole) {
-        toast.error("You do not have permission to access this page.", {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-        navigate("/", { replace: true });
       }
+      // Xóa phần kiểm tra role vì chúng ta không có thông tin về role từ access token
     };
 
     checkAuth();
-  }, [decodedToken, allowedRoles, navigate, location]);
+  }, [navigate, location]);
 
   return <Outlet />;
 }

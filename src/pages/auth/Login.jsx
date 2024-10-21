@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import {
@@ -12,9 +12,10 @@ import {
   FaGoogle,
   FaFacebook,
 } from "react-icons/fa";
-import { FaX } from "react-icons/fa6";
 import { AuthContext } from "../../context/AuthContext";
-
+import { useGoogleLogin } from "@react-oauth/google";
+import TicketLogo from "../../assets/TicketHub_Logo.png";
+import axios from "axios";
 const InputField = ({
   icon,
   label,
@@ -43,7 +44,7 @@ const InputField = ({
         type={type}
         placeholder={placeholder}
         className={`w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-400 
-                   focus:outline-none focus:ring-2 focus:ring-[#af1f24] focus:bg-white/15
+                   focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white/15
                    transition-all duration-300 backdrop-blur-sm
                    border ${
                      errors[name] && touched[name]
@@ -52,9 +53,15 @@ const InputField = ({
                    }`}
       />
       {errors[name] && touched[name] && (
-        <p className="mt-1 text-red-500 text-sm">{errors[name]}</p>
+        <motion.p
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-1 text-red-500 text-sm"
+        >
+          {errors[name]}
+        </motion.p>
       )}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10" />
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10" />
     </div>
   </motion.div>
 );
@@ -87,7 +94,7 @@ const PasswordField = ({
         type={showPassword ? "text" : "password"}
         placeholder={placeholder}
         className={`w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-400 
-                   focus:outline-none focus:ring-2 focus:ring-[#af1f24] focus:bg-white/15
+                   focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white/15
                    transition-all duration-300 backdrop-blur-sm
                    border ${
                      errors[name] && touched[name]
@@ -103,9 +110,15 @@ const PasswordField = ({
         {showPassword ? <FaEyeSlash /> : <FaEye />}
       </button>
       {errors[name] && touched[name] && (
-        <p className="mt-1 text-red-500 text-sm">{errors[name]}</p>
+        <motion.p
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-1 text-red-500 text-sm"
+        >
+          {errors[name]}
+        </motion.p>
       )}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10" />
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10" />
     </div>
   </motion.div>
 );
@@ -157,139 +170,209 @@ const Login = () => {
     }
   };
 
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      console.log("Token Response:", tokenResponse);
+
+      // Gọi API Google để lấy thông tin người dùng
+      try {
+        const userInfo = await axios.get(
+          "https://www.googleapis.com/oauth2/v3/userinfo",
+          {
+            headers: {
+              Authorization: `Bearer ${tokenResponse.access_token}`,
+            },
+          },
+        );
+        console.log("User Info:", userInfo.data);
+      } catch (error) {
+        console.error("Failed to fetch user info:", error);
+      }
+    },
+    onError: () => console.log("Login Failed"),
+    scope: "profile email", // Yêu cầu phạm vi profile và email để lấy thông tin
+  });
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 py-12 px-4 sm:px-6 lg:px-8">
       <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5"></div>
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-lg mx-4 relative z-10"
+        className="max-w-md w-full space-y-8 relative z-10"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="backdrop-blur-xl bg-black/30 rounded-3xl shadow-2xl overflow-hidden border border-white/10"
+          className="backdrop-blur-xl bg-black/30 rounded-3xl shadow-2xl overflow-hidden border border-white/10 p-8"
         >
-          <div className="p-8 lg:p-12">
-            <motion.div
-              initial={{ y: -20 }}
-              animate={{ y: 0 }}
+          <div className="text-center mb-10">
+            <motion.img
+              src={TicketLogo}
+              alt="Logo"
+              className="h-20 w-auto mx-auto mb-6"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 260, damping: 20 }}
-              className="text-center mb-12"
-            >
-              <motion.img
-                src="/logo.png"
-                alt="Logo"
-                className="h-16 w-auto mx-auto mb-6"
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: "spring", stiffness: 260, damping: 20 }}
-              />
-              <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">
-                Welcome Back
-              </h1>
-              <p className="text-gray-400">Sign in to continue your journey</p>
-            </motion.div>
+            />
+            <h2 className="text-3xl font-extrabold text-white mb-2">
+              Sign in to your account
+            </h2>
+            <p className="text-sm text-gray-300">
+              Or start your 14-day free trial
+            </p>
+          </div>
 
-            <Formik
-              initialValues={{ email: "", password: "", rememberMe: false }}
-              validationSchema={validationSchema}
-              onSubmit={handleSubmit}
-            >
-              {({ errors, touched, isSubmitting }) => (
-                <Form className="space-y-4">
-                  <InputField
-                    icon={<FaEnvelope className="text-white" />}
-                    label="Email"
-                    name="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    errors={errors}
-                    touched={touched}
-                  />
+          <Formik
+            initialValues={{ email: "", password: "", rememberMe: false }}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ errors, touched, isSubmitting }) => (
+              <Form className="mt-8 space-y-6">
+                <InputField
+                  icon={<FaEnvelope className="text-white" />}
+                  label="Email address"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  errors={errors}
+                  touched={touched}
+                />
 
-                  <PasswordField
-                    label="Password"
-                    name="password"
-                    placeholder="Enter your password"
-                    showPassword={showPassword}
-                    togglePasswordVisibility={() =>
-                      setShowPassword(!showPassword)
-                    }
-                    errors={errors}
-                    touched={touched}
-                  />
+                <PasswordField
+                  label="Password"
+                  name="password"
+                  placeholder="Enter your password"
+                  showPassword={showPassword}
+                  togglePasswordVisibility={() =>
+                    setShowPassword(!showPassword)
+                  }
+                  errors={errors}
+                  touched={touched}
+                />
 
-                  {/* Display global error if any */}
+                <AnimatePresence>
                   {(authError || errors.submit) && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-red-500 text-sm text-center"
+                      exit={{ opacity: 0, y: -10 }}
+                      className="text-red-500 text-sm text-center bg-red-100/10 border border-red-400/50 rounded-lg p-3"
                     >
                       {authError || errors.submit}
                     </motion.div>
                   )}
+                </AnimatePresence>
 
-                  <motion.div
-                    className="flex items-center justify-between text-sm"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <label className="flex items-center space-x-2 text-gray-400 hover:text-white cursor-pointer">
-                      <Field
-                        type="checkbox"
-                        name="rememberMe"
-                        className="rounded border-gray-600 text-[#af1f24] focus:ring-[#af1f24]"
-                      />
-                      <span>Remember me</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <input
+                      id="remember-me"
+                      name="remember-me"
+                      type="checkbox"
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label
+                      htmlFor="remember-me"
+                      className="ml-2 block text-sm text-gray-300"
+                    >
+                      Remember me
                     </label>
+                  </div>
+
+                  <div className="text-sm">
                     <Link
                       to="/forgot-password"
-                      className="text-[#af1f24] hover:text-[#d4363c] transition-colors duration-200"
+                      className="font-medium text-indigo-400 hover:text-indigo-300"
                     >
-                      Forgot password?
+                      Forgot your password?
                     </Link>
-                  </motion.div>
+                  </div>
+                </div>
 
-                  <motion.div
-                    className="mt-8"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
+                <div>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    disabled={isSubmitting || loading}
+                    className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+                      isSubmitting || loading
+                        ? "opacity-70 cursor-not-allowed"
+                        : ""
+                    }`}
                   >
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      type="submit"
-                      disabled={isSubmitting || loading}
-                      className={`w-full px-6 py-4 bg-gradient-to-r from-[#af1f24] to-[#d4363c] text-white rounded-xl
-                               hover:from-[#9a1b1f] hover:to-[#bf2f34]
-                               focus:outline-none focus:ring-2 focus:ring-[#af1f24] focus:ring-offset-2 
-                               transition-all duration-200 text-sm font-semibold
-                               flex items-center justify-center space-x-2 group
-                               ${
-                                 isSubmitting || loading
-                                   ? "opacity-70 cursor-not-allowed"
-                                   : ""
-                               }`}
-                    >
-                      {isSubmitting || loading ? (
-                        <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                      ) : (
-                        <>
-                          <span>Sign In</span>
-                          <FaChevronRight className="transition-transform duration-200 group-hover:translate-x-1" />
-                        </>
-                      )}
-                    </motion.button>
-                  </motion.div>
-                </Form>
-              )}
-            </Formik>
+                    {isSubmitting || loading ? (
+                      <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    ) : (
+                      <>
+                        <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                          <FaLock
+                            className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
+                            aria-hidden="true"
+                          />
+                        </span>
+                        Sign in
+                      </>
+                    )}
+                  </motion.button>
+                </div>
+              </Form>
+            )}
+          </Formik>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300/30"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-black/30 text-gray-300"></span>
+              </div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <button
+                  onClick={() => googleLogin()}
+                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300/30 rounded-md shadow-sm bg-white/10 text-sm font-medium text-white hover:bg-white/20 transition-colors duration-200"
+                >
+                  <FaGoogle className="h-5 w-5 text-white" />
+                  <span className="ml-2">Google</span>
+                </button>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <button
+                  onClick={() => {
+                    /* Implement Facebook login */
+                  }}
+                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300/30 rounded-md shadow-sm bg-white/10 text-sm font-medium text-white hover:bg-white/20 transition-colors duration-200"
+                >
+                  <FaFacebook className="h-5 w-5 text-white" />
+                  <span className="ml-2">Facebook</span>
+                </button>
+              </motion.div>
+            </div>
           </div>
+
+          <p className="mt-8 text-center text-sm text-gray-400">
+            Not a member?{" "}
+            <Link
+              to="/signup"
+              className="font-medium text-indigo-400 hover:text-indigo-300"
+            >
+              Start a 14 day free trial
+            </Link>
+          </p>
         </motion.div>
       </motion.div>
     </div>

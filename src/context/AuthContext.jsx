@@ -9,6 +9,7 @@ import {
   setError,
   logout,
 } from "../store/slice/authSlice";
+import { toast } from "react-toastify";
 
 export const AuthContext = createContext(null);
 
@@ -101,8 +102,20 @@ export function AuthProvider({ children }) {
       const response = await axiosInstance.post("/Auth/sign-up", userData);
 
       if (response.data && response.data.isSuccess) {
-        // Optionally, you can automatically log the user in after successful signup
-        // or just return the response and handle the next steps in the component
+        try {
+          await axiosInstance.post("/Auth/send-verify-email", {
+            email: userData.email,
+          });
+          toast.success(
+            "Sign up successful. Verification email sent. Please check your inbox.",
+          );
+        } catch (verifyError) {
+          console.error("Error sending verification email:", verifyError);
+          toast.warning(
+            "Sign up successful, but there was an issue sending the verification email. Please try to verify your email later.",
+          );
+        }
+
         return response.data;
       } else {
         throw new Error(response.data.message || "Signup failed");
@@ -113,6 +126,7 @@ export function AuthProvider({ children }) {
         error.message ||
         "An error occurred during signup";
       dispatch(setError(errorMessage));
+      toast.error(errorMessage);
       throw new Error(errorMessage);
     } finally {
       dispatch(setLoading(false));
