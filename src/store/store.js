@@ -10,19 +10,17 @@ import {
   REGISTER,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import authReducer from "./slice/authSlice"; // Đảm bảo đường dẫn này chính xác
+import authReducer from "./slice/authSlice";
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth", "theme", "profile"],
+  whitelist: ["auth"], // Chỉ bao gồm 'auth' vì hiện tại chỉ có authReducer
 };
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  // Thêm các reducer khác ở đây nếu có
-  // theme: themeReducer,
-  // profile: profileReducer,
+  // Thêm các reducer khác ở đây khi cần
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -40,3 +38,5 @@ const store = configureStore({
 const persistor = persistStore(store);
 
 export { store, persistor };
+// Thêm dòng này để export default store
+export default store;
