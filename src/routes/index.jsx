@@ -1,25 +1,38 @@
 import { createBrowserRouter } from "react-router-dom";
-// import Home from "../pages/Home/Home";
-import SignUp from "../pages/auth/SignUp";
 import RootLayout from "../layout/RootLayout";
-import Login from "../pages/auth/Login";
 import Home from "../pages/home/Home";
+import SignUp from "../pages/auth/SignUp";
+import Login from "../pages/auth/Login";
 import About from "../pages/About/About";
 import Ticket from "../pages/tickets";
 import NotFound from "../pages/auth/NotFound";
 import Profile from "../pages/userprofile/Profile";
+import VerifyEmail from "../pages/auth/VerifyEmail";
+import PrivateRoute from "./PrivateRoute";
+
+const publicRoutes = [
+  { index: true, element: <Home /> },
+  { path: "login", element: <Login /> },
+  { path: "signup", element: <SignUp /> },
+  { path: "about", element: <About /> },
+  { path: "verifyemail", element: <VerifyEmail /> },
+];
+
+const privateRoutes = [
+  { path: "tickets", element: <Ticket /> },
+  { path: "profile", element: <Profile /> },
+];
+
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <RootLayout />,
     children: [
-      { index: true, element: <Home /> },
-      { path: "login", element: <Login /> },
-      { path: "signup", element: <SignUp /> },
-      { path: "about", element: <About /> },
-      { path: "tickets", element: <Ticket /> },
-      { path: "notfound", element: <NotFound /> },
-      { path: "profile", element: <Profile /> },
+      ...publicRoutes,
+      {
+        element: <PrivateRoute />,
+        children: privateRoutes,
+      },
     ],
   },
   {

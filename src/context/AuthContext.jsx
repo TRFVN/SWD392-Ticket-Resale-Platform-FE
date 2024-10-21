@@ -1,4 +1,4 @@
-import { createContext, useEffect } from "react";
+import { createContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axiosInstance from "../config/axiosConfig";
 import Cookies from "js-cookie";
@@ -8,15 +8,15 @@ import {
   setLoading,
   setError,
   logout,
-  // Thêm action mới nếu cần
-  // setSignupSuccess,
 } from "../store/slice/authSlice";
+import { toast } from "react-toastify";
 
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const dispatch = useDispatch();
   const { user, loading, error } = useSelector((state) => state.auth);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -29,12 +29,14 @@ export function AuthProvider({ children }) {
           handleLogout();
         }
       }
+      setIsInitialized(true);
     };
 
     initializeAuth();
-  }, [dispatch]);
+  }, []);
 
   const fetchUserData = async (token) => {
+    dispatch(setLoading(true));
     try {
       const response = await axiosInstance.get("/Auth/FetchUserByToken", {
         params: { token },
@@ -42,12 +44,15 @@ export function AuthProvider({ children }) {
 
       if (response.data && response.data.isSuccess) {
         dispatch(setUser(response.data.result));
+        localStorage.setItem("userData", JSON.stringify(response.data.result));
       } else {
         throw new Error(response.data.message || "Failed to fetch user data");
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
       throw error;
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 
@@ -73,34 +78,19 @@ export function AuthProvider({ children }) {
         dispatch(setTokens({ accessToken, refreshToken }));
         await fetchUserData(accessToken);
 
-        dispatch(setLoading(false));
         return response.data;
       } else {
         throw new Error(response.data.message || "Login failed");
       }
     } catch (error) {
-      dispatch(setLoading(false));
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
         "An error occurred during login";
       dispatch(setError(errorMessage));
       throw new Error(errorMessage);
-    }
-  };
-
-  const sendVerificationEmail = async (email) => {
-    try {
-      const response = await axiosInstance.post("/Auth/send-verify-email", {
-        email,
-      });
-      if (response.data && response.data.isSuccess) {
-        console.log("Verification email sent successfully");
-      } else {
-        console.error("Failed to send verification email");
-      }
-    } catch (error) {
-      console.error("Error sending verification email:", error);
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 
@@ -112,36 +102,49 @@ export function AuthProvider({ children }) {
       const response = await axiosInstance.post("/Auth/sign-up", userData);
 
       if (response.data && response.data.isSuccess) {
-        dispatch(setLoading(false));
-        // Nếu bạn muốn lưu trữ thông tin về việc đăng ký thành công
-        // dispatch(setSignupSuccess(true));
-
-        // Tự động gửi email xác minh
-        await sendVerificationEmail(userData.email);
+        try {
+          await axiosInstance.post("/Auth/send-verify-email", {
+            email: userData.email,
+          });
+          toast.success(
+            "Sign up successful. Verification email sent. Please check your inbox.",
+          );
+        } catch (verifyError) {
+          console.error("Error sending verification email:", verifyError);
+          toast.warning(
+            "Sign up successful, but there was an issue sending the verification email. Please try to verify your email later.",
+          );
+        }
 
         return response.data;
       } else {
         throw new Error(response.data.message || "Signup failed");
       }
     } catch (error) {
-      dispatch(setLoading(false));
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
         "An error occurred during signup";
       dispatch(setError(errorMessage));
+      toast.error(errorMessage);
       throw new Error(errorMessage);
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 
   const handleLogout = () => {
     localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userData");
     Cookies.remove("accessToken");
     dispatch(logout());
   };
 
-  const clearError = () => {
-    dispatch(setError(null));
+  const refreshUserData = async () => {
+    const accessToken = Cookies.get("accessToken");
+    if (accessToken) {
+      await fetchUserData(accessToken);
+    }
   };
 
   return (
@@ -153,8 +156,8 @@ export function AuthProvider({ children }) {
         logout: handleLogout,
         loading,
         error,
-        clearError,
-        sendVerificationEmail, // Thêm hàm này vào context nếu bạn muốn sử dụng nó ở nơi khác
+        isInitialized,
+        refreshUserData,
       }}
     >
       {children}

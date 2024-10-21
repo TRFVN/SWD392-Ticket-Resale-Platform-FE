@@ -1,47 +1,37 @@
-import { useEffect, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
-import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import Cookies from "js-cookie";
+
 function PrivateRoute({ allowedRoles }) {
-  const { decodedToken: currentUser } = useSelector((state) => state.auth);
-  const [shouldRedirect, setShouldRedirect] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    let redirect = false;
-    const isAuthenticated =
-      !!currentUser && !!currentUser.auth.decodedToken.role;
-    const hasRequiredRole = allowedRoles
-      ? allowedRoles.includes(currentUser?.auth?.decodedToken?.role)
-      : true;
+    const checkAuth = () => {
+      const accessToken = Cookies.get("accessToken");
+      const isAuthenticated = !!accessToken;
 
-    if (!isAuthenticated || !hasRequiredRole) {
-      redirect = true;
-      setTimeout(() => {
-        if (!isAuthenticated) {
-          navigate("/login", {
-            state: {
-              showNotification: true,
-              message: "You need to log in to access this page.",
-            },
-          });
-        } else if (!hasRequiredRole) {
-          navigate(-1, {
-            state: {
-              showNotification: true,
-              message: "You do not have permission to access this page.",
-            },
-          });
-        }
-      }, 500);
-    }
+      if (!isAuthenticated) {
+        toast.error("You need to log in to access this page.", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        navigate("/login", {
+          state: { from: location.pathname },
+          replace: true,
+        });
+      }
+      // Xóa phần kiểm tra role vì chúng ta không có thông tin về role từ access token
+    };
 
-    setShouldRedirect(redirect);
-  }, [currentUser, allowedRoles, navigate]);
-
-  if (shouldRedirect) {
-    return null;
-  }
+    checkAuth();
+  }, [navigate, location]);
 
   return <Outlet />;
 }

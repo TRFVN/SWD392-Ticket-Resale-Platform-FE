@@ -1,9 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
+import Cookies from "js-cookie";
 
 const initialState = {
   user: null,
-  accessToken: null,
-  refreshToken: null,
+  accessToken: Cookies.get("accessToken") || null,
+  refreshToken: localStorage.getItem("refreshToken") || null,
   isAuthenticated: false,
   loading: false,
   error: null,
@@ -20,6 +21,11 @@ const authSlice = createSlice({
     setTokens: (state, action) => {
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
+      Cookies.set("accessToken", action.payload.accessToken, {
+        secure: true,
+        sameSite: "strict",
+      });
+      localStorage.setItem("refreshToken", action.payload.refreshToken);
     },
     setLoading: (state, action) => {
       state.loading = action.payload;
@@ -28,7 +34,9 @@ const authSlice = createSlice({
       state.error = action.payload;
     },
     logout: (state) => {
-      return initialState;
+      Cookies.remove("accessToken");
+      localStorage.removeItem("refreshToken");
+      return { ...initialState, accessToken: null, refreshToken: null };
     },
   },
 });

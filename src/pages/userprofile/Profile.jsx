@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../../context/AuthContext";
 import {
   FaUser,
   FaCreditCard,
@@ -7,19 +7,43 @@ import {
   FaCog,
   FaCamera,
   FaEdit,
+  FaLock,
 } from "react-icons/fa";
+import ChangePassword from "../auth/ChangePassword";
 
 const ProfilePage = () => {
-  const user = useSelector((state) => state.auth.user);
+  const { user, loading, refreshUserData } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState("personal");
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
-  if (!user) {
+  useEffect(() => {
+    if (!user) {
+      refreshUserData();
+    }
+  }, [refreshUserData, user]);
+
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
         Loading user data...
       </div>
     );
   }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        User not found. Please log in.
+      </div>
+    );
+  }
+
+  const handleChangePassword = async (passwordData) => {
+    // Implement password change logic here
+    console.log("Changing password:", passwordData);
+    // After changing password, close the popup
+    setShowChangePassword(false);
+  };
 
   const tabs = [
     { id: "personal", label: "Personal Info", icon: <FaUser /> },
@@ -32,6 +56,7 @@ const ProfilePage = () => {
     <div className="bg-white min-h-screen p-4 sm:p-8">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="p-6 sm:p-8">
+          {/* Profile header */}
           <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6 mb-8">
             <div className="relative">
               <img
@@ -51,6 +76,7 @@ const ProfilePage = () => {
             </div>
           </div>
 
+          {/* Tabs */}
           <div className="flex flex-wrap -mx-2 mb-8">
             {tabs.map((tab) => (
               <button
@@ -68,18 +94,33 @@ const ProfilePage = () => {
             ))}
           </div>
 
+          {/* Tab content */}
           <div className="bg-gray-50 rounded-lg p-6">
             {activeTab === "personal" && <PersonalInfo user={user} />}
             {activeTab === "interests" && <Interests user={user} />}
             {activeTab === "payment" && <PaymentInfo user={user} />}
-            {activeTab === "settings" && <Settings user={user} />}
+            {activeTab === "settings" && (
+              <Settings
+                user={user}
+                onChangePassword={() => setShowChangePassword(true)}
+              />
+            )}
           </div>
+
+          {/* Change Password Popup */}
+          {showChangePassword && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <ChangePassword
+                onClose={() => setShowChangePassword(false)}
+                onSubmit={handleChangePassword}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 };
-
 const PersonalInfo = ({ user }) => (
   <div className="space-y-4">
     <InfoItem label="Email" value={user.email} />
@@ -131,22 +172,32 @@ const PaymentInfo = ({ user }) => (
   </div>
 );
 
-const Settings = ({ user }) => (
-  <div className="space-y-4">
+const Settings = ({ user, onChangePassword }) => (
+  <div className="space-y-6">
     <h2 className="text-xl font-semibold mb-4">Account Settings</h2>
-    <ToggleItem label="Two-factor Authentication" />
-    <ToggleItem label="Email Notifications" />
-    <ToggleItem label="Profile Visibility" />
+    <div className="space-y-4">
+      <ToggleItem label="Two-factor Authentication" />
+      <ToggleItem label="Email Notifications" />
+      <ToggleItem label="Profile Visibility" />
+    </div>
+    <div className="pt-4 border-t border-gray-200">
+      <h3 className="text-lg font-medium mb-3">Security</h3>
+      <button
+        onClick={onChangePassword}
+        className="flex items-center px-4 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition duration-300"
+      >
+        <FaLock className="mr-2" />
+        Change Password
+      </button>
+    </div>
   </div>
 );
-
 const InfoItem = ({ label, value }) => (
   <div className="flex justify-between items-center border-b border-gray-200 pb-2">
     <span className="text-gray-600">{label}</span>
     <span className="font-medium">{value}</span>
   </div>
 );
-
 const ToggleItem = ({ label }) => (
   <div className="flex items-center justify-between">
     <span className="text-gray-700">{label}</span>

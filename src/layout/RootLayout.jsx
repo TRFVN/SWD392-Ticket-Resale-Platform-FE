@@ -35,7 +35,7 @@ const MainLayout = () => {
 
 const RootLayout = () => {
   const { pathname } = useLocation();
-  const isAuthPage = ["/login", "/signup"].includes(pathname);
+  const isAuthPage = ["/login", "/signup", "/verifyemail"].includes(pathname);
 
   return isAuthPage ? <AuthLayout /> : <MainLayout />;
 };

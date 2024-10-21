@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { PiShoppingCartBold } from "react-icons/pi";
 import {
   FaTicketAlt,
@@ -13,11 +14,14 @@ import Lottie from "lottie-react";
 import TicketHub_Logo_R from "../../assets/TicketHub_Logo_R.png";
 import None_Avatar from "../../assets/None_Avatar.jpg";
 import animationData from "../common/NotificationV3/notification-V3.json";
+import { logout } from "../../store/slice/authSlice";
 
 const Header = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const userMenuRef = useRef(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -42,6 +46,12 @@ const Header = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    setIsUserMenuOpen(false);
+    navigate("/login");
+  };
 
   return (
     <header
@@ -132,7 +142,10 @@ const Header = () => {
                   >
                     <FaCog className="inline-block mr-2" /> Settings
                   </Link>
-                  <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-100 transition-colors duration-200">
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-100 transition-colors duration-200"
+                  >
                     <FaSignOutAlt className="inline-block mr-2" /> Sign out
                   </button>
                 </div>
