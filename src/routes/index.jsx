@@ -5,7 +5,7 @@ import RootLayout from "../layout/RootLayout";
 import Login from "../pages/auth/Login";
 import Home from "../pages/home/Home";
 import About from "../pages/About/About";
-import Ticket from "../pages/seller/ticket";
+import Ticket from "../pages/tickets";
 import NotFound from "../pages/auth/NotFound";
 import Profile from "../pages/userprofile/Profile";
 export const router = createBrowserRouter([

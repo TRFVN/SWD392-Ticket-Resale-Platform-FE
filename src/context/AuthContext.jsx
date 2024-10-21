@@ -1,6 +1,6 @@
 import { createContext, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import axiosInstance from "../api/axiosConfig";
+import axiosInstance from "../config/axiosConfig";
 import Cookies from "js-cookie";
 import {
   setUser,
