@@ -32,7 +32,10 @@ function Purchased() {
           handleChangeCurrentStatus={handleChangeCurrentStatus}
         />
       )}
-      <Ticket />
+      <Ticket
+        currentState={currentState}
+        handleChangeCurrentState={handleChangeCurrentState}
+      />
     </div>
   );
 }

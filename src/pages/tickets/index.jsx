@@ -16,8 +16,8 @@ function Ticket() {
     );
   };
 
-    return (
-    <div className="w-full flex flex-col justify-start items-start gap-4">
+  return (
+    <div className="w-full flex flex-col justify-start items-start gap-4 mb-10">
       <h3 className="font-semibold text-3xl">Your Tickets</h3>
       <div className="border-b-2  w-full border-gray-900"></div>
       <div className="w-full grid grid-cols-12 justify-start items-start gap-10">

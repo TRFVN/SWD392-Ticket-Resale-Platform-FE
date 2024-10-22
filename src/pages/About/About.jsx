@@ -41,16 +41,16 @@ function About() {
   ]);
   return (
     <div className="flex flex-col justify-center items-start gap-8 w-full">
-      <div className="font-bold text-2xl">ABOUT SERVAVE</div>
+      <div className="font-bold text-2xl">ABOUT TicketHub</div>
       <div className="">
-        Servave is a safe, user-friendly, and fair website for buying and
+        TicketHub is a safe, user-friendly, and fair website for buying and
         selling tickets to concerts, festivals, sporting events, theatrical
         plays, and day excursions. To protect purchasers from inflated costs,
         the platform requires a maximum markup of 20% over the original ticket
-        price. In locations with unique resale pricing rules, Servave adjusts
+        price. In locations with unique resale pricing rules, TicketHub adjusts
         its markup accordingly, ensuring that purchasers always pay a fair
         price. The danger of fraud is reduced by user authentication and
-        engagement with event organizers. Servave has emerged as the premier
+        engagement with event organizers. TicketHub has emerged as the premier
         platform for fans wishing to buy and sell tickets globally.
       </div>
       <div className="font-bold text-2xl">FOUNDERS</div>

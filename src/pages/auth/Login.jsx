@@ -8,7 +8,6 @@ import {
   FaEye,
   FaEyeSlash,
   FaLock,
-  FaChevronRight,
   FaGoogle,
   FaFacebook,
 } from "react-icons/fa";
@@ -16,6 +15,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { useGoogleLogin } from "@react-oauth/google";
 import TicketLogo from "../../assets/TicketHub_Logo.png";
 import axios from "axios";
+
 const InputField = ({
   icon,
   label,
@@ -33,23 +33,23 @@ const InputField = ({
   >
     <label
       htmlFor={name}
-      className="block text-white text-sm font-medium mb-2 flex items-center opacity-80"
+      className="block text-gray-700 text-sm font-medium mb-2 flex items-center"
     >
       {icon}
       <span className="ml-2">{label}</span>
     </label>
-    <div className="relative group">
+    <div className="relative">
       <Field
         name={name}
         type={type}
         placeholder={placeholder}
-        className={`w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-400 
-                   focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white/15
-                   transition-all duration-300 backdrop-blur-sm
+        className={`w-full px-4 py-2 rounded-lg bg-white text-gray-800 placeholder-gray-500
+                   focus:outline-none focus:ring-2 focus:ring-orange-400
+                   transition-all duration-300
                    border ${
                      errors[name] && touched[name]
                        ? "border-red-500"
-                       : "border-white/10 hover:border-white/20"
+                       : "border-gray-300 hover:border-gray-400"
                    }`}
       />
       {errors[name] && touched[name] && (
@@ -61,7 +61,6 @@ const InputField = ({
           {errors[name]}
         </motion.p>
       )}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10" />
     </div>
   </motion.div>
 );
@@ -83,29 +82,29 @@ const PasswordField = ({
   >
     <label
       htmlFor={name}
-      className="block text-white text-sm font-medium mb-2 flex items-center opacity-80"
+      className="block text-gray-700 text-sm font-medium mb-2 flex items-center"
     >
-      <FaLock className="text-white" />
+      <FaLock className="text-gray-600" />
       <span className="ml-2">{label}</span>
     </label>
-    <div className="relative group">
+    <div className="relative">
       <Field
         name={name}
         type={showPassword ? "text" : "password"}
         placeholder={placeholder}
-        className={`w-full px-5 py-3 rounded-xl bg-white/10 text-white placeholder-gray-400 
-                   focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white/15
-                   transition-all duration-300 backdrop-blur-sm
+        className={`w-full px-4 py-2 rounded-lg bg-white text-gray-800 placeholder-gray-500
+                   focus:outline-none focus:ring-2 focus:ring-orange-400
+                   transition-all duration-300
                    border ${
                      errors[name] && touched[name]
                        ? "border-red-500"
-                       : "border-white/10 hover:border-white/20"
+                       : "border-gray-300 hover:border-gray-400"
                    }`}
       />
       <button
         type="button"
         onClick={togglePasswordVisibility}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white transition-colors duration-200"
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
       >
         {showPassword ? <FaEyeSlash /> : <FaEye />}
       </button>
@@ -118,7 +117,6 @@ const PasswordField = ({
           {errors[name]}
         </motion.p>
       )}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10" />
     </div>
   </motion.div>
 );
@@ -173,8 +171,6 @@ const Login = () => {
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       console.log("Token Response:", tokenResponse);
-
-      // Gọi API Google để lấy thông tin người dùng
       try {
         const userInfo = await axios.get(
           "https://www.googleapis.com/oauth2/v3/userinfo",
@@ -190,36 +186,35 @@ const Login = () => {
       }
     },
     onError: () => console.log("Login Failed"),
-    scope: "profile email", // Yêu cầu phạm vi profile và email để lấy thông tin
+    scope: "profile email",
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5"></div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="max-w-md w-full space-y-8 relative z-10"
+        className="max-w-md w-full space-y-8"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="backdrop-blur-xl bg-black/30 rounded-3xl shadow-2xl overflow-hidden border border-white/10 p-8"
+          className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 p-8"
         >
-          <div className="text-center mb-10">
+          <div className="text-center mb-8">
             <motion.img
               src={TicketLogo}
               alt="Logo"
-              className="h-20 w-auto mx-auto mb-6"
+              className="h-20 w-auto mx-auto mb-4"
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 260, damping: 20 }}
             />
-            <h2 className="text-3xl font-extrabold text-white mb-2">
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">
               Sign in to your account
             </h2>
-            <p className="text-sm text-gray-300">
+            <p className="text-sm text-gray-600">
               Or start your 14-day free trial
             </p>
           </div>
@@ -232,7 +227,7 @@ const Login = () => {
             {({ errors, touched, isSubmitting }) => (
               <Form className="mt-8 space-y-6">
                 <InputField
-                  icon={<FaEnvelope className="text-white" />}
+                  icon={<FaEnvelope className="text-gray-600" />}
                   label="Email address"
                   name="email"
                   type="email"
@@ -259,7 +254,7 @@ const Login = () => {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="text-red-500 text-sm text-center bg-red-100/10 border border-red-400/50 rounded-lg p-3"
+                      className="text-red-500 text-sm text-center bg-red-100 border border-red-400 rounded-lg p-3"
                     >
                       {authError || errors.submit}
                     </motion.div>
@@ -272,11 +267,11 @@ const Login = () => {
                       id="remember-me"
                       name="remember-me"
                       type="checkbox"
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-orange-400 focus:ring-orange-500 border-gray-300 rounded"
                     />
                     <label
                       htmlFor="remember-me"
-                      className="ml-2 block text-sm text-gray-300"
+                      className="ml-2 block text-sm text-gray-700"
                     >
                       Remember me
                     </label>
@@ -285,7 +280,7 @@ const Login = () => {
                   <div className="text-sm">
                     <Link
                       to="/forgot-password"
-                      className="font-medium text-indigo-400 hover:text-indigo-300"
+                      className="font-medium text-orange-400 hover:text-orange-500"
                     >
                       Forgot your password?
                     </Link>
@@ -298,7 +293,7 @@ const Login = () => {
                     whileTap={{ scale: 0.98 }}
                     type="submit"
                     disabled={isSubmitting || loading}
-                    className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+                    className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-orange-400 hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 ${
                       isSubmitting || loading
                         ? "opacity-70 cursor-not-allowed"
                         : ""
@@ -310,7 +305,7 @@ const Login = () => {
                       <>
                         <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                           <FaLock
-                            className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
+                            className="h-5 w-5 text-orange-300 group-hover:text-orange-400"
                             aria-hidden="true"
                           />
                         </span>
@@ -326,10 +321,12 @@ const Login = () => {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300/30"></div>
+                <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-black/30 text-gray-300"></span>
+                <span className="px-2 bg-white text-gray-500">
+                  Or continue with
+                </span>
               </div>
             </div>
 
@@ -340,9 +337,9 @@ const Login = () => {
               >
                 <button
                   onClick={() => googleLogin()}
-                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300/30 rounded-md shadow-sm bg-white/10 text-sm font-medium text-white hover:bg-white/20 transition-colors duration-200"
+                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200"
                 >
-                  <FaGoogle className="h-5 w-5 text-white" />
+                  <FaGoogle className="h-5 w-5 text-orange-400" />
                   <span className="ml-2">Google</span>
                 </button>
               </motion.div>
@@ -355,20 +352,20 @@ const Login = () => {
                   onClick={() => {
                     /* Implement Facebook login */
                   }}
-                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300/30 rounded-md shadow-sm bg-white/10 text-sm font-medium text-white hover:bg-white/20 transition-colors duration-200"
+                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200"
                 >
-                  <FaFacebook className="h-5 w-5 text-white" />
+                  <FaFacebook className="h-5 w-5 text-blue-600" />
                   <span className="ml-2">Facebook</span>
                 </button>
               </motion.div>
             </div>
           </div>
 
-          <p className="mt-8 text-center text-sm text-gray-400">
+          <p className="mt-8 text-center text-sm text-gray-600">
             Not a member?{" "}
             <Link
               to="/signup"
-              className="font-medium text-indigo-400 hover:text-indigo-300"
+              className="font-medium text-orange-400 hover:text-orange-500"
             >
               Start a 14 day free trial
             </Link>
