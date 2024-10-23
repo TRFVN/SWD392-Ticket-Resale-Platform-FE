@@ -1,3 +1,4 @@
+// src/store/index.js
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import {
   persistStore,
@@ -11,16 +12,17 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import authReducer from "./slice/authSlice";
+import themeReducer from "./slice/themeSlice";
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth"], // Chỉ bao gồm 'auth' vì hiện tại chỉ có authReducer
+  whitelist: ["auth", "theme"], // Thêm theme vào whitelist
 };
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  // Thêm các reducer khác ở đây khi cần
+  theme: themeReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -38,5 +40,4 @@ const store = configureStore({
 const persistor = persistStore(store);
 
 export { store, persistor };
-// Thêm dòng này để export default store
 export default store;
