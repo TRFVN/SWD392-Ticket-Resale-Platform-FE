@@ -86,7 +86,7 @@ const ForgotPassword = () => {
                     className="block text-gray-700 text-sm font-medium mb-2 flex items-center"
                   >
                     <FaEnvelope className="text-gray-600" />
-                    <span className="ml-2">Email address</span>
+                    <span className="ml-2">Email addresss</span>
                   </label>
                   <div className="relative">
                     <Field
@@ -156,7 +156,7 @@ const ForgotPassword = () => {
                     className="inline-flex items-center text-sm text-orange-400 hover:text-orange-500 transition-colors duration-200"
                   >
                     <FaArrowLeft className="mr-2" />
-                    Back to Login
+                    Back to Login right now
                   </Link>
                 </div>
               </Form>
