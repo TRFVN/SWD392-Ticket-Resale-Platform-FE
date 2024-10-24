@@ -9,13 +9,14 @@ import NotFound from "../pages/auth/NotFound";
 import Profile from "../pages/userprofile/Profile";
 import VerifyEmail from "../pages/auth/VerifyEmail";
 import PrivateRoute from "./PrivateRoute";
-
+import ForgotPassword from "../pages/auth/ForgotPassword";
 const publicRoutes = [
   { index: true, element: <Home /> },
   { path: "login", element: <Login /> },
   { path: "signup", element: <SignUp /> },
   { path: "about", element: <About /> },
   { path: "verifyemail", element: <VerifyEmail /> },
+  { path: "forgot-password", element: <ForgotPassword /> },
 ];
 
 const privateRoutes = [
