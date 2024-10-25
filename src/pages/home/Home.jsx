@@ -29,52 +29,147 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Improved */}
       <section className="relative h-[80vh] overflow-hidden">
+        {/* Background with improved overlay */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 via-orange-500/10 to-transparent dark:from-gray-900/90 dark:via-gray-900/70 dark:to-gray-900/50 z-10" />
-          <img
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/30 to-transparent dark:from-gray-900/90 dark:via-gray-900/70 dark:to-gray-900/50 z-10" />
+          <motion.img
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1.05 }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
             src="https://res.cloudinary.com/dtljonz0f/image/upload/c_auto,ar_464:283,w_3840,g_auto/f_auto/q_auto/habib-ayoade-PZ8lyg_c-pk-us-non-editorial_onv3g6?_a=BAVAEyBy0"
             alt="Event crowd"
-            className="w-full h-full object-cover transform scale-105"
+            className="w-full h-full object-cover"
           />
         </div>
+
+        {/* Content with improved typography and contrast */}
         <div className="relative container mx-auto px-4 h-full flex items-center z-20">
           <motion.div
             initial="initial"
             animate="animate"
             variants={fadeInUp}
-            className="max-w-3xl"
+            className="max-w-3xl space-y-8"
           >
-            <span className="inline-block px-4 py-2 bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 rounded-full text-sm font-medium mb-6">
+            {/* Badge with improved visibility */}
+            <motion.span
+              whileHover={{ scale: 1.05 }}
+              className="inline-block px-6 py-2 bg-white/90 dark:bg-orange-500/20 
+              text-orange-600 dark:text-orange-400 rounded-full 
+              text-sm font-semibold backdrop-blur-sm 
+              shadow-lg shadow-orange-500/10
+              border border-orange-100 dark:border-orange-500/20"
+            >
               The World's #1 Ticketing Platform
-            </span>
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+            </motion.span>
+
+            {/* Heading with improved contrast and shadow */}
+            <h1
+              className="text-5xl md:text-7xl font-bold text-white dark:text-white 
+            mb-6 leading-tight tracking-tight drop-shadow-lg"
+            >
               Where Moments <br />
-              Become Memories
+              <span className="text-orange-400">Become Memories</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-700 dark:text-gray-200 mb-8">
+
+            {/* Subheading with better readability */}
+            <p
+              className="text-xl md:text-2xl text-white dark:text-gray-200 
+            font-medium drop-shadow-md max-w-2xl"
+            >
               Discover and book tickets for the most exciting events happening
-              around you
+              around you. Join unforgettable experiences.
             </p>
-            <div className="flex gap-4">
+
+            {/* Buttons with improved design */}
+            <div className="flex flex-wrap gap-4 pt-4">
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+                }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-lg font-semibold transition-colors duration-300"
+                className="px-8 py-4 bg-orange-500 hover:bg-orange-600 
+                text-white rounded-full text-lg font-semibold 
+                transition-all duration-300 shadow-lg hover:shadow-xl
+                hover:shadow-orange-500/20 
+                flex items-center gap-2"
               >
                 Browse Events
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
+                </svg>
               </motion.button>
+
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+                }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-gray-900 rounded-full text-lg font-semibold transition-colors duration-300"
+                className="px-8 py-4 bg-white hover:bg-gray-50 
+                text-gray-900 dark:text-gray-900 rounded-full 
+                text-lg font-semibold transition-all duration-300 
+                shadow-lg hover:shadow-xl border border-gray-100
+                flex items-center gap-2 group"
               >
                 Host an Event
+                <svg
+                  className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
               </motion.button>
+            </div>
+
+            {/* Optional: Stats or social proof */}
+            <div className="flex gap-8 pt-8">
+              {["1M+ Users", "10K+ Events", "100+ Cities"].map(
+                (stat, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 + index * 0.1 }}
+                    className="text-white"
+                  >
+                    <div className="text-2xl font-bold">
+                      {stat.split(" ")[0]}
+                    </div>
+                    <div className="text-sm text-gray-200">
+                      {stat.split(" ")[1]}
+                    </div>
+                  </motion.div>
+                ),
+              )}
             </div>
           </motion.div>
         </div>
+
+        {/* Optional: Decorative elements */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/20 to-transparent z-10" />
       </section>
 
       {/* Stats Section */}

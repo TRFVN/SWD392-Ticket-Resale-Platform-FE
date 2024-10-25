@@ -10,6 +10,7 @@ import Profile from "../pages/userprofile/Profile";
 import VerifyEmail from "../pages/auth/VerifyEmail";
 import PrivateRoute from "./PrivateRoute";
 import ForgotPassword from "../pages/auth/ForgotPassword";
+import Cart from "../pages/cart/cart";
 const publicRoutes = [
   { index: true, element: <Home /> },
   { path: "login", element: <Login /> },
@@ -22,6 +23,7 @@ const publicRoutes = [
 const privateRoutes = [
   { path: "tickets", element: <Ticket /> },
   { path: "profile", element: <Profile /> },
+  { path: "cart", element: <Cart /> },
 ];
 
 export const router = createBrowserRouter([
