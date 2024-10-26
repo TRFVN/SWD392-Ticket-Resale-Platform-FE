@@ -1,8 +1,8 @@
 // src/components/header/Header.jsx
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Bell,
   ShoppingCart,
@@ -26,15 +26,16 @@ import { SearchBar } from "../header/SearchBar";
 import { SearchSuggestions } from "../header/SearchSuggestions";
 import { UserMenu } from "../header/UserMenu";
 import { MobileMenu } from "../header/MobileMenu";
+import { AuthContext } from "../../context/AuthContext";
 
 const Header = () => {
   // States
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
+  const { user } = useContext(AuthContext);
 
   // Refs
   const userMenuRef = useRef(null);
@@ -77,105 +78,171 @@ const Header = () => {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full
-    ${
-      isScrolled
-        ? "dark:bg-gray-900/95 bg-white/95 backdrop-blur-md shadow-lg"
-        : "dark:bg-gray-900/90 bg-white/90"
-    }`}
+          ${
+            isScrolled
+              ? "dark:bg-gray-900/95 bg-white/95 backdrop-blur-md shadow-lg"
+              : "dark:bg-gray-900/90 bg-white/90"
+          }`}
       >
         <div className="border-b border-gray-200 dark:border-gray-800 w-full">
-          {/* Thay đổi container class */}
-          <div className="w-full px-4 max-w-[100vw] mx-auto">
-            {" "}
-            {/* Removed fixed width container */}
-            <div className="flex items-center justify-between h-16">
-              {/* Logo - Make it more compact */}
-              <Link to="/" className="flex items-center flex-shrink-0">
+          <div className="w-full px-6 max-w-[1920px] mx-auto">
+            <div className="flex items-center justify-between h-20">
+              {/* Enhanced Logo Section */}
+              <Link to="/" className="flex items-center flex-shrink-0 group">
                 <motion.img
                   whileHover={{ scale: 1.05 }}
                   src={TicketLogo}
                   alt="TicketHub"
-                  className="h-8 w-auto"
+                  className="h-10 w-auto" // Increased size
                 />
-                <div className="hidden sm:flex flex-col ml-2">
-                  <span className="text-lg font-bold text-orange-500">
+                <div className="hidden sm:flex flex-col ml-3">
+                  <span
+                    className="text-xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 
+                    bg-clip-text text-transparent group-hover:from-orange-600 group-hover:to-orange-700 
+                    transition-all duration-300"
+                  >
                     TicketHub
                   </span>
-                  <span className="text-xs italic text-gray-600 dark:text-gray-400">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
                     Best resell platform
                   </span>
                 </div>
               </Link>
 
               {/* Desktop Navigation */}
-              <div className="hidden md:flex items-center flex-1 justify-end">
-                {/* Search Section */}
-                <div className="flex-1 max-w-2xl mx-6" ref={searchRef}>
-                  <SearchBar
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
-                    onFocus={() => setShowSearchSuggestions(true)}
-                  />
-                  <SearchSuggestions
-                    isVisible={showSearchSuggestions}
-                    onClose={() => setShowSearchSuggestions(false)}
-                  />
+              <div className="hidden md:flex items-center flex-1 justify-end space-x-8">
+                {/* Search Section with increased size */}
+                <div className="flex-1 max-w-3xl mx-8" ref={searchRef}>
+                  <div className="relative">
+                    <SearchBar
+                      value={searchValue}
+                      onChange={(e) => setSearchValue(e.target.value)}
+                      onFocus={() => setShowSearchSuggestions(true)}
+                    />
+                    <SearchSuggestions
+                      isVisible={showSearchSuggestions}
+                      onClose={() => setShowSearchSuggestions(false)}
+                    />
+                  </div>
                 </div>
 
-                {/* Desktop Action Icons */}
-                <div className="flex items-center gap-3">
-                  <IconButton
-                    icon={isDarkMode ? Sun : Moon}
+                {/* Enhanced Desktop Action Icons */}
+                <div className="flex items-center gap-4">
+                  {/* Theme Toggle with animation */}
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 
+                      hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                     onClick={() => dispatch(toggleTheme())}
-                  />
-                  <IconButton
-                    icon={Calendar}
-                    onClick={() => navigate("/events")}
-                    badge="5"
-                  />
-                  <IconButton
-                    icon={Bell}
-                    badge="3"
-                    onClick={() => navigate("/notifications")}
-                  />
-                  <IconButton
-                    icon={ShoppingCart}
-                    badge="2"
-                    onClick={() => navigate("/cart")}
-                  />
+                  >
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={isDarkMode ? "dark" : "light"}
+                        initial={{ y: -20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 20, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {isDarkMode ? (
+                          <Sun className="w-5 h-5 text-orange-500" />
+                        ) : (
+                          <Moon className="w-5 h-5 text-gray-600" />
+                        )}
+                      </motion.div>
+                    </AnimatePresence>
+                  </motion.button>
 
-                  {/* User Menu */}
+                  {/* Action Buttons with Enhanced Design */}
+                  {[
+                    { icon: Calendar, badge: "5", path: "/events" },
+                    { icon: Bell, badge: "3", path: "/notifications" },
+                    { icon: ShoppingCart, badge: "2", path: "/cart" },
+                  ].map((item) => (
+                    <motion.button
+                      key={item.path}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => navigate(item.path)}
+                      className="relative p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 
+                        hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <item.icon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                      {item.badge && (
+                        <span
+                          className="absolute -top-1 -right-1 w-5 h-5 flex items-center 
+                          justify-center text-xs font-medium text-white bg-orange-500 
+                          rounded-full border-2 border-white dark:border-gray-900"
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </motion.button>
+                  ))}
+
+                  {/* Enhanced User Menu */}
                   <div className="relative" ref={userMenuRef}>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                      className="flex items-center space-x-2 p-1 rounded-full focus:outline-none"
+                      className="flex items-center space-x-3 p-1.5 rounded-xl 
+                        bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 
+                        dark:hover:bg-gray-700 transition-colors"
                     >
                       <img
                         src={None_Avatar}
                         alt="User"
-                        className="w-8 h-8 rounded-full border-2 border-orange-500"
+                        className="w-9 h-9 rounded-lg border-2 border-orange-500"
                       />
+                      <div className="hidden lg:block text-left">
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                          {user.fullName}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {user.email}
+                        </p>
+                      </div>
                       <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                     </motion.button>
-                    <UserMenu isOpen={isUserMenuOpen} onClose={handleLogout} />
+                    <UserMenu
+                      isOpen={isUserMenuOpen}
+                      onClose={() => setIsUserMenuOpen(false)}
+                      handleLogout={handleLogout}
+                    />{" "}
                   </div>
                 </div>
               </div>
 
-              {/* Mobile Menu Button */}
-              <div className="md:hidden flex items-center gap-3">
-                <IconButton
-                  icon={isDarkMode ? Sun : Moon}
+              {/* Enhanced Mobile Menu Button */}
+              <div className="md:hidden flex items-center gap-4">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => dispatch(toggleTheme())}
-                  className="text-gray-600 dark:text-gray-300"
-                />
-                <IconButton
-                  icon={isMobileMenuOpen ? X : Menu}
+                  className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 
+                    hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                >
+                  {isDarkMode ? (
+                    <Sun className="w-5 h-5 text-orange-500" />
+                  ) : (
+                    <Moon className="w-5 h-5 text-gray-600" />
+                  )}
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="text-gray-600 dark:text-gray-300"
-                />
+                  className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 
+                    hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                >
+                  {isMobileMenuOpen ? (
+                    <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                  ) : (
+                    <Menu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                  )}
+                </motion.button>
               </div>
             </div>
           </div>
