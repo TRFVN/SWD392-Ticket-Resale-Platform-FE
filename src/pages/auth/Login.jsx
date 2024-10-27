@@ -1,143 +1,35 @@
-import React, { useContext, useState } from "react";
+// src/pages/Login.jsx
+import React from "react";
+import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
-import {
-  FaEnvelope,
-  FaEye,
-  FaEyeSlash,
-  FaLock,
-  FaGoogle,
-  FaFacebook,
-} from "react-icons/fa";
-import { AuthContext } from "../../context/AuthContext";
 import { useGoogleLogin } from "@react-oauth/google";
+import { FaGoogle, FaFacebook } from "react-icons/fa";
+import * as Yup from "yup";
+import { useContext } from "react";
+
 import TicketLogo from "../../assets/TicketHub_Logo.png";
 import axios from "axios";
+import { LoginForm } from "../../components/auth/login/LoginForm";
+import { SocialButton } from "../../components/auth/login/SocialButton";
+import { AuthContext } from "../../context/AuthContext";
 
-const InputField = ({
-  icon,
-  label,
-  name,
-  type,
-  placeholder,
-  errors,
-  touched,
-}) => (
-  <motion.div
-    className="mb-4 sm:mb-6"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3 }}
-  >
-    <label
-      htmlFor={name}
-      className="block text-gray-700 dark:text-gray-200 text-sm font-medium mb-1.5 flex items-center"
-    >
-      {icon}
-      <span className="ml-2">{label}</span>
-    </label>
-    <div className="relative">
-      <Field
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        className={`w-full px-3 sm:px-4 py-2.5 rounded-lg bg-white dark:bg-gray-800 
-          text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400
-          focus:outline-none focus:ring-2 focus:ring-orange-400
-          transition-all duration-300 text-sm sm:text-base
-          border ${
-            errors[name] && touched[name]
-              ? "border-red-500"
-              : "border-gray-300 dark:border-gray-600 hover:border-gray-400"
-          }`}
-      />
-      {errors[name] && touched[name] && (
-        <motion.p
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-1 text-red-500 text-xs sm:text-sm"
-        >
-          {errors[name]}
-        </motion.p>
-      )}
-    </div>
-  </motion.div>
-);
-const PasswordField = ({
-  label,
-  name,
-  placeholder,
-  showPassword,
-  togglePasswordVisibility,
-  errors,
-  touched,
-}) => (
-  <motion.div
-    className="mb-6"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3 }}
-  >
-    <label
-      htmlFor={name}
-      className="block text-gray-700 text-sm font-medium mb-2 flex items-center"
-    >
-      <FaLock className="text-gray-600" />
-      <span className="ml-2">{label}</span>
-    </label>
-    <div className="relative">
-      <Field
-        name={name}
-        type={showPassword ? "text" : "password"}
-        placeholder={placeholder}
-        className={`w-full px-4 py-2 rounded-lg bg-white text-gray-800 placeholder-gray-500
-                   focus:outline-none focus:ring-2 focus:ring-orange-400
-                   transition-all duration-300
-                   border ${
-                     errors[name] && touched[name]
-                       ? "border-red-500"
-                       : "border-gray-300 hover:border-gray-400"
-                   }`}
-      />
-      <button
-        type="button"
-        onClick={togglePasswordVisibility}
-        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
-      >
-        {showPassword ? <FaEyeSlash /> : <FaEye />}
-      </button>
-      {errors[name] && touched[name] && (
-        <motion.p
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-1 text-red-500 text-sm"
-        >
-          {errors[name]}
-        </motion.p>
-      )}
-    </div>
-  </motion.div>
-);
+const validationSchema = Yup.object().shape({
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  password: Yup.string().required("Password is required"),
+  rememberMe: Yup.boolean(),
+});
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, error, loading, clearError } = useContext(AuthContext);
-  const [showPassword, setShowPassword] = useState(false);
-
-  const validationSchema = Yup.object().shape({
-    email: Yup.string()
-      .email("Invalid email address")
-      .required("Email is required"),
-    password: Yup.string().required("Password is required"),
-    rememberMe: Yup.boolean(),
-  });
+  const { login, loading, error } = useContext(AuthContext);
 
   const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {
       const response = await login(values.email, values.password);
-      if (response && response.result) {
+
+      if (response && response.isSuccess) {
         if (values.rememberMe) {
           localStorage.setItem("rememberMe", "true");
         } else {
@@ -165,9 +57,8 @@ const Login = () => {
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      console.log("Token Response:", tokenResponse);
       try {
-        const userInfo = await axios.get(
+        const response = await axios.get(
           "https://www.googleapis.com/oauth2/v3/userinfo",
           {
             headers: {
@@ -175,7 +66,8 @@ const Login = () => {
             },
           },
         );
-        console.log("User Info:", userInfo.data);
+        // Handle Google login success
+        console.log("User Info:", response.data);
       } catch (error) {
         console.error("Failed to fetch user info:", error);
       }
@@ -216,112 +108,11 @@ const Login = () => {
             </p>
           </div>
 
-          {/* Form Section */}
-          <Formik
-            initialValues={{ email: "", password: "", rememberMe: false }}
-            validationSchema={validationSchema}
+          <LoginForm
             onSubmit={handleSubmit}
-          >
-            {({ errors, touched, isSubmitting }) => (
-              <Form className="space-y-4 sm:space-y-6">
-                <InputField
-                  icon={
-                    <FaEnvelope className="text-gray-500 dark:text-gray-400 w-4 h-4" />
-                  }
-                  label="Email address"
-                  name="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  errors={errors}
-                  touched={touched}
-                />
-
-                <PasswordField
-                  label="Password"
-                  name="password"
-                  placeholder="Enter your password"
-                  showPassword={showPassword}
-                  togglePasswordVisibility={() =>
-                    setShowPassword(!showPassword)
-                  }
-                  errors={errors}
-                  touched={touched}
-                />
-
-                {/* Error Message */}
-                <AnimatePresence>
-                  {errors.submit && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="text-red-500 text-xs sm:text-sm text-center bg-red-100 dark:bg-red-900/30 
-                        border border-red-400 dark:border-red-500/50 rounded-lg p-2.5"
-                    >
-                      {errors.submit}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Remember Me & Forgot Password */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="flex items-center">
-                    <input
-                      id="remember-me"
-                      name="remember-me"
-                      type="checkbox"
-                      className="h-4 w-4 text-orange-400 focus:ring-orange-500 border-gray-300 rounded"
-                    />
-                    <label
-                      htmlFor="remember-me"
-                      className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
-                    >
-                      Remember me
-                    </label>
-                  </div>
-
-                  <div className="text-sm">
-                    <Link
-                      to="/forgot-password"
-                      className="font-medium text-orange-400 hover:text-orange-500"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Submit Button */}
-                <div>
-                  <motion.button
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                    type="submit"
-                    disabled={isSubmitting || loading}
-                    className={`group relative w-full flex justify-center py-2.5 px-4 
-                      border border-transparent text-sm font-medium rounded-lg 
-                      text-white bg-orange-400 hover:bg-orange-500 
-                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 
-                      transition-colors ${
-                        isSubmitting || loading
-                          ? "opacity-70 cursor-not-allowed"
-                          : ""
-                      }`}
-                  >
-                    {isSubmitting || loading ? (
-                      <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                          <FaLock className="h-4 w-4 text-orange-300 group-hover:text-orange-400" />
-                        </span>
-                        Sign in
-                      </>
-                    )}
-                  </motion.button>
-                </div>
-              </Form>
-            )}
-          </Formik>
+            loading={loading}
+            validationSchema={validationSchema}
+          />
 
           {/* Social Login Section */}
           <div className="mt-6">
@@ -337,32 +128,18 @@ const Login = () => {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              {/* Google Button */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <SocialButton
+                icon={FaGoogle}
+                label="Google"
                 onClick={() => googleLogin()}
-                className="w-full inline-flex justify-center items-center py-2.5 px-4 
-                  border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm 
-                  bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 
-                  hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
-              >
-                <FaGoogle className="h-4 w-4 text-orange-400" />
-                <span className="ml-2 text-xs sm:text-sm">Google</span>
-              </motion.button>
-
-              {/* Facebook Button */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full inline-flex justify-center items-center py-2.5 px-4 
-                  border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm 
-                  bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 
-                  hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
-              >
-                <FaFacebook className="h-4 w-4 text-blue-600" />
-                <span className="ml-2 text-xs sm:text-sm">Facebook</span>
-              </motion.button>
+                iconColor="text-orange-400"
+              />
+              <SocialButton
+                icon={FaFacebook}
+                label="Facebook"
+                onClick={() => {}}
+                iconColor="text-blue-600"
+              />
             </div>
           </div>
 

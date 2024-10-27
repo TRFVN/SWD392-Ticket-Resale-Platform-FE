@@ -1,4 +1,3 @@
-// components/profile/tabs/Interests.jsx
 import React from "react";
 import { FaEdit } from "react-icons/fa";
 

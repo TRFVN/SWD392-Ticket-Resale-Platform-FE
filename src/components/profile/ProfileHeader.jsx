@@ -1,13 +1,16 @@
-import React, { useRef, useState, useContext } from "react";
-import { FaCamera } from "react-icons/fa";
-import { AuthContext } from "../../context/AuthContext";
+import React, { useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Camera } from "lucide-react";
 import axiosInstance from "../../config/axiosConfig";
 import { toast } from "react-toastify";
+import { setTokens, setUser } from "../../store/slice/authSlice";
 
 const ProfileHeader = ({ user }) => {
+  const dispatch = useDispatch();
+  const currentUser = useSelector((state) => state.auth.user);
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
-  const { refreshUserData } = useContext(AuthContext);
+
   const handleFileChange = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -34,8 +37,23 @@ const ProfileHeader = ({ user }) => {
       });
 
       if (response.data && response.data.isSuccess) {
+        // Update tokens in Redux store
+        dispatch(
+          setTokens({
+            accessToken: response.data.result.accessToken,
+            refreshToken: response.data.result.refreshToken,
+          }),
+        );
+
+        // Update user data in Redux store with new avatar URL
+        dispatch(
+          setUser({
+            ...currentUser,
+            avatarUrl: response.data.result.avatarUrl,
+          }),
+        );
+
         toast.success("Avatar updated successfully!");
-        await refreshUserData();
       } else {
         throw new Error(response.data?.message || "Failed to update avatar");
       }
@@ -82,8 +100,8 @@ const ProfileHeader = ({ user }) => {
           >
             <div className="relative">
               <img
-                src={user.avatarUrl || "https://via.placeholder.com/150"}
-                alt={user.fullName}
+                src={currentUser.avatarUrl || "https://via.placeholder.com/150"}
+                alt={currentUser.fullName}
                 className={`w-36 h-36 rounded-full object-cover border-4 border-white 
                          dark:border-gray-800 transition-opacity duration-300
                          ${uploading ? "opacity-50" : "opacity-100"}`}
@@ -114,7 +132,7 @@ const ProfileHeader = ({ user }) => {
                          : "hover:bg-orange-50"
                      }`}
           >
-            <FaCamera size={18} />
+            <Camera size={18} />
           </button>
 
           {uploading && (
@@ -125,11 +143,11 @@ const ProfileHeader = ({ user }) => {
         </div>
 
         <h1 className="mt-6 text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-          {user.fullName}
+          {currentUser.fullName}
         </h1>
 
         <div className="mt-4 flex justify-center gap-3">
-          {user.roles.map((role) => (
+          {currentUser.roles.map((role) => (
             <span
               key={role}
               className="px-4 py-1.5 text-sm font-medium bg-gradient-to-r from-orange-50 to-orange-100
