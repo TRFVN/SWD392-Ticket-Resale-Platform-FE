@@ -33,7 +33,7 @@ const ChatMessages = ({ messages, userId, messagesEndRef }) => {
               </p>
             )}
             <p className="text-sm">{msg.content}</p>
-            <span className="text-xs opacity-75 mt-1 block">
+            <span className="text-xs opacity-75 mt-2 block">
               {new Date(msg.timestamp).toLocaleTimeString()}
             </span>
           </div>
