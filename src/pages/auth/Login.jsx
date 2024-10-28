@@ -1,17 +1,17 @@
-// src/pages/Login.jsx
-import React from "react";
+// Login.jsx
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { useGoogleLogin } from "@react-oauth/google";
-import { FaGoogle, FaFacebook } from "react-icons/fa";
+import { FaGoogle } from "react-icons/fa";
 import * as Yup from "yup";
 import { useContext } from "react";
-
+import { AuthContext } from "../../context/AuthContext";
+import { toast } from "react-toastify";
 import TicketLogo from "../../assets/TicketHub_Logo.png";
-import axios from "axios";
 import { LoginForm } from "../../components/auth/login/LoginForm";
 import { SocialButton } from "../../components/auth/login/SocialButton";
-import { AuthContext } from "../../context/AuthContext";
+import { useDispatch, useSelector } from "react-redux";
+import { setGoogleLoginSuccess } from "../../store/slice/authSlice";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -23,58 +23,54 @@ const validationSchema = Yup.object().shape({
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, loading, error } = useContext(AuthContext);
+  const dispatch = useDispatch();
+  const { login, loading, googleLogin } = useContext(AuthContext);
+  const googleLoginSuccess = useSelector(
+    (state) => state.auth.googleLoginSuccess,
+  );
+
+  useEffect(() => {
+    if (googleLoginSuccess) {
+      toast.success("Successfully logged in with Google!", {
+        onClose: () => {
+          dispatch(setGoogleLoginSuccess(false));
+          navigate("/");
+        },
+      });
+    }
+  }, [googleLoginSuccess, navigate, dispatch]);
+
+  const handleGoogleLogin = async () => {
+    try {
+      await googleLogin();
+    } catch (error) {
+      console.error("Google login error:", error);
+      if (error?.error !== "popup_closed_by_user") {
+        toast.error(error.message || "Failed to login with Google");
+      }
+    }
+  };
 
   const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {
       const response = await login(values.email, values.password);
-
-      if (response && response.isSuccess) {
+      if (response?.isSuccess) {
         if (values.rememberMe) {
           localStorage.setItem("rememberMe", "true");
         } else {
           localStorage.removeItem("rememberMe");
         }
-
-        const role = response.result.role?.toLowerCase();
-        switch (role) {
-          case "admin":
-            navigate("/admin/dashboard");
-            break;
-          case "user":
-            navigate("/dashboard");
-            break;
-          default:
-            navigate("/dashboard");
-        }
+        toast.success("Successfully logged in!", {
+          onClose: () => navigate("/"),
+        });
       }
-    } catch (err) {
-      setFieldError("submit", err.message);
+    } catch (error) {
+      setFieldError("submit", error.message);
+      toast.error(error.message);
     } finally {
       setSubmitting(false);
     }
   };
-
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        const response = await axios.get(
-          "https://www.googleapis.com/oauth2/v3/userinfo",
-          {
-            headers: {
-              Authorization: `Bearer ${tokenResponse.access_token}`,
-            },
-          },
-        );
-        // Handle Google login success
-        console.log("User Info:", response.data);
-      } catch (error) {
-        console.error("Failed to fetch user info:", error);
-      }
-    },
-    onError: () => console.log("Login Failed"),
-    scope: "profile email",
-  });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:py-12">
@@ -90,7 +86,6 @@ const Login = () => {
           className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden 
             border border-gray-200 dark:border-gray-700 p-6 sm:p-8"
         >
-          {/* Logo Section */}
           <div className="text-center mb-6 sm:mb-8">
             <motion.img
               src={TicketLogo}
@@ -114,7 +109,6 @@ const Login = () => {
             validationSchema={validationSchema}
           />
 
-          {/* Social Login Section */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -127,23 +121,17 @@ const Login = () => {
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="mt-6">
               <SocialButton
                 icon={FaGoogle}
-                label="Google"
-                onClick={() => googleLogin()}
-                iconColor="text-orange-400"
-              />
-              <SocialButton
-                icon={FaFacebook}
-                label="Facebook"
-                onClick={() => {}}
-                iconColor="text-blue-600"
+                label="Continue with Google"
+                onClick={handleGoogleLogin}
+                iconColor="text-blue-500"
+                disabled={loading}
               />
             </div>
           </div>
 
-          {/* Sign Up Link */}
           <p className="mt-6 text-center text-xs sm:text-sm text-gray-600 dark:text-gray-400">
             Not a member?{" "}
             <Link
