@@ -11,6 +11,7 @@ import VerifyEmail from "../pages/auth/VerifyEmail";
 import PrivateRoute from "./PrivateRoute";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import Cart from "../pages/cart/cart";
+import ChatsPage from "../pages/Chatspage";
 const publicRoutes = [
   { index: true, element: <Home /> },
   { path: "login", element: <Login /> },
@@ -24,6 +25,7 @@ const privateRoutes = [
   { path: "tickets", element: <Ticket /> },
   { path: "profile", element: <Profile /> },
   { path: "cart", element: <Cart /> },
+  { path: "chat", element: <ChatsPage /> },
 ];
 
 export const router = createBrowserRouter([
