@@ -12,6 +12,7 @@ import PrivateRoute from "./PrivateRoute";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import Cart from "../pages/cart/cart";
 import ChatsPage from "../pages/Chatspage";
+import TicketDetailsPage from "../pages/tickets/TicketDetails";
 const publicRoutes = [
   { index: true, element: <Home /> },
   { path: "login", element: <Login /> },
@@ -22,6 +23,8 @@ const publicRoutes = [
 ];
 
 const privateRoutes = [
+  { path: "tickets/:ticketId", element: <TicketDetailsPage /> }, // Add this line
+
   { path: "tickets", element: <Ticket /> },
   { path: "profile", element: <Profile /> },
   { path: "cart", element: <Cart /> },
