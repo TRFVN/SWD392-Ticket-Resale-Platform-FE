@@ -28,7 +28,13 @@ const privateRoutes = [
   { path: "tickets", element: <Ticket /> },
   { path: "profile", element: <Profile /> },
   { path: "cart", element: <Cart /> },
-  { path: "chat/:userId", element: <ChatsPage /> },
+  {
+    path: "chat",
+    children: [
+      { index: true, element: <ChatsPage /> }, // Handles /chat
+      { path: ":userId", element: <ChatsPage /> }, // Handles /chat/:userId
+    ],
+  },
 ];
 
 export const router = createBrowserRouter([
