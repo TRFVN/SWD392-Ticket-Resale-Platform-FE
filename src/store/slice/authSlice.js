@@ -8,6 +8,7 @@ const initialState = {
   isAuthenticated: false,
   loading: false,
   error: null,
+  googleLoginSuccess: false, // Add this
 };
 
 const authSlice = createSlice({
@@ -33,6 +34,9 @@ const authSlice = createSlice({
     setError: (state, action) => {
       state.error = action.payload;
     },
+    setGoogleLoginSuccess: (state, action) => {
+      state.googleLoginSuccess = action.payload;
+    },
     logout: (state) => {
       Cookies.remove("accessToken");
       localStorage.removeItem("refreshToken");
@@ -41,7 +45,13 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, setTokens, setLoading, setError, logout } =
-  authSlice.actions;
+export const {
+  setUser,
+  setTokens,
+  setLoading,
+  setError,
+  logout,
+  setGoogleLoginSuccess,
+} = authSlice.actions;
 
 export default authSlice.reducer;

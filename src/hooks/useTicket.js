@@ -1,31 +1,42 @@
 import { useState, useEffect } from "react";
+import { getTicketByIdApi } from "../services/ticket";
 
-export const useTickets = () => {
-  const [tickets, setTickets] = useState([]);
-  const [loading, setLoading] = useState(true);
+export const useTicket = (ticketId) => {
+  const [ticket, setTicket] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchTickets = async () => {
-      try {
-        // Replace with your actual API call
-        const response = await fetch("/api/tickets");
-        const data = await response.json();
+    let isMounted = true;
 
-        if (data.isSuccess) {
-          setTickets(data.result);
-        } else {
-          throw new Error(data.message);
+    const fetchTicket = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await getTicketByIdApi(ticketId);
+        if (isMounted) {
+          setTicket(data);
         }
       } catch (err) {
-        setError(err.message);
+        if (isMounted) {
+          setError(err.message);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
-    fetchTickets();
-  }, []);
+    // Chỉ fetch khi có ticketId
+    if (ticketId) {
+      fetchTicket();
+    }
 
-  return { tickets, loading, error };
+    return () => {
+      isMounted = false;
+    };
+  }, [ticketId]);
+
+  return { ticket, isLoading, error };
 };
