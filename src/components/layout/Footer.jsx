@@ -13,6 +13,7 @@ import {
   ExternalLink,
   ChevronRight,
 } from "lucide-react";
+import { FaFacebook, FaInstagram, FaTiktok, FaTwitter } from "react-icons/fa";
 
 const FooterLink = ({ href, children, external }) => (
   <motion.li
@@ -94,25 +95,25 @@ const Footer = () => {
             </h3>
             <div className="space-y-4">
               <SocialIcon
-                icon={Facebook}
+                icon={FaFacebook}
                 href="https://facebook.com"
                 label="Facebook"
                 gradient="bg-gradient-to-r from-blue-600 to-blue-500"
               />
               <SocialIcon
-                icon={Twitter}
+                icon={FaTwitter}
                 href="https://twitter.com"
                 label="Twitter"
                 gradient="bg-gradient-to-r from-blue-400 to-blue-300"
               />
               <SocialIcon
-                icon={Instagram}
+                icon={FaInstagram}
                 href="https://instagram.com"
                 label="Instagram"
                 gradient="bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500"
               />
               <SocialIcon
-                icon={TrendingUp}
+                icon={FaTiktok}
                 href="https://tiktok.com"
                 label="TikTok"
                 gradient="bg-gradient-to-r from-black to-gray-800"
