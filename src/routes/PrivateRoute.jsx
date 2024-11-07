@@ -1,9 +1,15 @@
+// components/routes/PrivateRoute.jsx
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
-
+const findRoleFromToken = (decodedToken) => {
+  const roleKey = Object.keys(decodedToken).find((key) =>
+    key.toLowerCase().includes("role"),
+  );
+  return roleKey ? decodedToken[roleKey] : null;
+};
 function PrivateRoute({ allowedRoles }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,12 +32,31 @@ function PrivateRoute({ allowedRoles }) {
           state: { from: location.pathname },
           replace: true,
         });
+        return;
       }
-      // Xóa phần kiểm tra role vì chúng ta không có thông tin về role từ access token
+
+      if (allowedRoles?.length > 0) {
+        const decodedTokenStr = localStorage.getItem("decodedToken");
+        if (!decodedTokenStr) return;
+
+        const decodedToken = JSON.parse(decodedTokenStr);
+        // Tìm role động
+        const userRole = findRoleFromToken(decodedToken);
+
+        console.log("Current Role:", userRole);
+
+        if (!userRole || !allowedRoles.includes(userRole)) {
+          toast.error("You don't have permission to access this page.", {
+            position: "top-center",
+            autoClose: 5000,
+          });
+          navigate("/", { replace: true });
+        }
+      }
     };
 
     checkAuth();
-  }, [navigate, location]);
+  }, [navigate, location, allowedRoles]);
 
   return <Outlet />;
 }
