@@ -13,7 +13,7 @@ function Progress({ currentProgress, handleChangeProgress }) {
       </div>
       <div
         className={`col-span-6 w-full py-4 px-4 text-center cursor-pointer ${
-          currentProgress === "Add New" ? "bg-orange-300" : ""
+          currentProgress === "Add New" ? "bg-orange-300" : "bg-white"
         }  `}
         onClick={() => handleChangeProgress("Add New")}
       >

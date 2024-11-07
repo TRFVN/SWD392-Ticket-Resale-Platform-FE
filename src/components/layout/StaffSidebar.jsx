@@ -18,20 +18,22 @@ function StaffSidebar({
         className={`flex flex-row ${
           showSidebar ? "justify-end" : "justify-center"
         } items-center  w-full px-3`}
-        onClick={() => toggleSidebar()}
       >
-        <div className="flex flex-row justify-center items-center border rounded-md p-2 h-9 w-9 hover:bg-orange-400 cursor-pointer">
+        <div
+          className="flex flex-row justify-center items-center border rounded-md p-2 h-9 w-9 hover:bg-orange-400 cursor-pointer"
+          onClick={() => toggleSidebar()}
+        >
           <AlignJustify />
         </div>
       </div>
-      <div className="flex flex-col justify-start items-start w-full mt-3">
+      <div className="flex flex-col justify-start items-start w-full mt-3 px-1">
         {items &&
           items.length > 0 &&
           items.map((item, index) => {
             return (
               <div
                 key={index}
-                className={`flex flex-row gap-3 font-medium text-base ${
+                className={`flex flex-row gap-3 font-medium text-base my-1 rounded-md ${
                   showSidebar ? "justify-start" : "justify-center"
                 }  items-center py-4 w-full cursor-pointer px-5 hover:bg-orange-200 ${
                   currentPath === item.label.toLowerCase()
