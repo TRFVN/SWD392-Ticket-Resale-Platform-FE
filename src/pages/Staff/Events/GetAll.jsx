@@ -6,7 +6,7 @@ import * as Yup from "yup";
 import DeleteEvent from "./DeleteEvent";
 import { toast } from "react-toastify";
 import Loader from "../../../components/common/Loader";
-function GetAll() {
+function GetAll({ handleGetCurrEvent, handleChangeProgress }) {
   const [eventList, setEventList] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentEvent, setCurrentEvent] = useState({});
@@ -100,7 +100,13 @@ function GetAll() {
                   <td className="px-6 py-4 flex flex-row justify-start items-center gap-2">
                     {event.status === 1 ? (
                       <>
-                        <span className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full border border-green-500 p-2 text-green-500 text-xs hover:bg-green-500 hover:text-white">
+                        <span
+                          className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full border border-green-500 p-2 text-green-500 text-xs hover:bg-green-500 hover:text-white"
+                          onClick={() => {
+                            handleGetCurrEvent(event);
+                            handleChangeProgress("Update Event");
+                          }}
+                        >
                           <Pencil />
                         </span>
                         <span

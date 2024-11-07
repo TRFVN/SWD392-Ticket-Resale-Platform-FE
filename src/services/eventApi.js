@@ -61,3 +61,33 @@ export const deleteEventApi = async (eventId) => {
     throw new Error(error.message || "Failed to delete event");
   }
 };
+
+export const putEventApi = async ({
+  eventId,
+  eventName,
+  eventDescription,
+  eventDate,
+  city,
+  district,
+  address,
+}) => {
+  try {
+    const response = await axiosInstance.put("Event", {
+      eventId: eventId,
+      eventName: eventName,
+      eventDescription: eventDescription,
+      eventDate: eventDate,
+      city: city,
+      district: district,
+      address: address,
+    });
+    console.log(response.data);
+    if (response.status === 201) {
+      return response.data.result;
+    } else {
+      throw new Error(response.data.message || "Failed to update event");
+    }
+  } catch (error) {
+    throw new Error(error.message || "Failed to update event");
+  }
+};

@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Asterisk } from "lucide-react";
-import { getLocationApi, postEventApi } from "../../../services/eventApi";
+import {
+  getLocationApi,
+  postEventApi,
+  putEventApi,
+} from "../../../services/eventApi";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
-function UpdateEvent({ handleChangeProgress, currentEvent }) {
+function UpdateEvent({ handleChangeProgress, curEvent }) {
+  console.log(curEvent);
   const [cityList, setCityList] = useState([]);
   const [districtList, setDistrictList] = useState([]);
   const [openCity, setOpenCity] = useState(false);
@@ -26,15 +31,21 @@ function UpdateEvent({ handleChangeProgress, currentEvent }) {
     formik.setFieldValue("district", "");
     setChosenDistrict({});
   };
-
+  const getDateMonthYear = (date) => {
+    const d = new Date(date);
+    const ngay = String(d.getDate()).padStart(2, "0"); // Đảm bảo có hai chữ số
+    const thang = String(d.getMonth() + 1).padStart(2, "0"); // Đảm bảo có hai chữ số
+    const nam = d.getFullYear();
+    return `${nam}-${thang}-${ngay}`;
+  };
   const formik = useFormik({
     initialValues: {
-      eventName: "",
-      eventDate: "",
-      eventDescription: "",
-      city: "",
-      district: "",
-      address: "",
+      eventName: curEvent.eventName,
+      eventDate: getDateMonthYear(curEvent.eventDate),
+      eventDescription: curEvent.eventDescription,
+      city: curEvent.city,
+      district: curEvent.district,
+      address: curEvent.address,
     },
     validationSchema: Yup.object({
       eventName: Yup.string()
@@ -61,7 +72,15 @@ function UpdateEvent({ handleChangeProgress, currentEvent }) {
         .required("Address is required"),
     }),
     onSubmit: async (values) => {
-      const response = await postEventApi(values);
+      const response = await putEventApi({
+        eventId: curEvent.eventId,
+        eventName: values.eventName,
+        eventDescription: values.eventDescription,
+        eventDate: values.eventDate,
+        city: values.city,
+        district: values.district,
+        address: values.address,
+      });
       if (response) {
         toast.success("Add new event successfully!");
         handleChangeProgress("Get All");
@@ -275,7 +294,7 @@ function UpdateEvent({ handleChangeProgress, currentEvent }) {
           type="submit"
           className="border rounded-md py-2 px-3 cursor-pointer border-orange-400 text-orange-400 hover:bg-orange-500 hover:font-medium hover:text-white"
         >
-          Add New
+          Update
         </button>
       </div>
     </form>
