@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Asterisk } from "lucide-react";
 import { getLocationApi } from "../../../services/eventApi";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 function AddNew() {
   const [cityList, setCityList] = useState([]);
   const [districtList, setDistrictList] = useState([]);
@@ -21,6 +23,35 @@ function AddNew() {
     setDistrictList(city.districts);
   };
   console.log(cityList);
+
+  const formik = useFormik({
+    initialValues: {
+      eventName: "",
+      eventDate: "",
+
+      city: "",
+      district: "",
+      address: "",
+    },
+    validationSchema: Yup.object({
+      eventName: Yup.string()
+        .min(10, "Event name must be at least 10 characters")
+        .matches(
+          /^[a-zA-Z0-9\s]+$/,
+          "Event name cannot contain special characters",
+        )
+        .required("Event name is required"),
+      eventDate: Yup.date()
+        .min(new Date(), "Event date must be in the future")
+        .required("Event date is required"),
+      city: Yup.string().required("City is required"),
+      district: Yup.string().required("District is required"),
+      address: Yup.string().required("Address is required"),
+    }),
+    onSubmit: (values) => {
+      console.log("Form values:", values);
+    },
+  });
   return (
     <form className="flex flex-col justify-start items-start gap-5 p-8 w-full">
       <div className="flex flex-row justify-start items-start gap-2 w-full">

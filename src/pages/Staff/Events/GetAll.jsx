@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Pencil, Trash } from "lucide-react";
 import { getAllEventApi } from "../../../services/eventApi";
-
+import { useFormik } from "formik";
+import * as Yup from "yup";
 function GetAll() {
   const [eventList, setEventList] = useState([]);
   useEffect(() => {
@@ -19,11 +20,12 @@ function GetAll() {
   const formatDate = (dateTimeString) => {
     const date = new Date(dateTimeString);
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Tháng bắt đầu từ 0 nên cần +1
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
 
     return `${day}/${month}/${year}`;
   };
+
   return (
     <div className="relative overflow-x-auto sm:rounded-lg w-full">
       <table className="w-full text-sm text-left text-gray-500 ">
