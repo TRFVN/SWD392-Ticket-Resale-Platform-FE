@@ -13,7 +13,10 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import Cart from "../pages/cart/cart";
 import ChatsPage from "../pages/Chatspage";
 import TicketDetailsPage from "../pages/tickets/TicketDetails";
-// import ReviewTickets from "../pages/Staff/reviewTickets";
+import Tickets from "../pages/Staff/Tickets";
+import Locations from "../pages/Staff/Locations";
+import Events from "../pages/Staff/Events";
+import StaffLayout from "../layout/StaffLayout";
 const publicRoutes = [
   { index: true, element: <Home /> },
   { path: "login", element: <Login /> },
@@ -21,7 +24,6 @@ const publicRoutes = [
   { path: "about", element: <About /> },
   { path: "verifyemail", element: <VerifyEmail /> },
   { path: "forgot-password", element: <ForgotPassword /> },
-  // { path: "review-tickets", element: <ReviewTickets /> },
 ];
 
 const privateRoutes = [
@@ -43,6 +45,15 @@ export const router = createBrowserRouter([
         element: <PrivateRoute />,
         children: privateRoutes,
       },
+    ],
+  },
+  {
+    path: "/staff",
+    element: <StaffLayout />,
+    children: [
+      { path: "tickets", element: <Tickets /> },
+      { path: "locations", element: <Locations /> },
+      { path: "events", element: <Events /> },
     ],
   },
   {
