@@ -27,3 +27,23 @@ export const getLocationApi = async () => {
     throw new Error(error.message || "Failed to get locations");
   }
 };
+
+export const postEventApi = async (events) => {
+  try {
+    const response = await axiosInstance.post("/Event", {
+      eventName: events.eventName,
+      eventDescription: events.eventDescription,
+      eventDate: events.eventDate,
+      city: events.city,
+      district: events.district,
+      address: events.address,
+    });
+    if (response.status === 201) {
+      return response.data.result;
+    } else {
+      throw new Error(response.data.message || "Failed to create event");
+    }
+  } catch (error) {
+    throw new Error(error.message || "Failed to create event");
+  }
+};

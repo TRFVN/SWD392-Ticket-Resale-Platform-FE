@@ -5,7 +5,7 @@ function Progress({ currentProgress, handleChangeProgress }) {
     <div className="grid grid-cols-12 flex-row justify-center items-center w-full border-[1px] rounded-md text-base font-medium">
       <div
         className={`col-span-6 w-full py-4 px-4 text-center cursor-pointer ${
-          currentProgress === "Get All" ? "bg-orange-300" : ""
+          currentProgress === "Get All" ? "bg-orange-400" : ""
         }  `}
         onClick={() => handleChangeProgress("Get All")}
       >
@@ -13,7 +13,7 @@ function Progress({ currentProgress, handleChangeProgress }) {
       </div>
       <div
         className={`col-span-6 w-full py-4 px-4 text-center cursor-pointer ${
-          currentProgress === "Add New" ? "bg-orange-300" : "bg-white"
+          currentProgress === "Add New" ? "bg-orange-400" : "bg-white"
         }  `}
         onClick={() => handleChangeProgress("Add New")}
       >
