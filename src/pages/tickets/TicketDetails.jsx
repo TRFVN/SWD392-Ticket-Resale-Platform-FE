@@ -5,6 +5,7 @@ import TicketInfo from "../../components/ticket/ticketdetails/TicketInfo";
 import MainContent from "../../components/ticket/ticketdetails/MainContent";
 import Sidebar from "../../components/ticket/ticketdetails/Sidebar";
 import { motion } from "framer-motion";
+import { formatDate } from "../../utils/dateUtils";
 const TicketDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,18 +23,6 @@ const TicketDetails = () => {
   if (!ticket) {
     return null;
   }
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("vi-VN", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
-  };
 
   const handleShare = () => {
     if (navigator.share) {

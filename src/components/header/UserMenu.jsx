@@ -13,7 +13,6 @@ import {
   Ticket,
   Star,
 } from "lucide-react";
-import { AuthContext } from "../../context/AuthContext";
 
 const menuVariants = {
   closed: {

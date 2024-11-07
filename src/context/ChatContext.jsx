@@ -1,6 +1,6 @@
 // src/context/ChatContext.jsx
 import React, { createContext, useContext, useReducer, useEffect } from "react";
-import signalRService from "../services/signalRService";
+import { signalRService } from "../services/signalRService";
 
 const ChatContext = createContext();
 
