@@ -39,10 +39,12 @@ const chatApi = {
     }
   },
 
-  createChatRoom: async (nameRoom = "string") => {
+  createChatRoom: async (sendMessageUserId, receiveMessageUserId) => {
     const payload = {
       chatRoomId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      nameRoom: nameRoom,
+      nameRoom: "string",
+      sendMessageUserId,
+      receiveMessageUserId,
       createTime: "2024-10-31T06:30:34.700Z",
       updateTime: "2024-10-31T06:30:34.700Z",
     };
