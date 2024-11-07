@@ -3,8 +3,10 @@ import { Pencil, Trash } from "lucide-react";
 import { getAllEventApi } from "../../../services/eventApi";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import DeleteEvent from "./DeleteEvent";
 function GetAll() {
   const [eventList, setEventList] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   useEffect(() => {
     const getEvents = async () => {
       const response = await getAllEventApi();
@@ -15,7 +17,18 @@ function GetAll() {
     getEvents();
   }, []);
 
-  console.log(eventList);
+  const handleOpenDeleteModal = () => {
+    setShowDeleteModal(true);
+  };
+  const hanldeCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+  };
+
+  const hanldeConfirmDeleteModal = () => {
+    setShowDeleteModal(false);
+    // Implement delete event logic here
+  };
+  // console.log(eventList);
 
   const formatDate = (dateTimeString) => {
     const date = new Date(dateTimeString);
@@ -53,22 +66,25 @@ function GetAll() {
         </thead>
         <tbody>
           {eventList.map((event, index) => (
-            <tr key={index} className={`border-t dark:border-gray-700`}>
+            <tr key={index} className={`border-t`}>
               <th
                 scope="row"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
               >
                 {event.eventName}
               </th>
               <td className="px-6 py-4">{formatDate(event.eventDate)}</td>
-              <td className="px-6 py-4">TP.HCM</td>
-              <td className="px-6 py-4">TP.Thu Duc</td>
-              <td className="px-6 py-4">115/10B Lam Chan Khang</td>
+              <td className="px-6 py-4">{event.city}</td>
+              <td className="px-6 py-4">{event.district}</td>
+              <td className="px-6 py-4">{event.address}</td>
               <td className="px-6 py-4 flex flex-row justify-start items-center gap-2">
                 <span className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full border border-green-500 p-2 text-green-500 text-xs hover:bg-green-500 hover:text-white">
                   <Pencil />
                 </span>
-                <span className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full border border-red-500 p-2 text-red-500 text-xs hover:bg-red-500 hover:text-white">
+                <span
+                  className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full border border-red-500 p-2 text-red-500 text-xs hover:bg-red-500 hover:text-white"
+                  onClick={() => handleOpenDeleteModal()}
+                >
                   <Trash />
                 </span>
               </td>
@@ -76,6 +92,13 @@ function GetAll() {
           ))}
         </tbody>
       </table>
+      {showDeleteModal && (
+        <DeleteEvent
+          showDeleteModal={showDeleteModal}
+          hanldeCloseDeleteModal={hanldeCloseDeleteModal}
+          hanldeConfirmDeleteModal={hanldeConfirmDeleteModal}
+        />
+      )}
     </div>
   );
 }

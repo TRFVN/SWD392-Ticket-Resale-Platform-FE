@@ -4,7 +4,7 @@ import { getLocationApi, postEventApi } from "../../../services/eventApi";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
-function AddNew() {
+function AddNew({ handleChangeProgress }) {
   const [cityList, setCityList] = useState([]);
   const [districtList, setDistrictList] = useState([]);
   const [openCity, setOpenCity] = useState(false);
@@ -64,10 +64,11 @@ function AddNew() {
       const response = await postEventApi(values);
       if (response) {
         toast.success("Add new event successfully!");
+        handleChangeProgress("Get All");
       } else {
         toast.error("Failed to add new event. Please try again.");
       }
-      console.log("Form values:", values);
+      // console.log("Form values:", values);
     },
   });
   return (

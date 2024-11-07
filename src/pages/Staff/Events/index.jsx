@@ -22,7 +22,11 @@ function EventsMangement() {
         />
       </div>
       <div className="bg-white flex flex-col justify-start items-start w-full border-[1px] rounded-sm">
-        {currentProgress === "Get All" ? <GetAll /> : <AddNew />}
+        {currentProgress === "Get All" ? (
+          <GetAll />
+        ) : (
+          <AddNew handleChangeProgress={handleChangeProgress} />
+        )}
       </div>
     </div>
   );
