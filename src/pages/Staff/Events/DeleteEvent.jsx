@@ -1,13 +1,15 @@
 import React from "react";
 
 function DeleteEvent({
-  showModalDelete,
+  currentEvent,
+  showDeleteModal,
   hanldeCloseDeleteModal,
   hanldeConfirmDeleteModal,
 }) {
+  // console.log(currentEventId);
   return (
     <div>
-      {showModalDelete && (
+      {showDeleteModal && (
         <div
           id="popup-modal"
           className="fixed inset-0 z-50 flex justify-center items-center w-full h-full overflow-y-auto bg-black bg-opacity-50"
@@ -23,7 +25,7 @@ function DeleteEvent({
                 className="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
               >
                 <svg
-                  className="w-3 h-3"
+                  className="w-3 h-3 "
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -42,7 +44,7 @@ function DeleteEvent({
 
               <div className="p-4 md:p-5 text-center">
                 <svg
-                  className="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
+                  className="mx-auto mb-4  w-12 h-12 dark:text-gray-200 text-red-600"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -57,7 +59,10 @@ function DeleteEvent({
                   />
                 </svg>
                 <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-                  Are you sure you want to delete this product?
+                  Are you sure you want to delete this event?
+                  <span className="italic text-base">
+                    {currentEvent.eventName}
+                  </span>
                 </h3>
 
                 <button

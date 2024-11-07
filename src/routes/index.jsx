@@ -1,3 +1,4 @@
+// router/index.js
 import { createBrowserRouter } from "react-router-dom";
 import RootLayout from "../layout/RootLayout";
 import Home from "../pages/home/Home";
@@ -17,6 +18,13 @@ import Tickets from "../pages/Staff/Tickets";
 import Locations from "../pages/Staff/Locations";
 import Events from "../pages/Staff/Events";
 import StaffLayout from "../layout/StaffLayout";
+
+const ROLES = {
+  ADMIN: "ADMIN",
+  STAFF: "STAFF",
+  MEMBER: "MEMBER",
+};
+
 const publicRoutes = [
   { index: true, element: <Home /> },
   { path: "login", element: <Login /> },
@@ -27,16 +35,15 @@ const publicRoutes = [
 ];
 
 const privateRoutes = [
-  { path: "tickets/:ticketId", element: <TicketDetailsPage /> }, // Add this line
-
+  { path: "tickets/:ticketId", element: <TicketDetailsPage /> },
   { path: "tickets", element: <Ticket /> },
   { path: "profile", element: <Profile /> },
   { path: "cart", element: <Cart /> },
   {
     path: "chat",
     children: [
-      { index: true, element: <ChatsPage /> }, // Handles /chat
-      { path: ":userId", element: <ChatsPage /> }, // Handles /chat/:userId
+      { index: true, element: <ChatsPage /> },
+      { path: ":userId", element: <ChatsPage /> },
     ],
   },
 ];
@@ -48,18 +55,23 @@ export const router = createBrowserRouter([
     children: [
       ...publicRoutes,
       {
-        element: <PrivateRoute />,
+        element: <PrivateRoute allowedRoles={[ROLES.MEMBER]} />,
         children: privateRoutes,
       },
     ],
   },
   {
     path: "/staff",
-    element: <StaffLayout />,
+    element: <PrivateRoute allowedRoles={[ROLES.STAFF]} />,
     children: [
-      { path: "tickets", element: <Tickets /> },
-      { path: "locations", element: <Locations /> },
-      { path: "events", element: <Events /> },
+      {
+        element: <StaffLayout />,
+        children: [
+          { path: "tickets", element: <Tickets /> },
+          { path: "locations", element: <Locations /> },
+          { path: "events", element: <Events /> },
+        ],
+      },
     ],
   },
   {

@@ -25,7 +25,26 @@ const validationSchema = Yup.object().shape({
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  // Sử dụng useAuth hook thay vì useContext
+  const navigateByRole = () => {
+    const userRole = localStorage.getItem("userRole");
+    console.log("Role from localStorage:", userRole);
+
+    switch (userRole?.toUpperCase()) {
+      case "ADMIN":
+        navigate("/admin");
+        break;
+      case "STAFF":
+        navigate("/staff/tickets");
+        break;
+      case "MEMBER":
+        navigate("/");
+        break;
+      default:
+        navigate("/");
+        break;
+    }
+  };
+
   const { login, loading, googleLogin } = useAuth();
   const googleLoginSuccess = useSelector(
     (state) => state.auth.googleLoginSuccess,
@@ -73,11 +92,8 @@ const Login = () => {
           localStorage.removeItem("rememberMe");
           localStorage.removeItem("email");
         }
-
-        toast.success("Welcome back!", {
-          // Thay đổi message
-          onClose: () => navigate("/"),
-        });
+        navigateByRole();
+        toast.success("Welcome back!");
       }
     } catch (error) {
       setFieldError("submit", error.message);

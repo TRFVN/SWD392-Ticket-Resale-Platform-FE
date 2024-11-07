@@ -1,3 +1,4 @@
+import axios from "axios";
 import axiosInstance from "../config/axiosConfig";
 
 export const getAllEventApi = async () => {
@@ -15,7 +16,7 @@ export const getAllEventApi = async () => {
 
 export const getLocationApi = async () => {
   try {
-    const response = await axiosInstance.get(
+    const response = await axios.get(
       "https://provinces.open-api.vn/api?depth=2",
     );
     if (response.status === 200) {
@@ -45,5 +46,18 @@ export const postEventApi = async (events) => {
     }
   } catch (error) {
     throw new Error(error.message || "Failed to create event");
+  }
+};
+
+export const deleteEventApi = async (eventId) => {
+  try {
+    const response = await axiosInstance.delete(`/Event/${eventId}`);
+    if (response.status === 201) {
+      return response.data.result; //tai vi api tra nhu the :))))
+    } else {
+      throw new Error(response.data.message || "Failed to delete event");
+    }
+  } catch (error) {
+    throw new Error(error.message || "Failed to delete event");
   }
 };

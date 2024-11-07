@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { AuthContext } from "../context/AuthContext";
 import { useGoogleLogin } from "@react-oauth/google";
 import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import {
   setUser,
@@ -12,8 +13,39 @@ import {
   setError,
   setGoogleLoginSuccess,
   logout,
+  setRole,
 } from "../store/slice/authSlice";
 import authService from "../services/auth";
+import { de } from "date-fns/locale";
+
+const findRoleFromToken = (decodedToken) => {
+  // Tìm key chứa từ "role" (không phân biệt hoa thường)
+  const roleKey = Object.keys(decodedToken).find((key) =>
+    key.toLowerCase().includes("role"),
+  );
+
+  return roleKey ? decodedToken[roleKey] : null;
+};
+
+const handleTokenAndDecode = (accessToken) => {
+  try {
+    const decodedToken = jwtDecode(accessToken);
+    console.log("Decoded Token:", decodedToken);
+
+    // Tìm role động
+    const role = findRoleFromToken(decodedToken);
+    console.log("Found Role:", role);
+
+    // Lưu cả decoded token và role
+    localStorage.setItem("decodedToken", JSON.stringify(decodedToken));
+    localStorage.setItem("userRole", role);
+
+    return { decodedToken, role };
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
+  }
+};
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -56,6 +88,8 @@ export const useAuth = () => {
           secure: true,
           sameSite: "strict",
         });
+        // Decode token và lưu thông tin
+        handleTokenAndDecode(accessToken);
         localStorage.setItem("refreshToken", refreshToken);
         dispatch(setTokens({ accessToken, refreshToken }));
         await handleFetchUserData(accessToken);

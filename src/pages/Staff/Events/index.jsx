@@ -3,9 +3,10 @@ import { CalendarFold } from "lucide-react";
 import Progress from "./Progress";
 import GetAll from "./GetAll";
 import AddNew from "./AddNew";
+import UpdateEvent from "./UpdateEvent";
 function EventsMangement() {
   const [currentProgress, setCurrentProgress] = useState("Get All");
-
+  const [currentEvent, setCurrentEvent] = useState({});
   const handleChangeProgress = (newProgress) => {
     setCurrentProgress(newProgress);
   };
@@ -24,8 +25,10 @@ function EventsMangement() {
       <div className="bg-white flex flex-col justify-start items-start w-full border-[1px] rounded-sm">
         {currentProgress === "Get All" ? (
           <GetAll />
-        ) : (
+        ) : currentProgress === "Add New Event" ? (
           <AddNew handleChangeProgress={handleChangeProgress} />
+        ) : (
+          <UpdateEvent />
         )}
       </div>
     </div>

@@ -8,7 +8,8 @@ const initialState = {
   isAuthenticated: false,
   loading: false,
   error: null,
-  googleLoginSuccess: false, // Add this
+  googleLoginSuccess: false,
+  role: null,
 };
 
 const authSlice = createSlice({
@@ -18,6 +19,9 @@ const authSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
       state.isAuthenticated = true;
+    },
+    setRole: (state, action) => {
+      state.role = action.payload;
     },
     setTokens: (state, action) => {
       state.accessToken = action.payload.accessToken;
@@ -47,6 +51,7 @@ const authSlice = createSlice({
 
 export const {
   setUser,
+  setRole,
   setTokens,
   setLoading,
   setError,
