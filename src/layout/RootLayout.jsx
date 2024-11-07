@@ -47,53 +47,63 @@ const AuthLayout = () => (
 const MainLayout = () => {
   const location = useLocation();
   const isProfilePage = location.pathname.startsWith("/profile");
+  const isChatPage = location.pathname.startsWith("/chat");
 
   return (
     <div
       className="min-h-screen flex flex-col bg-white dark:bg-gray-900 
-      text-gray-900 dark:text-gray-100 transition-colors duration-200 w-full overflow-x-hidden"
+                    text-gray-900 dark:text-gray-100 transition-colors duration-200 
+                    w-full overflow-x-hidden"
     >
       <Header />
 
       <main
         className={`
         flex-grow w-full 
-        ${isProfilePage ? "px-4" : "px-4 sm:px-6 lg:px-8"} 
-        pt-16 sm:pt-20
+        ${isChatPage ? "p-0" : isProfilePage ? "px-4" : "px-4 sm:px-6 lg:px-8"} 
+        ${isChatPage ? "pt-16" : "pt-16 sm:pt-20"}
         max-w-[100vw]
         overflow-x-hidden
       `}
       >
         <Suspense fallback={<LoaderWrapper />}>
-          <motion.div
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            variants={pageTransition}
-            className="w-full max-w-[100vw] overflow-x-hidden"
-          >
-            {!isProfilePage && (
-              <div className="mb-4">
-                <BreadCrumb />
-              </div>
-            )}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={location.pathname}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                variants={pageTransition}
-                className="w-full"
-              >
-                <Outlet />
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
+          {isChatPage ? (
+            // Direct render without animations for chat
+            <div className="w-full h-full">
+              <Outlet />
+            </div>
+          ) : (
+            // Normal page rendering with animations
+            <motion.div
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageTransition}
+              className="w-full max-w-[100vw] overflow-x-hidden"
+            >
+              {!isProfilePage && (
+                <div className="mb-4">
+                  <BreadCrumb />
+                </div>
+              )}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={location.pathname}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  variants={pageTransition}
+                  className="w-full"
+                >
+                  <Outlet />
+                </motion.div>
+              </AnimatePresence>
+            </motion.div>
+          )}
         </Suspense>
       </main>
 
-      <Footer />
+      {!isChatPage && <Footer />}
     </div>
   );
 };

@@ -65,7 +65,7 @@ const ChatPage = () => {
     async (receiverId) => {
       try {
         setError(null);
-        const roomResponse = await chatApi.createChatRoom();
+        const roomResponse = await chatApi.createChatRoom(user.id, receiverId);
 
         if (roomResponse?.isSuccess && roomResponse.result?.chatRoomId) {
           const { chatRoomId } = roomResponse.result;
@@ -96,8 +96,6 @@ const ChatPage = () => {
     },
     [user?.id, joinChatRoom, fetchUserRooms],
   );
-
-  // pages/ChatPage.jsx
 
   // Modify handleRoomChange
   const handleRoomChange = useCallback(
