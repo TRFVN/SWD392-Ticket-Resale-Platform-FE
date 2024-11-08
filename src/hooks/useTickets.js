@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axiosInstance from "../config/axiosConfig";
 
 export const useTickets = () => {
   const [tickets, setTickets] = useState([]);
@@ -8,8 +9,7 @@ export const useTickets = () => {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        // Replace with your actual API call
-        const response = await fetch("/api/tickets");
+        const response = await axiosInstance("/tickets");
         const data = await response.json();
 
         if (data.isSuccess) {

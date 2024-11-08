@@ -165,5 +165,4 @@ axiosInstance.interceptors.response.use(
   },
 );
 
-// Export configured instance
 export default axiosInstance;
