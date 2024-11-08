@@ -105,7 +105,6 @@ export const useAuth = () => {
       dispatch(setLoading(false));
     }
   };
-
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       dispatch(setLoading(true));
@@ -117,14 +116,31 @@ export const useAuth = () => {
         if (response.isSuccess) {
           const { accessToken, refreshToken } = response.result;
 
+          // Set cookies cho accessToken
           Cookies.set("accessToken", accessToken, {
             secure: true,
             sameSite: "strict",
           });
+
+          // Decode token và lưu thông tin giống như login thông thường
+          const decodedInfo = handleTokenAndDecode(accessToken);
+          if (decodedInfo) {
+            const { role } = decodedInfo;
+            dispatch(setRole(role)); // Nếu bạn cần dispatch role vào redux
+          }
+
+          // Lưu refreshToken
           localStorage.setItem("refreshToken", refreshToken);
+
+          // Set tokens vào redux
           dispatch(setTokens({ accessToken, refreshToken }));
+
+          // Fetch user data
           await handleFetchUserData(accessToken);
+
+          // Set google login success
           dispatch(setGoogleLoginSuccess(true));
+
           return response;
         }
         throw new Error("Google login failed");

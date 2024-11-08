@@ -58,17 +58,12 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // Xử lý Google login success
   useEffect(() => {
     if (googleLoginSuccess) {
-      toast.success("Successfully logged in with Google!", {
-        onClose: () => {
-          dispatch(setGoogleLoginSuccess(false));
-          navigate("/");
-        },
-      });
+      dispatch(setGoogleLoginSuccess(false));
+      navigateByRole();
     }
-  }, [googleLoginSuccess, navigate, dispatch]);
+  }, [googleLoginSuccess, dispatch]);
 
   const handleGoogleLogin = async () => {
     try {

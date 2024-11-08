@@ -34,11 +34,11 @@ const publicRoutes = [
   { path: "about", element: <About /> },
   { path: "verifyemail", element: <VerifyEmail /> },
   { path: "forgot-password", element: <ForgotPassword /> },
+  { path: "tickets", element: <Ticket /> },
 ];
 
 const privateRoutes = [
   { path: "tickets/:ticketId", element: <TicketDetailsPage /> },
-  { path: "tickets", element: <Ticket /> },
   { path: "create-ticket", element: <CreateTicket /> },
   { path: "profile", element: <Profile /> },
   { path: "cart", element: <Cart /> },

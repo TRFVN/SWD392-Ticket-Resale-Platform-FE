@@ -1,14 +1,10 @@
 import axiosInstance from "../config/axiosConfig";
 
-export const getAllTicketsApi = async (currentPage, quantityDisplay) => {
+export const getAllTicketsApi = async () => {
   try {
-    const rs = await axiosInstance.get("/Tickets", {
-      params: {
-        pageNumber: currentPage,
-        pageSize: quantityDisplay,
-      },
-    });
+    const rs = await axiosInstance.get("/Tickets");
     if (rs.status === 200) {
+      console.log(rs);
       return rs.data.result;
     } else {
       throw new Error(`Error: Received status code ${rs.status}`);
