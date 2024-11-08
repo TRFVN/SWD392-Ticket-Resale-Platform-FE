@@ -3,27 +3,31 @@ import { Pencil, Trash, OctagonAlert } from "lucide-react";
 import { deleteEventApi, getAllEventApi } from "../../../services/eventApi";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import DeleteEvent from "./DeleteEvent";
+import DeleteCategory from "./DeleteCategory";
 import { toast } from "react-toastify";
 import Loader from "../../../components/common/Loader";
-function GetAll({ handleGetCurrEvent, handleChangeProgress }) {
-  const [eventList, setEventList] = useState([]);
+import {
+  deleteCategoryApi,
+  getAllCategoryApi,
+} from "../../../services/categoryApi";
+function GetAll({ handleSetCurrentCategory, handleChangeProgress }) {
+  const [categoryList, setCategoryList] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [currentEvent, setCurrentEvent] = useState({});
+  const [currentCategory, setCurrentCategory] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const getEvents = async () => {
-    const response = await getAllEventApi();
+  const getCategorys = async () => {
+    const response = await getAllCategoryApi();
     if (response) {
       setIsLoading(false);
-      setEventList(response);
+      setCategoryList(response);
     }
   };
   useEffect(() => {
-    getEvents();
+    getCategorys();
   }, []);
 
-  const handleOpenDeleteModal = (event) => {
-    setCurrentEvent(event);
+  const handleOpenDeleteModal = (category) => {
+    setCurrentCategory(category);
     setShowDeleteModal(true);
   };
   const hanldeCloseDeleteModal = () => {
@@ -31,16 +35,16 @@ function GetAll({ handleGetCurrEvent, handleChangeProgress }) {
   };
 
   const hanldeConfirmDeleteModal = () => {
-    const deleteEvent = async () => {
-      const response = await deleteEventApi(currentEvent.eventId);
+    const deleteCategory = async () => {
+      const response = await deleteCategoryApi(currentCategory.categoryId);
       if (response) {
-        toast.success("Delete event successfully");
-        getEvents();
+        toast.success("Delete category successfully");
+        getCategorys();
       } else {
-        toast.error("Failed to delete event. Please try again");
+        toast.error("Failed to delete category. Please try again");
       }
     };
-    deleteEvent();
+    deleteCategory();
     setShowDeleteModal(false);
   };
   // console.log(eventList);
@@ -64,23 +68,11 @@ function GetAll({ handleGetCurrEvent, handleChangeProgress }) {
           <table className="w-full text-sm text-left text-gray-500 ">
             <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
               <tr>
-                <th scope="col" className="px-3 py-3">
+                <th scope="col" className="px-6 py-3">
                   No.
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Event name
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Event Date
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  City
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  District
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Address
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Action
@@ -88,34 +80,30 @@ function GetAll({ handleGetCurrEvent, handleChangeProgress }) {
               </tr>
             </thead>
             <tbody>
-              {eventList.map((event, index) => (
+              {categoryList.map((category, index) => (
                 <tr key={index} className={`border-t`}>
-                  <td className="px-3 py-4 text-center">{index + 1}</td>
+                  <td className="px-6 py-4">{index + 1}</td>
                   <th
                     scope="row"
                     className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
                   >
-                    {event.eventName}
+                    {category.categoryName}
                   </th>
-                  <td className="px-6 py-4">{formatDate(event.eventDate)}</td>
-                  <td className="px-6 py-4">{event.city}</td>
-                  <td className="px-6 py-4">{event.district}</td>
-                  <td className="px-6 py-4">{event.address}</td>
                   <td className="px-6 py-4 flex flex-row justify-start items-center gap-2">
-                    {event.status === 1 ? (
+                    {category.status === 0 ? (
                       <>
                         <span
                           className="cursor-pointer w-7 h-7 flex items-center justify-center rounded-full border border-green-500 p-2 text-green-500 text-xs hover:bg-green-500 hover:text-white"
                           onClick={() => {
-                            handleGetCurrEvent(event);
-                            handleChangeProgress("Update Event");
+                            handleSetCurrentCategory(category);
+                            handleChangeProgress("Update Category");
                           }}
                         >
                           <Pencil />
                         </span>
                         <span
                           className="cursor-pointer w-7 h-7 flex items-center justify-center rounded-full border border-red-500 p-2 text-red-500 text-xs hover:bg-red-500 hover:text-white"
-                          onClick={() => handleOpenDeleteModal(event)}
+                          onClick={() => handleOpenDeleteModal(category)}
                         >
                           <Trash />
                         </span>
@@ -123,9 +111,9 @@ function GetAll({ handleGetCurrEvent, handleChangeProgress }) {
                     ) : (
                       <div>
                         <OctagonAlert
-                          className="text-yellow-500 cursor-pointer"
+                          className="text-yellow-500 cursor-pointer "
                           onClick={() =>
-                            toast.warning("This event was deleted")
+                            toast.warning("This category was deleted")
                           }
                         />
                       </div>
@@ -136,8 +124,8 @@ function GetAll({ handleGetCurrEvent, handleChangeProgress }) {
             </tbody>
           </table>
           {showDeleteModal && (
-            <DeleteEvent
-              currentEvent={currentEvent}
+            <DeleteCategory
+              currentCategory={currentCategory}
               showDeleteModal={showDeleteModal}
               hanldeCloseDeleteModal={hanldeCloseDeleteModal}
               hanldeConfirmDeleteModal={hanldeConfirmDeleteModal}

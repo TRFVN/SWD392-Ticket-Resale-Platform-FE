@@ -41,11 +41,11 @@ function Processing({ ticketList }) {
   };
   return (
     <div className="flex flex-col justify-center items-center w-full py-8 gap-8">
-      <div className="flex flex-row justify-center items-center w-2/3 gap-10">
+      <div className="flex flex-row justify-center items-center w-2/3 gap-5">
         <div className="w-full">
           <Search />
         </div>
-        <div className="flex flex-row gap-2 border p-3 rounded-md cursor-pointer hover:bg-orange-300">
+        <div className="flex flex-row gap-2 border p-3 rounded-md cursor-pointer hover:bg-orange-400">
           <Filter />
           Filters
         </div>
