@@ -1,14 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Ticket, AlertCircle, Loader2, Plus } from "lucide-react";
+import {
+  Ticket,
+  AlertCircle,
+  Loader2,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import { getAllTicketsApi } from "../../services/ticket";
 import { useNavigate } from "react-router-dom";
 import TicketGrid from "../../components/ticket/TicketGrid";
+import axiosInstance from "../../config/axiosConfig";
+
+const Toast = ({ message, type, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div
+      className={`fixed bottom-4 right-4 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg backdrop-blur-sm transition-all duration-300
+      ${type === "success" ? "bg-green-500/90" : "bg-red-500/90"} text-white`}
+    >
+      {type === "success" ? (
+        <CheckCircle className="w-5 h-5" />
+      ) : (
+        <XCircle className="w-5 h-5" />
+      )}
+      <p className="font-medium">{message}</p>
+    </div>
+  );
+};
 
 const TicketsPage = () => {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
   const isDarkMode = useSelector((state) => state.theme?.isDarkMode || false);
   const navigate = useNavigate();
 
@@ -31,10 +60,22 @@ const TicketsPage = () => {
 
   const handleAddToCart = async (ticket) => {
     try {
-      // Implement add to cart logic here
-      console.log("Adding to cart:", ticket);
+      setToast(null);
+      await axiosInstance.post("/Cart/AddToCart", {
+        ticketId: ticket.ticketId,
+      });
+
+      setToast({
+        type: "success",
+        message: `${ticket.ticketName} added to cart successfully!`,
+      });
     } catch (error) {
       console.error("Error adding to cart:", error);
+      setToast({
+        type: "error",
+        message:
+          error.response?.data?.message || "Failed to add ticket to cart",
+      });
     }
   };
 
@@ -86,7 +127,7 @@ const TicketsPage = () => {
       } transition-colors duration-200`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+        {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-orange-500/10 rounded-lg">
@@ -98,17 +139,6 @@ const TicketsPage = () => {
               </h1>
               <p className="text-gray-400">{tickets.length} tickets found</p>
             </div>
-          </div>
-
-          <div className="flex gap-4">
-            {/* Example: Add New Ticket Button for admins */}
-            {/* <button
-              onClick={() => navigate("/tickets/new")}
-              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl transition-colors flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Add Ticket</span>
-            </button> */}
           </div>
         </div>
 
@@ -141,7 +171,7 @@ const TicketsPage = () => {
                 notation: "compact",
                 maximumFractionDigits: 1,
               }).format(Math.min(...tickets.map((t) => t.ticketPrice)))}{" "}
-              -
+              -{" "}
               {new Intl.NumberFormat("vi-VN", {
                 style: "currency",
                 currency: "VND",
@@ -158,6 +188,15 @@ const TicketsPage = () => {
           onAction={handleAction}
           onAddToCart={handleAddToCart}
         />
+
+        {/* Toast Notification */}
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
       </div>
     </div>
   );

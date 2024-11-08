@@ -43,6 +43,7 @@ export const acceptTicketApi = async (ticketId) => {
     throw new Error(`Failed to approve Ticket`);
   }
 };
+
 export const rejectTicketApi = async (ticketId) => {
   try {
     const response = await axiosInstance.post(`/Tickets/${ticketId}/reject`);
@@ -53,5 +54,26 @@ export const rejectTicketApi = async (ticketId) => {
     }
   } catch (error) {
     throw new Error(`Failed to reject Ticket`);
+  }
+};
+
+export const postTicketApi = async (ticket) => {
+  try {
+    const response = await axiosInstance.post("/Tickets", {
+      ticketName: ticket.ticketName,
+      ticketDescription: ticket.ticketDescription,
+      eventId: ticket.eventId,
+      categoryId: ticket.categoryId,
+      ticketPrice: ticket.ticketPrice,
+      ticketImage: ticket.imageUrl,
+      serialNumber: ticket.serialNumber,
+    });
+    if (response.status === 201) {
+      return response.data.result;
+    } else {
+      throw new Error(response.data.message || "Failed to create ticket");
+    }
+  } catch (error) {
+    throw new Error(`Failed to create`);
   }
 };
