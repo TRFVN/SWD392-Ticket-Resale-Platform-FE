@@ -2,7 +2,7 @@ import React from "react";
 
 function Search() {
   return (
-    <form className="w-1/2 mx-auto">
+    <form className="w-full mx-auto">
       <label
         htmlFor="default-search"
         className="mb-2 text-sm font-medium text-gray-900 sr-only"
@@ -31,15 +31,15 @@ function Search() {
           type="search"
           id="default-search"
           className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none"
-          placeholder="Search for an event, artist, venue or city..."
+          placeholder="Search for ticket name, event name,..."
           required
         />
-        <button
+        {/* <button
           type="submit"
           className="text-black absolute end-2.5 bottom-2.5 bg-orange-400 hover:bg-orange-400 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-4 py-2"
         >
           Search
-        </button>
+        </button> */}
       </div>
     </form>
   );

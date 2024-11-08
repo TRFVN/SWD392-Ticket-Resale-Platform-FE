@@ -13,7 +13,7 @@ function StaffSidebar({
   ]);
 
   return (
-    <div className="flex flex-col justify-start items-start py-3 w-full border-r-[1px] border-b-[1px]">
+    <div className="flex flex-col justify-start items-start py-3 w-full">
       <div
         className={`flex flex-row ${
           showSidebar ? "justify-end" : "justify-center"
