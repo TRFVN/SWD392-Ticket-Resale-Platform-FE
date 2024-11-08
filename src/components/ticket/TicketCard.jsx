@@ -198,6 +198,7 @@ const TicketCard = ({ ticket, onAddToCart }) => {
         <button
           onClick={(e) => {
             e.stopPropagation();
+            console.log(ticket.userId);
             navigate(`/chat/${ticket.userId}`);
           }}
           className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-xl transition-colors"
