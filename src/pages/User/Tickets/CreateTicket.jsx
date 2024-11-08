@@ -4,6 +4,7 @@ import { getAllEventApi } from "../../../services/eventApi";
 import { getAllCategoryApi } from "../../../services/categoryApi";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import axiosInstance from "../../../config/axiosConfig";
 function CreateTicket() {
   const [eventList, setEventList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
@@ -27,16 +28,32 @@ function CreateTicket() {
     getEvent();
     getCategory();
   }, []);
-  // const handleOpenEventList = () => {
-  //   setOpenEventList(true);
-  // };
-  // const hadleOpenCategoryList = () => {
-  //   setOpenCategoryList(true);
-  // };
+  const [imageUrl, setImageUrl] = useState(null);
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await axiosInstance.post("/upload-image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      // Assuming the API response has the image URL at `response.data.url`
+      setImageUrl(response.data.url);
+    } catch (error) {
+      console.error("Image upload failed:", error);
+    }
+  };
   console.log(eventList);
   console.log(categoryList);
   return (
-    <div className="flex flex-col justify-start items-start gap-8 py-8 px-72 w-full min-h-screen">
+    <div className="flex flex-col justify-start items-start gap-8 py-8 px-72 w-full min-h-screen overflow-hidden">
       <div className="flex flex-row justify-start items-center gap-3 text-orange-500 ">
         <Plus />
         <span className="text-xl font-semibold ">Create New Ticket</span>
@@ -71,8 +88,8 @@ function CreateTicket() {
             rows={7}
           />
         </div>
-        <div className="flex flex-row justify-start items-start gap-4 w-full">
-          <div className="flex flex-col justify-start items-start gap-3 w-1/2 pr-5">
+        <div className="flex flex-row justify-start items-start gap-5 w-full">
+          <div className="flex flex-col justify-start items-start gap-3 w-1/2">
             <div className="flex flex-row justify-start items-center gap-7 w-full">
               <div className="inline-flex text-lg font-medium">
                 Category <span className="text-red-500">*</span>
@@ -111,11 +128,8 @@ function CreateTicket() {
                 </div>
               </div>
             </div>
-            {/* {formik.touched.city && formik.errors.city ? (
-            <div className="text-red-500">{formik.errors.city}</div>
-          ) : null} */}
           </div>
-          <div className="flex flex-col justify-start items-start gap-3 w-1/2 pr-5">
+          <div className="flex flex-col justify-start items-start gap-3 w-1/2">
             <div className="flex flex-row justify-start items-center gap-7 w-full">
               <div className="inline-flex text-lg font-medium">
                 Event <span className="text-red-500">*</span>
@@ -153,9 +167,57 @@ function CreateTicket() {
                 </div>
               </div>
             </div>
-            {/* {formik.touched.city && formik.errors.city ? (
-            <div className="text-red-500">{formik.errors.city}</div>
-          ) : null} */}
+          </div>
+        </div>
+        <div className="flex flex-row justify-start items-start gap-5 w-full">
+          <div className="flex flex-col justify-start items-start gap-3 w-full">
+            <label
+              className="flex flex-row text-lg font-medium"
+              htmlFor="serialNumber"
+            >
+              Serial Number (<span className="text-red-500">*</span>)
+            </label>
+            <input
+              type="text"
+              id="serialNumber"
+              name="serialNumber"
+              className="border rounded-md px-3 py-2 w-full"
+            />
+          </div>
+          <div className="flex flex-col justify-start items-start gap-3 w-full">
+            <label
+              className="flex flex-row text-lg font-medium"
+              htmlFor="ticketPrice"
+            >
+              Ticket Price (<span className="text-red-500">*</span>)
+            </label>
+            <input
+              type="number"
+              id="ticketPrice"
+              name="ticketPrice"
+              min={0}
+              className="border rounded-md px-3 py-2 w-full"
+            />
+          </div>
+        </div>
+        <div className="flex flex-col justify-start items-start w-full">
+          <div className="flex flex-row text-lg font-medium">
+            Upload Image (<span className="text-red-500">*</span>)
+          </div>
+          <div className="flex flex-col justify-start items-center w-full">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="mt-2"
+            />
+            {imageUrl && (
+              <img
+                src={imageUrl}
+                alt="Uploaded"
+                className="mt-4 w-full max-w-xs rounded-lg"
+              />
+            )}
           </div>
         </div>
       </form>
