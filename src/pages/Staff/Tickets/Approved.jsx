@@ -9,7 +9,7 @@ function Approved({ ticketList }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const handleFilter = (tickets) => {
-    return tickets.filter((ticket) => ticket.status === 1);
+    return tickets.filter((ticket) => ticket.status === 0);
   };
   const approvedTicketList = handleFilter(ticketList);
   console.log(ticketList);

@@ -13,15 +13,16 @@ function TicketMangement() {
     setCurrentState(newState);
   };
 
+  const getAllTicket = async () => {
+    const response = await getAllTicketsApi();
+    if (response) {
+      setTicketList(response);
+    }
+  };
+  
   useEffect(() => {
-    const getAllTicket = async () => {
-      const response = await getAllTicketsApi();
-      if (response) {
-        setTicketList(response);
-      }
-    };
     getAllTicket();
-  }, []);
+  }, [ticketList]);
 
   return (
     <div className="flex flex-col justify-start items-start gap-8 w-full p-8">

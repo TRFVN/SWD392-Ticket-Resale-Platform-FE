@@ -10,7 +10,7 @@ function Processing({ ticketList }) {
   const [isLoading, setIsLoading] = useState(true);
   const [currentTicketId, setCurrentTicketId] = useState("");
   const handleFilter = (tickets) => {
-    return tickets.filter((ticket) => ticket.status === 0);
+    return tickets.filter((ticket) => ticket.status === 1);
   };
   const processingTicketList = handleFilter(ticketList);
   console.log(ticketList);
@@ -88,16 +88,16 @@ function Processing({ ticketList }) {
                     <span className="text-xs">Serial No. </span>
                     <span className="text-sm">{ticket.serialNumber}</span>
                   </div>
-                  <div className="flex flex-row justify-center items-center gap-3">
+                  <div className="flex flex-row justify-center items-center gap-2 text-sm">
                     <button
-                      className="border rounded-lg py-2 px-5 border-red-500 text-red-500 hover:bg-red-500 hover:text-white cursor-pointer"
+                      className="border rounded-lg py-2 px-3 border-red-500 text-red-500 hover:bg-red-500 hover:text-white cursor-pointer"
                       onClick={() => handleRejectTicket(ticket.ticketId)}
                     >
                       Reject
                     </button>
 
                     <div
-                      className="border rounded-lg py-2 px-5 border-green-500 text-green-500 hover:bg-green-500 hover:text-white cursor-pointer"
+                      className="border rounded-lg p-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-white cursor-pointer"
                       onClick={() => handleApproveTicket(ticket.ticketId)}
                     >
                       Approve

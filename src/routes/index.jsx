@@ -18,6 +18,7 @@ import Tickets from "../pages/Staff/Tickets";
 import Static from "../pages/Staff/Static";
 import Events from "../pages/Staff/Events";
 import StaffLayout from "../layout/StaffLayout";
+import CreateTicket from "../pages/User/Tickets/CreateTicket";
 
 const ROLES = {
   ADMIN: "ADMIN",
@@ -37,6 +38,7 @@ const publicRoutes = [
 const privateRoutes = [
   { path: "tickets/:ticketId", element: <TicketDetailsPage /> },
   { path: "tickets", element: <Ticket /> },
+  { path: "create-ticket", element: <CreateTicket /> },
   { path: "profile", element: <Profile /> },
   { path: "cart", element: <Cart /> },
   {

@@ -14,6 +14,7 @@ import {
   X,
   LogIn,
   UserPlus,
+  Plus,
 } from "lucide-react";
 
 import { toggleTheme } from "../../store/slice/themeSlice";
@@ -80,6 +81,12 @@ const AuthenticatedNav = React.memo(
     onNavigate,
   }) => {
     const navItems = [
+      {
+        icon: Plus,
+        badge: "",
+        path: "/create-ticket",
+        label: "Create-Ticket",
+      },
       { icon: Calendar, badge: "5", path: "/events", label: "Events" },
       {
         icon: Bell,
