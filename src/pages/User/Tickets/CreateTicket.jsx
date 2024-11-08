@@ -38,18 +38,54 @@ function CreateTicket() {
     formData.append("file", file);
 
     try {
-      const response = await axiosInstance.post("/upload-image", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      const response = await axiosInstance.post(
+        "/Tickets/upload-image",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         },
-      });
-
-      // Assuming the API response has the image URL at `response.data.url`
-      setImageUrl(response.data.url);
+      );
+      setImageUrl(response.data.result);
+      console.log(imageUrl);
     } catch (error) {
       console.error("Image upload failed:", error);
     }
   };
+
+  const formik = useFormik({
+    initialValues: {
+      ticketName: "",
+      ticketDescription: "",
+      eventId: chosenEvent.eventId,
+      categoryId: chosenCategory.categoryId,
+      imageUrl: imageUrl,
+      serialNumber: "",
+      ticketPrice: "",
+    },
+    validationSchema: Yup.object({
+      ticketName: Yup.string()
+        .required("Ticket Name is required")
+        .min(10, "Ticket Name must be at least 10 characters"),
+      ticketDescription: Yup.string()
+        .required("Ticket Description is required")
+        .min(10, "Ticket Description must be at least 10 characters"),
+      serialNumber: Yup.string()
+        .required("Serial Number is required")
+        .min(10, "Serial Number must be at least 10 characters"),
+      ticketPrice: Yup.number()
+        .required("Ticket Price is required")
+        .min(1, "Ticket Price must be greater than 0"),
+      eventId: Yup.string().required("Event selection is required"),
+      categoryId: Yup.string().required("Category selection is required"),
+      imageUrl: Yup.string().required("Image upload is required"),
+    }),
+    onSubmit: (values) => {
+      // handle form submission
+      console.log("Form submitted with values:", values);
+    },
+  });
   console.log(eventList);
   console.log(categoryList);
   return (
@@ -58,7 +94,10 @@ function CreateTicket() {
         <Plus />
         <span className="text-xl font-semibold ">Create New Ticket</span>
       </div>
-      <form className="flex flex-col justify-start items-start gap-8 border rounded-md w-full p-8">
+      <form
+        className="flex flex-col justify-start items-start gap-8 border rounded-md w-full p-8"
+        onSubmit={formik.handleSubmit}
+      >
         <div className="flex flex-col justify-start items-start gap-3 w-full">
           <label
             className="flex flex-row text-lg font-medium"
@@ -71,7 +110,14 @@ function CreateTicket() {
             id="ticketName"
             name="ticketName"
             className="border rounded-md px-3 py-2 w-full"
+            value={formik.values.ticketName}
+            onChange={formik.handleChange}
           />
+          {formik.touched.ticketName && formik.errors.ticketName && (
+            <div className="text-red-500 text-sm">
+              {formik.errors.ticketName}
+            </div>
+          )}
         </div>
         <div className="flex flex-col justify-start items-start gap-3 w-full">
           <label
@@ -86,7 +132,15 @@ function CreateTicket() {
             name="ticketDescription"
             className="border rounded-md px-3 py-2 w-full"
             rows={7}
+            value={formik.values.ticketDescription}
+            onChange={formik.handleChange}
           />
+          {formik.touched.ticketDescription &&
+            formik.errors.ticketDescription && (
+              <div className="text-red-500 text-sm">
+                {formik.errors.ticketDescription}
+              </div>
+            )}
         </div>
         <div className="flex flex-row justify-start items-start gap-5 w-full">
           <div className="flex flex-col justify-start items-start gap-3 w-1/2">
@@ -182,7 +236,14 @@ function CreateTicket() {
               id="serialNumber"
               name="serialNumber"
               className="border rounded-md px-3 py-2 w-full"
+              value={formik.values.serialNumber}
+              onChange={formik.handleChange}
             />
+            {formik.touched.serialNumber && formik.errors.serialNumber && (
+              <div className="text-red-500 text-sm">
+                {formik.errors.serialNumber}
+              </div>
+            )}
           </div>
           <div className="flex flex-col justify-start items-start gap-3 w-full">
             <label
@@ -197,29 +258,51 @@ function CreateTicket() {
               name="ticketPrice"
               min={0}
               className="border rounded-md px-3 py-2 w-full"
+              value={formik.values.ticketPrice}
+              onChange={formik.handleChange}
             />
+            {formik.touched.ticketPrice && formik.errors.ticketPrice && (
+              <div className="text-red-500 text-sm">
+                {formik.errors.ticketPrice}
+              </div>
+            )}
           </div>
         </div>
         <div className="flex flex-col justify-start items-start w-full">
           <div className="flex flex-row text-lg font-medium">
             Upload Image (<span className="text-red-500">*</span>)
           </div>
-          <div className="flex flex-col justify-start items-center w-full">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="mt-2"
-            />
-            {imageUrl && (
+          <div className="flex flex-row justify-center gap-10 items-center w-full">
+            {imageUrl ? (
               <img
                 src={imageUrl}
                 alt="Uploaded"
-                className="mt-4 w-full max-w-xs rounded-lg"
+                className="mt-4 w-full max-w-md rounded-md"
+              />
+            ) : (
+              <img
+                src="https://ehs.stanford.edu/wp-content/uploads/missing-image.png"
+                alt="upload_image"
+                className="mt-4 w-full max-w-md rounded-md"
               />
             )}
+            <label className="mt-5 cursor-pointer inline-flex items-center px-4 py-2 border border-orange-500 text-orange-500 rounded-md hover:bg-orange-600 hover:text-white transition-colors">
+              <span>Upload</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+            </label>
           </div>
         </div>
+        <button
+          type="submit"
+          className="bg-orange-500 text-white py-2 px-4 rounded-md w-full text-center mt-5"
+        >
+          Create Ticket
+        </button>
       </form>
     </div>
   );
