@@ -17,6 +17,7 @@ import TicketDetailsPage from "../pages/tickets/TicketDetails";
 import Tickets from "../pages/Staff/Tickets";
 import Static from "../pages/Staff/Static";
 import Events from "../pages/Staff/Events";
+import Category from "../pages/Staff/Category";
 import StaffLayout from "../layout/StaffLayout";
 import CreateTicket from "../pages/User/Tickets/CreateTicket";
 
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
         children: [
           { path: "tickets", element: <Tickets /> },
           { path: "static", element: <Static /> },
+          { path: "category", element: <Category /> },
           { path: "events", element: <Events /> },
         ],
       },

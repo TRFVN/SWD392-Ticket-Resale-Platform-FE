@@ -6,6 +6,7 @@ import {
   CalendarFold,
   ChartColumnBig,
 } from "lucide-react";
+import { BiCategory } from "react-icons/bi";
 function StaffSidebar({
   toggleSidebar,
   showSidebar,
@@ -15,7 +16,8 @@ function StaffSidebar({
   const [items, setItems] = useState([
     { id: 1, icon: <Tickets />, label: "Tickets" },
     { id: 2, icon: <CalendarFold />, label: "Events" },
-    { id: 3, icon: <ChartColumnBig />, label: "Static" },
+    { id: 3, icon: <BiCategory />, label: "Category" },
+    { id: 4, icon: <ChartColumnBig />, label: "Static" },
   ]);
 
   return (
