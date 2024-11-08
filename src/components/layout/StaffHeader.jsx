@@ -5,6 +5,7 @@ import TicketLogo from "../../assets/TicketHub_Logo.png";
 import { AuthContext } from "../../context/AuthContext";
 import Cookies from "js-cookie";
 import None_Avatar from "../../assets/None_Avatar.jpg";
+import { BiCategory } from "react-icons/bi";
 import {
   Bell,
   ChartColumnBig,
@@ -71,6 +72,7 @@ function StaffHeader() {
         {[
           { icon: Tickets, badge: "2", path: "/staff/tickets" },
           { icon: CalendarFold, badge: "2", path: "/staff/events" },
+          { icon: BiCategory, badge: "2", path: "/staff/category" },
           { icon: ChartColumnBig, badge: "8", path: "/staff/static" },
           { icon: MessageSquare, badge: "2", path: "/message" },
           { icon: Bell, badge: "3", path: "/notifications" },
