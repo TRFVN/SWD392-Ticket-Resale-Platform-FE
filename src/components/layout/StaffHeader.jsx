@@ -1,22 +1,55 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import TicketLogo from "../../assets/TicketHub_Logo.png";
 import { AuthContext } from "../../context/AuthContext";
+import Cookies from "js-cookie";
 import None_Avatar from "../../assets/None_Avatar.jpg";
 import {
   Bell,
   ChartColumnBig,
   ChartNoAxesColumnIncreasing,
   MessageSquare,
+  ChevronDown,
 } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
+import { useDispatch } from "react-redux";
 
 function StaffHeader() {
-  const { user } = useContext(AuthContext);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+  const { logout } = useAuth();
+
+  const [openMenu, setOpenMenu] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    navigate("/login");
+    Cookies.remove("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userData");
+    dispatch(logout());
+  };
   return (
     <div className="flex flex-row justify-between items-center w-full py-4 px-6 border-b-[1px]">
-      <Link to="/" className="flex items-center flex-shrink-0 group">
+      <Link
+        to="/staff/tickets"
+        className="flex items-center flex-shrink-0 group"
+      >
         <motion.img
           whileHover={{ scale: 1.05 }}
           src={TicketLogo}
@@ -53,11 +86,12 @@ function StaffHeader() {
             )}
           </motion.button>
         ))}
-        <div className="relative">
+        <div className="relative" ref={menuRef}>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center space-x-3 p-1.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            onClick={() => setOpenMenu((prev) => !prev)}
           >
             <img
               src={user?.avatarUrl || None_Avatar}
@@ -72,12 +106,24 @@ function StaffHeader() {
                 {user?.email || "user@example.com"}
               </p>
             </div>
+            <ChevronDown className="text-gray-600 w-4 h-4 text-xs" />
           </motion.button>
-          {/* <UserMenu
-            isOpen={isUserMenuOpen}
-            onClose={() => setIsUserMenuOpen(false)}
-            handleLogout={handleLogout}
-          /> */}
+          {openMenu && (
+            <div className="absolute right-0 mt-3 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-10 border">
+              <button
+                onClick={() => console.log("Navigate to profile")}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Profile
+              </button>
+              <button
+                onClick={handleLogout}
+                className="border-t-[1px] block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

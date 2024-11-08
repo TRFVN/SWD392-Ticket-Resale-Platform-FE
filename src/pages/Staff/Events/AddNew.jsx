@@ -275,7 +275,7 @@ function AddNew({ handleChangeProgress }) {
           type="submit"
           className="border rounded-md py-2 px-3 cursor-pointer border-orange-400 text-orange-400 hover:bg-orange-500 hover:font-medium hover:text-white"
         >
-          Add New
+          Add
         </button>
       </div>
     </form>
