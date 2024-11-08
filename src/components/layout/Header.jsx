@@ -1,10 +1,8 @@
-// components/layout/Header.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  Bell,
   ShoppingCart,
   Sun,
   Moon,
@@ -15,10 +13,11 @@ import {
   LogIn,
   UserPlus,
   Plus,
+  Ticket,
 } from "lucide-react";
 
 import { toggleTheme } from "../../store/slice/themeSlice";
-import { useAuth } from "../../hooks/useAuth"; // Thay đổi import
+import { useAuth } from "../../hooks/useAuth";
 import TicketLogo from "../../assets/TicketHub_Logo.png";
 import None_Avatar from "../../assets/None_Avatar.jpg";
 import { SearchBar } from "../header/SearchBar";
@@ -26,7 +25,6 @@ import { SearchSuggestions } from "../header/SearchSuggestions";
 import { UserMenu } from "../header/UserMenu";
 import { MobileMenu } from "../header/MobileMenu";
 
-// Tách các components con ra để tối ưu re-render
 const ThemeToggleButton = ({ isDarkMode, onClick }) => (
   <motion.button
     whileHover={{ scale: 1.1 }}
@@ -89,10 +87,10 @@ const AuthenticatedNav = React.memo(
       },
       { icon: Calendar, badge: "5", path: "/events", label: "Events" },
       {
-        icon: Bell,
+        icon: Ticket,
         badge: "3",
-        path: "/notifications",
-        label: "Notifications",
+        path: "/tickets",
+        label: "Tickets",
       },
       { icon: ShoppingCart, badge: "2", path: "/cart", label: "Cart" },
     ];
@@ -241,7 +239,6 @@ const Header = () => {
             : "dark:bg-gray-900/90 bg-white/90"
         }`}
       >
-        {/* Rest of the header implementation */}
         <div className="border-b border-gray-200 dark:border-gray-800 w-full">
           <div className="w-full px-6 max-w-[1920px] mx-auto">
             <div className="flex items-center justify-between h-20">

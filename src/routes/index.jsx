@@ -20,7 +20,7 @@ import Events from "../pages/Staff/Events";
 import Category from "../pages/Staff/Category";
 import StaffLayout from "../layout/StaffLayout";
 import CreateTicket from "../pages/User/Tickets/CreateTicket";
-
+import MyTicketsPage from "../pages/User/Tickets/MyTickets";
 const ROLES = {
   ADMIN: "ADMIN",
   STAFF: "STAFF",
@@ -49,6 +49,7 @@ const privateRoutes = [
       { path: ":userId", element: <ChatsPage /> },
     ],
   },
+  { path: "mytickets", element: <MyTicketsPage /> },
 ];
 
 export const router = createBrowserRouter([

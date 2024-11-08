@@ -38,7 +38,6 @@ const TicketsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
-  const isDarkMode = useSelector((state) => state.theme?.isDarkMode || false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -98,10 +97,12 @@ const TicketsPage = () => {
         <div className="p-6 bg-red-500/10 rounded-full mb-4">
           <AlertCircle className="w-12 h-12 text-red-500" />
         </div>
-        <h3 className="text-xl font-medium text-white mb-2">
+        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">
           Oops! Something went wrong
         </h3>
-        <p className="text-gray-400 text-center mb-6">{error}</p>
+        <p className="text-gray-500 dark:text-gray-400 text-center mb-6">
+          {error}
+        </p>
         <div className="flex gap-4">
           <button
             onClick={fetchTickets}
@@ -121,11 +122,7 @@ const TicketsPage = () => {
   }
 
   return (
-    <div
-      className={`min-h-screen ${
-        isDarkMode ? "bg-gray-900" : "bg-black"
-      } transition-colors duration-200`}
-    >
+    <div className="w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -134,44 +131,53 @@ const TicketsPage = () => {
               <Ticket className="w-6 h-6 text-orange-500" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Available Tickets
               </h1>
-              <p className="text-gray-400">{tickets.length} tickets found</p>
+              <p className="text-gray-500 dark:text-gray-400">
+                {tickets.length} tickets found
+              </p>
             </div>
           </div>
         </div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4">
-            <p className="text-gray-400 text-sm">Total Events</p>
-            <p className="text-2xl font-bold text-white">
+          <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 shadow-sm dark:shadow-none">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
+              Total Events
+            </p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {new Set(tickets.map((t) => t.eventId)).size}
             </p>
           </div>
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4">
-            <p className="text-gray-400 text-sm">Categories</p>
-            <p className="text-2xl font-bold text-white">
+          <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 shadow-sm dark:shadow-none">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
+              Categories
+            </p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {new Set(tickets.map((t) => t.categoryName)).size}
             </p>
           </div>
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4">
-            <p className="text-gray-400 text-sm">Locations</p>
-            <p className="text-2xl font-bold text-white">
+          <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 shadow-sm dark:shadow-none">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
+              Locations
+            </p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {new Set(tickets.map((t) => t.city)).size}
             </p>
           </div>
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4">
-            <p className="text-gray-400 text-sm">Price Range</p>
-            <p className="text-2xl font-bold text-white">
+          <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 shadow-sm dark:shadow-none">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
+              Price Range
+            </p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {new Intl.NumberFormat("vi-VN", {
                 style: "currency",
                 currency: "VND",
                 notation: "compact",
                 maximumFractionDigits: 1,
-              }).format(Math.min(...tickets.map((t) => t.ticketPrice)))}{" "}
-              -{" "}
+              }).format(Math.min(...tickets.map((t) => t.ticketPrice)))}
               {new Intl.NumberFormat("vi-VN", {
                 style: "currency",
                 currency: "VND",

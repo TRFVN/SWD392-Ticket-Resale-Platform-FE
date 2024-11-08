@@ -4,6 +4,7 @@ import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { FaLock, FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
 import axios from "axios";
+import axiosInstance from "../../config/axiosConfig";
 
 const PasswordField = ({
   label,
@@ -89,14 +90,11 @@ const ChangePassword = ({ onClose }) => {
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      const response = await axios.post(
-        "https://tickethub-f6gxgnhngpbue9gs.southeastasia-01.azurewebsites.net/api/Auth/change-password",
-        {
-          oldPassword: values.oldPassword,
-          newPassword: values.newPassword,
-          confirmNewPassword: values.confirmNewPassword,
-        },
-      );
+      const response = await axiosInstance.post("Auth/change-password", {
+        oldPassword: values.oldPassword,
+        newPassword: values.newPassword,
+        confirmNewPassword: values.confirmNewPassword,
+      });
 
       setSubmitStatus({
         type: "success",

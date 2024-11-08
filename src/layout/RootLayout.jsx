@@ -81,11 +81,11 @@ const MainLayout = () => {
               variants={pageTransition}
               className="w-full max-w-[100vw] overflow-x-hidden"
             >
-              {!isProfilePage && (
+              {/* {!isProfilePage && (
                 <div className="mb-4">
                   <BreadCrumb />
                 </div>
-              )}
+              )} */}
               <AnimatePresence mode="wait">
                 <motion.div
                   key={location.pathname}

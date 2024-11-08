@@ -31,6 +31,22 @@ export const getTicketByIdApi = async (ticketId) => {
   }
 };
 
+export const GetUserTicket = async () => {
+  try {
+    const rs = await axiosInstance.get("/Tickets/user");
+    if (rs.status === 200) {
+      return rs.data.result;
+    } else {
+      throw new Error(
+        rs.data.message || `Error: Received status code ${rs.status}`,
+      );
+    }
+  } catch (error) {
+    console.error("Failed to fetch ticket details:", error.message || error);
+    throw error;
+  }
+};
+
 export const acceptTicketApi = async (ticketId) => {
   try {
     const response = await axiosInstance.post(`/Tickets/${ticketId}/accept`);
