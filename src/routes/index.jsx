@@ -15,7 +15,7 @@ import Cart from "../pages/cart/cart";
 import ChatsPage from "../pages/Chatspage";
 import TicketDetailsPage from "../pages/tickets/TicketDetails";
 import Tickets from "../pages/Staff/Tickets";
-import Locations from "../pages/Staff/Locations";
+import Static from "../pages/Staff/Static";
 import Events from "../pages/Staff/Events";
 import StaffLayout from "../layout/StaffLayout";
 
@@ -68,7 +68,7 @@ export const router = createBrowserRouter([
         element: <StaffLayout />,
         children: [
           { path: "tickets", element: <Tickets /> },
-          { path: "locations", element: <Locations /> },
+          { path: "static", element: <Static /> },
           { path: "events", element: <Events /> },
         ],
       },

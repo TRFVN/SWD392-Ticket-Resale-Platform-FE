@@ -9,8 +9,10 @@ import {
   Bell,
   ChartColumnBig,
   ChartNoAxesColumnIncreasing,
+  Tickets,
   MessageSquare,
   ChevronDown,
+  CalendarFold,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useDispatch } from "react-redux";
@@ -67,8 +69,10 @@ function StaffHeader() {
       </Link>
       <div className="flex flex-row items-center gap-4">
         {[
+          { icon: Tickets, badge: "2", path: "/staff/tickets" },
+          { icon: CalendarFold, badge: "2", path: "/staff/events" },
+          { icon: ChartColumnBig, badge: "8", path: "/staff/static" },
           { icon: MessageSquare, badge: "2", path: "/message" },
-          { icon: ChartColumnBig, badge: "8", path: "/static" },
           { icon: Bell, badge: "3", path: "/notifications" },
         ].map((item) => (
           <motion.button

@@ -34,3 +34,28 @@ export const getTicketByIdApi = async (ticketId) => {
     throw error;
   }
 };
+
+export const acceptTicketApi = async (ticketId) => {
+  try {
+    const response = await axiosInstance.post(`/Tickets/${ticketId}/accept`);
+    if (response.status === 200) {
+      return response;
+    } else {
+      throw new Error(`Failed to approve Ticket`);
+    }
+  } catch (error) {
+    throw new Error(`Failed to approve Ticket`);
+  }
+};
+export const rejectTicketApi = async (ticketId) => {
+  try {
+    const response = await axiosInstance.post(`/Tickets/${ticketId}/reject`);
+    if (response.status === 200) {
+      return response;
+    } else {
+      throw new Error(`Failed to reject Ticket`);
+    }
+  } catch (error) {
+    throw new Error(`Failed to reject Ticket`);
+  }
+};

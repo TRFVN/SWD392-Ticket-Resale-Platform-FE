@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { AlignJustify, MapPin, Tickets, CalendarFold } from "lucide-react";
+import {
+  AlignJustify,
+  MapPin,
+  Tickets,
+  CalendarFold,
+  ChartColumnBig,
+} from "lucide-react";
 function StaffSidebar({
   toggleSidebar,
   showSidebar,
@@ -9,7 +15,7 @@ function StaffSidebar({
   const [items, setItems] = useState([
     { id: 1, icon: <Tickets />, label: "Tickets" },
     { id: 2, icon: <CalendarFold />, label: "Events" },
-    { id: 3, icon: <MapPin />, label: "Locations" },
+    { id: 3, icon: <ChartColumnBig />, label: "Static" },
   ]);
 
   return (

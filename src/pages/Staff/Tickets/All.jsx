@@ -48,7 +48,7 @@ function All({ ticketList }) {
                     {formatDate(ticket.eventDate)}
                   </div>
                   <div className="inline-flex items-center w-full text-sm">
-                    <CiLocationOn className="mr-1" />
+                    <CiLocationOn className="mr-1 text-2xl" />
                     {ticket.address || "23/10 Hoang Dieu 2"},{" "}
                     {ticket.district || "Thu Duc"},{" "}
                     {ticket.city || "Ho Chi Minh"}{" "}

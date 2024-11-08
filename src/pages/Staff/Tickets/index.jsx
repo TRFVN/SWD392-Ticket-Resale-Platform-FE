@@ -35,9 +35,11 @@ function TicketMangement() {
       />
       <div className="bg-white flex flex-col justify-start items-start w-full border-[1px] rounded-sm">
         {currentState === "All" && <All ticketList={ticketList} />}
-        {currentState === "Processing" && <Processing />}
-        {currentState === "Approved" && <Approved />}
-        {currentState === "Rejected" && <Rejected />}
+        {currentState === "Processing" && (
+          <Processing ticketList={ticketList} />
+        )}
+        {currentState === "Approved" && <Approved ticketList={ticketList} />}
+        {currentState === "Rejected" && <Rejected ticketList={ticketList} />}
       </div>
     </div>
   );
