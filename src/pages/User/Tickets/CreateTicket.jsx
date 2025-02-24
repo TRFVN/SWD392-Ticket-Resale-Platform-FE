@@ -342,6 +342,7 @@ function CreateTicket() {
     };
     const getCategory = async () => {
       const response = await getAllCategoryApi();
+      console.log(response);
       if (response) {
         setCategoryList(response);
       }

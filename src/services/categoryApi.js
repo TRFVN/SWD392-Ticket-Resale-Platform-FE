@@ -3,9 +3,10 @@ import axiosInstance from "../config/axiosConfig";
 
 export const getAllCategoryApi = async () => {
   try {
-    const response = await axiosInstance.get("/Category", {
+    const response = await axiosInstance.get("/api/Category", {
       params: {
-        pageSize: 100,
+        pageNumber: 1,
+        pageSize: 10,
       },
     });
     if (response.status === 200) {

@@ -20,7 +20,8 @@ import Category from "../pages/Staff/Category";
 import StaffLayout from "../layout/StaffLayout";
 import CreateTicket from "../pages/User/Tickets/CreateTicket";
 import MyTicketsPage from "../pages/User/Tickets/MyTickets";
-import EventsPage from "../pages/Event";
+import EventsPage from "../pages/tickets/Events/Event";
+import EventDetails from "../pages/tickets/Events/EventDetails";
 const ROLES = {
   ADMIN: "ADMIN",
   STAFF: "STAFF",
@@ -37,6 +38,7 @@ const publicRoutes = [
   { path: "forgot-password", element: <ForgotPassword /> },
   { path: "tickets", element: <Ticket /> },
   { path: "events", element: <EventsPage /> },
+  { path: "events/:eventId", element: <EventDetails /> }, // Thêm dòng này
 ];
 
 const privateRoutes = [
