@@ -215,7 +215,7 @@ const Cart = () => {
   const fetchCart = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("/Cart/GetCart");
+      const response = await axiosInstance.get("api/Cart/GetCart");
       setCart(response.data.result);
     } catch (err) {
       setError(err.message || "Failed to fetch cart");
@@ -227,7 +227,9 @@ const Cart = () => {
 
   const handleRemoveFromCart = async (ticketId) => {
     try {
-      await axiosInstance.delete(`/Cart/RemoveFromCart/?ticketId=${ticketId}`);
+      await axiosInstance.delete(
+        `app/Cart/RemoveFromCart/?ticketId=${ticketId}`,
+      );
       await fetchCart();
       toast.success("Ticket removed from cart");
     } catch (error) {

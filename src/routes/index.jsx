@@ -16,11 +16,11 @@ import ChatsPage from "../pages/Chatspage";
 import TicketDetailsPage from "../pages/tickets/TicketDetails";
 import Tickets from "../pages/Staff/Tickets";
 import Static from "../pages/Staff/Static";
-import Events from "../pages/Staff/Events";
 import Category from "../pages/Staff/Category";
 import StaffLayout from "../layout/StaffLayout";
 import CreateTicket from "../pages/User/Tickets/CreateTicket";
 import MyTicketsPage from "../pages/User/Tickets/MyTickets";
+import EventsPage from "../pages/Event";
 const ROLES = {
   ADMIN: "ADMIN",
   STAFF: "STAFF",
@@ -35,6 +35,7 @@ const publicRoutes = [
   { path: "verifyemail", element: <VerifyEmail /> },
   { path: "forgot-password", element: <ForgotPassword /> },
   { path: "tickets", element: <Ticket /> },
+  { path: "events", element: <EventsPage /> },
 ];
 
 const privateRoutes = [
@@ -74,7 +75,6 @@ export const router = createBrowserRouter([
           { path: "tickets", element: <Tickets /> },
           { path: "static", element: <Static /> },
           { path: "category", element: <Category /> },
-          { path: "events", element: <Events /> },
         ],
       },
     ],

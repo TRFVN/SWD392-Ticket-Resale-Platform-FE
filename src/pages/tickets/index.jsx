@@ -60,7 +60,7 @@ const TicketsPage = () => {
   const handleAddToCart = async (ticket) => {
     try {
       setToast(null);
-      await axiosInstance.post("/Cart/AddToCart", {
+      await axiosInstance.post("api/Cart/AddToCart", {
         ticketId: ticket.ticketId,
       });
 

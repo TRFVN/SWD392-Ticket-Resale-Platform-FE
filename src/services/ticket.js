@@ -2,7 +2,7 @@ import axiosInstance from "../config/axiosConfig";
 
 export const getAllTicketsApi = async () => {
   try {
-    const rs = await axiosInstance.get("/Tickets");
+    const rs = await axiosInstance.get("api/Tickets");
     if (rs.status === 200) {
       console.log(rs);
       return rs.data.result;

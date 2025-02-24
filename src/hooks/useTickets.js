@@ -13,9 +13,9 @@ export const useTickets = (type = "all") => {
         let response;
 
         if (type === "user") {
-          response = await axiosInstance.get("/Tickets/user");
+          response = await axiosInstance.get("api/Tickets/user");
         } else {
-          response = await axiosInstance.get("/tickets");
+          response = await axiosInstance.get("api/tickets");
         }
 
         if (response.status === 200 && response.data.isSuccess) {

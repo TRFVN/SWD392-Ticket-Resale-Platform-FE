@@ -30,16 +30,14 @@ const authService = {
   },
 
   fetchUserData: async (token) => {
-    const response = await axiosInstance.post("/user", null, {
+    const response = await axiosInstance.get("/user", {
       params: { token },
       headers: {
-        Authorization: token,
         accept: "*/*",
       },
     });
     return response.data;
   },
-
   googleLogin: async (token) => {
     const response = await axiosInstance.post("/sign-in-google", {
       token,
