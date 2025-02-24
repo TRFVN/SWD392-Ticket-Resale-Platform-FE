@@ -62,7 +62,7 @@ export const router = createBrowserRouter([
       ...publicRoutes,
       {
         element: (
-          <PrivateRoute allowedRoles={[ROLES.CUSTOMER || ROLES.ORGANIZATION]} />
+          <PrivateRoute allowedRoles={[ROLES.CUSTOMER, ROLES.ORGANIZATION]} />
         ),
         children: privateRoutes,
       },
