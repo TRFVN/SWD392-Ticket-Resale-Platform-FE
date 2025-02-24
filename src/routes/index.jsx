@@ -24,7 +24,8 @@ import MyTicketsPage from "../pages/User/Tickets/MyTickets";
 const ROLES = {
   ADMIN: "ADMIN",
   STAFF: "STAFF",
-  MEMBER: "MEMBER",
+  CUSTOMER: "CUSTOMER",
+  ORGANIZATION: "ORGANIZATION",
 };
 
 const publicRoutes = [
@@ -59,7 +60,9 @@ export const router = createBrowserRouter([
     children: [
       ...publicRoutes,
       {
-        element: <PrivateRoute allowedRoles={[ROLES.MEMBER]} />,
+        element: (
+          <PrivateRoute allowedRoles={[ROLES.CUSTOMER || ROLES.ORGANIZATION]} />
+        ),
         children: privateRoutes,
       },
     ],
