@@ -8,10 +8,11 @@ import {
   Ticket,
   Users,
 } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const EventDetails = () => {
   const [event, setEvent] = useState(null);
-  const isDarkMode = false; // Replace with your theme state
+  const isDarkMode = useSelector((state) => state.theme?.isDarkMode); // Lấy darkMode từ Redux
 
   useEffect(() => {
     // Get event from location state or fetch it

@@ -9,14 +9,15 @@ export const SearchBar = ({ value, onChange, onFocus }) => (
       onChange={onChange}
       onFocus={onFocus}
       placeholder="Search events, artists, or venues..."
-      className="w-full py-3 px-5 pr-12 rounded-full
+      className="w-full py-3 px-5 pr-24 rounded-full  {/* Tăng padding-right lên 24 để tránh đè lên text */}
         bg-gray-100 dark:bg-gray-800 
         border border-gray-300 dark:border-gray-700
         text-gray-900 dark:text-gray-100
         focus:outline-none focus:ring-2 focus:ring-orange-500
         placeholder-gray-500 dark:placeholder-gray-400"
     />
-    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 bg-gray-100 dark:bg-gray-800 pl-2">
+      {/* Thêm background cho container các nút */}
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}

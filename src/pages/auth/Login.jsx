@@ -98,112 +98,143 @@ const Login = () => {
     }
   };
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0, y: -20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        when: "beforeChildren",
-        staggerChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4 },
-    },
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4 sm:py-12">
+    <div
+      className="min-h-screen flex flex-col items-center justify-center 
+      bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-200 via-slate-100 to-indigo-200 
+      dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 
+      py-12 px-4 sm:px-6 lg:px-8"
+    >
       <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="w-full max-w-[400px] space-y-6 sm:space-y-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
       >
-        <motion.div
-          variants={itemVariants}
-          className="bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden 
-            border border-gray-200 dark:border-gray-700 p-6 sm:p-8
-            backdrop-filter backdrop-blur-lg bg-opacity-95"
-        >
+        {/* Logo and Header Section */}
+        <div className="text-center mb-8">
           <motion.div
-            variants={itemVariants}
-            className="text-center mb-6 sm:mb-8"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            className="flex justify-center mb-6"
           >
-            <motion.img
-              src={TicketLogo}
-              alt="Logo"
-              className="h-16 sm:h-20 w-auto mx-auto mb-3 sm:mb-4"
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            />
-            <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent mb-1 sm:mb-2">
-              Welcome Back
+            <img src={TicketLogo} alt="TicketHub" className="h-16 w-auto" />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+              Welcome Back!
             </h2>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-              Sign in to continue to TicketHub
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              Sign in to your account to continue
             </p>
           </motion.div>
+        </div>
 
-          <LoginForm
-            onSubmit={handleSubmit}
-            loading={loading}
-            validationSchema={validationSchema}
-            initialValues={{
-              email: localStorage.getItem("email") || "", // Auto-fill email if remembered
-              password: "",
-              rememberMe: !!localStorage.getItem("rememberMe"),
-            }}
-          />
-
-          <motion.div variants={itemVariants} className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300 dark:border-gray-600" />
-              </div>
-              <div className="relative flex justify-center text-xs sm:text-sm">
-                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6">
+        {/* Main Card with Glassmorphism */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white/30 dark:bg-gray-800/30
+            backdrop-blur-xl backdrop-saturate-150
+            border border-white/30 dark:border-gray-700/30
+            shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]
+            rounded-2xl overflow-hidden"
+        >
+          {/* Inner Content with Additional Glass Effect */}
+          <div className="p-8 backdrop-blur-sm">
+            {/* Social Login */}
+            <div className="mb-6">
               <SocialButton
                 icon={FaGoogle}
                 label="Continue with Google"
                 onClick={handleGoogleLogin}
                 iconColor="text-blue-500"
                 disabled={loading}
-                className="hover:scale-105 transform transition-all duration-200"
+                className="w-full py-2.5 bg-white/50 dark:bg-gray-800/50 
+                  backdrop-blur-md transition-all duration-300
+                  hover:bg-white/70 dark:hover:bg-gray-700/70
+                  hover:scale-[1.02] transform"
               />
             </div>
-          </motion.div>
 
-          <motion.p
-            variants={itemVariants}
-            className="mt-6 text-center text-xs sm:text-sm text-gray-600 dark:text-gray-400"
-          >
-            Not a member?{" "}
-            <Link
-              to="/signup"
-              className="font-medium text-orange-400 hover:text-orange-500 
-                transition-colors duration-200"
-            >
-              Start your journey
-            </Link>
-          </motion.p>
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300/50 dark:border-gray-600/50" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span
+                  className="px-2 bg-white/30 dark:bg-gray-800/30 
+                  backdrop-blur-md text-gray-600 dark:text-gray-400"
+                >
+                  Or continue with email
+                </span>
+              </div>
+            </div>
+
+            {/* Login Form */}
+            <div className="space-y-4 backdrop-blur-sm">
+              <LoginForm
+                onSubmit={handleSubmit}
+                loading={loading}
+                validationSchema={validationSchema}
+                initialValues={{
+                  email: localStorage.getItem("email") || "",
+                  password: "",
+                  rememberMe: !!localStorage.getItem("rememberMe"),
+                }}
+              />
+            </div>
+
+            {/* Footer Links */}
+            <div className="mt-6 flex items-center justify-between text-sm">
+              <Link
+                to="/forgot-password"
+                className="font-medium text-orange-500 hover:text-orange-400 
+                  transition-colors backdrop-blur-sm"
+              >
+                Forgot password?
+              </Link>
+              <Link
+                to="/signup"
+                className="font-medium text-orange-500 hover:text-orange-400 
+                  transition-colors backdrop-blur-sm"
+              >
+                Create account
+              </Link>
+            </div>
+          </div>
         </motion.div>
+
+        {/* Terms Text */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-6 text-center text-sm text-gray-600/90 dark:text-gray-400/90 
+            backdrop-blur-sm"
+        >
+          By signing in, you agree to our{" "}
+          <Link
+            to="/terms"
+            className="font-medium text-orange-500 hover:text-orange-400"
+          >
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link
+            to="/privacy"
+            className="font-medium text-orange-500 hover:text-orange-400"
+          >
+            Privacy Policy
+          </Link>
+        </motion.p>
       </motion.div>
     </div>
   );
