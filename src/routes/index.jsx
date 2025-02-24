@@ -25,7 +25,7 @@ import EventDetails from "../pages/tickets/Events/EventDetails";
 const ROLES = {
   ADMIN: "ADMIN",
   STAFF: "STAFF",
-  CUSTOMER: "CUSTOMER",
+  MEMBER: "MEMBER",
   ORGANIZATION: "ORGANIZATION",
 };
 
@@ -34,7 +34,7 @@ const publicRoutes = [
   { path: "login", element: <Login /> },
   { path: "signup", element: <SignUp /> },
   { path: "about", element: <About /> },
-  { path: "verifyemail", element: <VerifyEmail /> },
+  { path: "verify-email", element: <VerifyEmail /> },
   { path: "forgot-password", element: <ForgotPassword /> },
   { path: "tickets", element: <Ticket /> },
   { path: "events", element: <EventsPage /> },
@@ -64,7 +64,7 @@ export const router = createBrowserRouter([
       ...publicRoutes,
       {
         element: (
-          <PrivateRoute allowedRoles={[ROLES.CUSTOMER, ROLES.ORGANIZATION]} />
+          <PrivateRoute allowedRoles={[ROLES.MEMBER, ROLES.ORGANIZATION]} />
         ),
         children: privateRoutes,
       },

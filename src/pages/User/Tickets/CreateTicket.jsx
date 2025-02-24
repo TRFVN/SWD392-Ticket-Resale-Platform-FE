@@ -7,8 +7,10 @@ import * as Yup from "yup";
 import axiosInstance from "../../../config/axiosConfig";
 import { postTicketApi } from "../../../services/ticket";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function CreateTicket() {
+  const navigate = useNavigate();
   const [eventList, setEventList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
   const [openEventList, setOpenEventList] = useState(false);
@@ -41,7 +43,6 @@ function CreateTicket() {
     };
     const getCategory = async () => {
       const response = await getAllCategoryApi();
-      console.log(response);
       if (response) {
         setCategoryList(response);
       }
@@ -130,12 +131,14 @@ function CreateTicket() {
       categoryId: Yup.string().required("Category selection is required"),
       imageUrl: Yup.string().required("Image upload is required"),
     }),
-    onSubmit: async (values) => {
+    onSubmit: async (values, { resetForm }) => {
       const response = await postTicketApi(values);
       if (response) {
         toast.success(
           "Create ticket successfully. Please wait for staff review",
         );
+        resetForm();
+        navigate("/");
       } else {
         toast.error("Failed to create ticket. Please try again.");
       }
