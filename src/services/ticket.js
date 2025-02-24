@@ -72,24 +72,33 @@ export const rejectTicketApi = async (ticketId) => {
     throw new Error(`Failed to reject Ticket`);
   }
 };
-
 export const postTicketApi = async (ticket) => {
   try {
-    const response = await axiosInstance.post("/Tickets", {
+    const ticketData = {
       ticketName: ticket.ticketName,
       ticketDescription: ticket.ticketDescription,
       eventId: ticket.eventId,
       categoryId: ticket.categoryId,
       ticketPrice: ticket.ticketPrice,
-      ticketImage: ticket.imageUrl,
+      ticketImage: ticket.imageUrl || ticket.ticketImage,
       serialNumber: ticket.serialNumber,
-    });
+      status: ticket.status || 0, // Default to 0 if not provided
+    };
+
+    const response = await axiosInstance.post("/api/Tickets", [ticketData]); // Wrap in array to match API format
+
     if (response.status === 201) {
       return response.data.result;
-    } else {
-      throw new Error(response.data.message || "Failed to create ticket");
     }
+
+    throw new Error(response.data.message || "Failed to create ticket");
   } catch (error) {
-    throw new Error(`Failed to create`);
+    if (error.response) {
+      throw new Error(
+        error.response.data.message ||
+          `Failed to create ticket: ${error.response.status}`,
+      );
+    }
+    throw new Error("Failed to create ticket: Network error");
   }
 };

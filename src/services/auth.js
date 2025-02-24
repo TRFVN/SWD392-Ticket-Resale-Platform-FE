@@ -23,15 +23,19 @@ const authService = {
   },
 
   sendVerifyEmail: async (email) => {
-    const response = await axiosInstance.post("/send-verify-email", {
+    const response = await axiosInstance.post("/email/verification/send", {
       email,
     });
     return response.data;
   },
 
   fetchUserData: async (token) => {
-    const response = await axiosInstance.get("/user", {
+    const response = await axiosInstance.post("/user", null, {
       params: { token },
+      headers: {
+        Authorization: token,
+        accept: "*/*",
+      },
     });
     return response.data;
   },
