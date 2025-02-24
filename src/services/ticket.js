@@ -73,6 +73,8 @@ export const rejectTicketApi = async (ticketId) => {
   }
 };
 export const postTicketApi = async (ticket) => {
+  console.log(ticket);
+
   try {
     const ticketData = {
       ticketName: ticket.ticketName,
@@ -85,7 +87,9 @@ export const postTicketApi = async (ticket) => {
       status: ticket.status || 0, // Default to 0 if not provided
     };
 
-    const response = await axiosInstance.post("/api/Tickets", [ticketData]); // Wrap in array to match API format
+    const response = await axiosInstance.post("/api/Tickets/organization", [
+      ticketData,
+    ]);
 
     if (response.status === 201) {
       return response.data.result;

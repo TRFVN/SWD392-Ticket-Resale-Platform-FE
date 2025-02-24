@@ -3,7 +3,7 @@ import axiosInstance from "../config/axiosConfig";
 
 export const getAllEventApi = async () => {
   try {
-    const response = await axiosInstance.get("/Event");
+    const response = await axiosInstance.get("/api/Event");
     if (response.status === 200) {
       return response.data.result;
     } else {
@@ -31,7 +31,7 @@ export const getLocationApi = async () => {
 
 export const postEventApi = async (events) => {
   try {
-    const response = await axiosInstance.post("/Event", {
+    const response = await axiosInstance.post("/api/Event", {
       eventName: events.eventName,
       eventDescription: events.eventDescription,
       eventDate: events.eventDate,
