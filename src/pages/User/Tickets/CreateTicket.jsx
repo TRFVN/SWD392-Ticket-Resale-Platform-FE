@@ -372,7 +372,7 @@ function CreateTicket() {
             </button>
           </div>
         </div>
-        <div className="mt-24 w-[24%]">
+        <div className="mt-14 w-[15%]">
           <ol className="relative text-gray-500 border-s border-gray-200 dark:border-gray-700 dark:text-gray-400">
             {steps.map((step, index) => (
               <li
