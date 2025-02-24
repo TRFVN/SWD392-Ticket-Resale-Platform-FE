@@ -1,4 +1,3 @@
-// hooks/useAuth.js
 import { useContext } from "react";
 import { useDispatch } from "react-redux";
 import { AuthContext } from "../context/AuthContext";
@@ -16,27 +15,19 @@ import {
   setRole,
 } from "../store/slice/authSlice";
 import authService from "../services/auth";
-import { de } from "date-fns/locale";
 
 const findRoleFromToken = (decodedToken) => {
-  // Tìm key chứa từ "role" (không phân biệt hoa thường)
   const roleKey = Object.keys(decodedToken).find((key) =>
     key.toLowerCase().includes("role"),
   );
-
   return roleKey ? decodedToken[roleKey] : null;
 };
 
 const handleTokenAndDecode = (accessToken) => {
   try {
     const decodedToken = jwtDecode(accessToken);
-    console.log("Decoded Token:", decodedToken);
-
-    // Tìm role động
     const role = findRoleFromToken(decodedToken);
-    console.log("Found Role:", role);
 
-    // Lưu cả decoded token và role
     localStorage.setItem("decodedToken", JSON.stringify(decodedToken));
     localStorage.setItem("userRole", role);
 
@@ -59,7 +50,6 @@ export const useAuth = () => {
     dispatch(setLoading(true));
     try {
       const response = await authService.fetchUserData(token);
-
       if (response.isSuccess) {
         dispatch(setUser(response.result));
         localStorage.setItem("userData", JSON.stringify(response.result));
@@ -88,7 +78,7 @@ export const useAuth = () => {
           secure: true,
           sameSite: "strict",
         });
-        // Decode token và lưu thông tin
+
         handleTokenAndDecode(accessToken);
         localStorage.setItem("refreshToken", refreshToken);
         dispatch(setTokens({ accessToken, refreshToken }));
@@ -105,6 +95,7 @@ export const useAuth = () => {
       dispatch(setLoading(false));
     }
   };
+
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       dispatch(setLoading(true));
@@ -116,29 +107,20 @@ export const useAuth = () => {
         if (response.isSuccess) {
           const { accessToken, refreshToken } = response.result;
 
-          // Set cookies cho accessToken
           Cookies.set("accessToken", accessToken, {
             secure: true,
             sameSite: "strict",
           });
 
-          // Decode token và lưu thông tin giống như login thông thường
           const decodedInfo = handleTokenAndDecode(accessToken);
           if (decodedInfo) {
             const { role } = decodedInfo;
-            dispatch(setRole(role)); // Nếu bạn cần dispatch role vào redux
+            dispatch(setRole(role));
           }
 
-          // Lưu refreshToken
           localStorage.setItem("refreshToken", refreshToken);
-
-          // Set tokens vào redux
           dispatch(setTokens({ accessToken, refreshToken }));
-
-          // Fetch user data
           await handleFetchUserData(accessToken);
-
-          // Set google login success
           dispatch(setGoogleLoginSuccess(true));
 
           return response;
@@ -157,12 +139,12 @@ export const useAuth = () => {
     scope: "profile email openid",
   });
 
-  const signup = async (userData) => {
+  const signupCustomer = async (userData) => {
     dispatch(setLoading(true));
     dispatch(setError(null));
 
     try {
-      const response = await authService.signup(userData);
+      const response = await authService.signupCustomer(userData);
 
       if (response.isSuccess) {
         try {
@@ -177,10 +159,43 @@ export const useAuth = () => {
         }
         return response;
       }
-      throw new Error("Signup failed");
+      throw new Error("Customer signup failed");
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "An error occurred during signup";
+      dispatch(setError(errorMessage));
+      toast.error(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  const signupOrganization = async (userData) => {
+    dispatch(setLoading(true));
+    dispatch(setError(null));
+
+    try {
+      const response = await authService.signupOrganization(userData);
+
+      if (response.isSuccess) {
+        try {
+          await authService.sendVerifyEmail(userData.email);
+          toast.success(
+            "Organization signup successful. Verification email sent. Please check your inbox.",
+          );
+        } catch (error) {
+          toast.warning(
+            "Organization signup successful, but there was an issue sending the verification email.",
+          );
+        }
+        return response;
+      }
+      throw new Error("Organization signup failed");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        "An error occurred during organization signup";
       dispatch(setError(errorMessage));
       toast.error(errorMessage);
       throw new Error(errorMessage);
@@ -193,6 +208,8 @@ export const useAuth = () => {
     Cookies.remove("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("userData");
+    localStorage.removeItem("decodedToken");
+    localStorage.removeItem("userRole");
     dispatch(logout());
   };
 
@@ -200,7 +217,8 @@ export const useAuth = () => {
     ...context,
     login,
     googleLogin,
-    signup,
+    signupCustomer,
+    signupOrganization,
     logout: handleLogout,
   };
 };

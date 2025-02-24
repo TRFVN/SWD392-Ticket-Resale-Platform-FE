@@ -1,23 +1,21 @@
-// components/auth/Signup.jsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Formik, Form } from "formik";
-import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { useAuth } from "../../hooks/useAuth";
-import { StepIndicator } from "../../components/auth/sign-up/StepIndicator";
-import { StepContent } from "../../components/auth/sign-up/StepContent";
-import { FormButtons } from "../../components/auth/sign-up/FormButtons";
-import { SocialLogin } from "../../components/auth/sign-up/SocialLogin";
-// Tách validation schema và steps ra file riêng để dễ maintain
 import {
-  signupValidationSchema,
+  ACCOUNT_TYPES,
+  AccountTypeSelector,
+  FormButtons,
+  initialValues,
   signupSteps,
-  STEP_FIELDS,
-} from "../../components/auth/sign-up/constants";
+  SocialLogin,
+  StepContent,
+  StepIndicator,
+  validationSchemas,
+} from "../../components/auth/sign-up";
 
-// Tách animation variants ra để tái sử dụng
 const animationVariants = {
   pageInitial: {
     opacity: 0,
@@ -42,32 +40,24 @@ const animationVariants = {
 };
 
 const Signup = () => {
-  // State
   const [currentStep, setCurrentStep] = useState(0);
+  const [accountType, setAccountType] = useState(ACCOUNT_TYPES.INDIVIDUAL);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Hooks
   const navigate = useNavigate();
-  const { signup, loading, googleLogin } = useAuth();
+  const { signupCustomer, signupOrganization, loading, googleLogin } =
+    useAuth();
 
-  // Initial form values
-  const initialValues = {
-    email: "",
-    password: "",
-    confirmPassword: "",
-    fullName: "",
-    phoneNumber: "",
-    birthDate: "",
-    cccd: "",
-    country: "",
-    address: "",
-  };
-
-  // Handlers
   const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {
-      await signup(values);
+      // Choose the appropriate signup function based on account type
+      const signupFunction =
+        values.accountType === ACCOUNT_TYPES.INDIVIDUAL
+          ? signupCustomer
+          : signupOrganization;
+
+      await signupFunction(values);
 
       toast.success("Registration successful! Please verify your email.", {
         onClose: () => {
@@ -86,7 +76,6 @@ const Signup = () => {
       setSubmitting(false);
     }
   };
-
   const handleGoogleSignup = async () => {
     try {
       await googleLogin();
@@ -99,16 +88,15 @@ const Signup = () => {
     }
   };
 
-  // Validation helper
+  const currentSteps = signupSteps[accountType];
   const isStepValid = (values, errors, step) => {
-    const stepFields = STEP_FIELDS[step];
+    const stepFields = currentSteps[step].fields;
     return stepFields.every((field) => values[field] && !errors[field]);
   };
 
-  // Step navigation
   const handleNextStep = (values, errors) => {
     if (
-      currentStep < signupSteps.length - 1 &&
+      currentStep < currentSteps.length - 1 &&
       isStepValid(values, errors, currentStep)
     ) {
       setCurrentStep((prev) => prev + 1);
@@ -117,6 +105,11 @@ const Signup = () => {
 
   const handlePreviousStep = () => {
     setCurrentStep((prev) => prev - 1);
+  };
+
+  const handleAccountTypeChange = (type) => {
+    setAccountType(type);
+    setCurrentStep(0);
   };
 
   return (
@@ -130,48 +123,47 @@ const Signup = () => {
       >
         {/* Header */}
         <div className="text-center">
-          <motion.img
-            src="/logo.png"
-            alt="Logo"
-            className="mx-auto h-12 w-auto"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", damping: 15 }}
-          />
           <motion.h2
             className="mt-6 text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            {signupSteps[currentStep].title}
+            {currentSteps[currentStep].title}
           </motion.h2>
           <motion.p
             className="mt-2 text-sm text-gray-600 dark:text-gray-400"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            {signupSteps[currentStep].subtitle}
+            {currentSteps[currentStep].subtitle}
           </motion.p>
         </div>
+
+        {/* Account Type Selector */}
+        <AccountTypeSelector
+          selectedType={accountType}
+          onChange={handleAccountTypeChange}
+        />
 
         {/* Progress Indicator */}
         <StepIndicator
           currentStep={currentStep}
-          totalSteps={signupSteps.length}
-          steps={signupSteps}
+          totalSteps={currentSteps.length}
+          steps={currentSteps}
         />
 
         {/* Form */}
         <Formik
-          initialValues={initialValues}
-          validationSchema={signupValidationSchema}
+          initialValues={initialValues[accountType]}
+          validationSchema={validationSchemas[accountType]}
           onSubmit={handleSubmit}
+          enableReinitialize
         >
           {({ errors, touched, values, isValid, dirty }) => (
             <Form className="mt-8 space-y-6">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={currentStep}
+                  key={`${accountType}-${currentStep}`}
                   variants={animationVariants}
                   initial="stepInitial"
                   animate="stepAnimate"
@@ -180,6 +172,7 @@ const Signup = () => {
                 >
                   <StepContent
                     step={currentStep}
+                    accountType={accountType}
                     errors={errors}
                     touched={touched}
                     showPassword={showPassword}
@@ -204,7 +197,7 @@ const Signup = () => {
               {/* Navigation Buttons */}
               <FormButtons
                 currentStep={currentStep}
-                totalSteps={signupSteps.length}
+                totalSteps={currentSteps.length}
                 isValid={isStepValid(values, errors, currentStep)}
                 dirty={dirty}
                 loading={loading}

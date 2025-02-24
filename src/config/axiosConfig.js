@@ -3,8 +3,7 @@ import Cookies from "js-cookie";
 import store from "../store/store";
 import { setTokens, logout } from "../store/slice/authSlice";
 
-const BASE_URL =
-  "https://tickethub-f6gxgnhngpbue9gs.southeastasia-01.azurewebsites.net/api";
+const BASE_URL = "https://tickethubapp.azurewebsites.net";
 
 // Constants
 const TOKEN_CONFIG = {
