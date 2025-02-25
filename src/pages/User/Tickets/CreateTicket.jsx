@@ -17,20 +17,54 @@ function CreateTicket() {
   const [openCategoryList, setOpenCategoryList] = useState(false);
   const [chosenEvent, setChosenEvent] = useState({});
   const [chosenCategory, setChosenCategory] = useState({});
+  const ticketImage = useRef(null);
+  const ticketName = useRef(null);
+  const serialNumber = useRef(null);
+  const ticketDescription = useRef(null);
+  const category = useRef(null);
+  const event = useRef(null);
+  const ticketPrice = useRef(null);
+
+  const handleScrollToSection = (section) => {
+    console.log(section);
+    section.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
   const [imageUrl, setImageUrl] = useState(
     "https://salt.tkbcdn.com/ts/ds/92/72/1e/f512ada4512f5f41ec44723925e84c38.png",
   );
 
   const steps = [
-    "Ticket Image",
-    "Ticket Name",
-    "Serial Number",
-    "Ticket Description",
-    "Category",
-    "Event",
-    "Ticket Price",
+    {
+      name: "Ticket Image",
+      ref: ticketImage,
+    },
+    {
+      name: "Ticket Name",
+      ref: ticketName,
+    },
+    {
+      name: "Serial Number",
+      ref: serialNumber,
+    },
+    {
+      name: "Ticket Description",
+      ref: ticketDescription,
+    },
+    {
+      name: "Category",
+      ref: category,
+    },
+    {
+      name: "Event",
+      ref: event,
+    },
+    {
+      name: "Ticket Price",
+      ref: ticketPrice,
+    },
   ];
-  const [currentStep, setCurrentStep] = useState(2);
+
+  const [currentStep, setCurrentStep] = useState(10);
   const eventRef = useRef(null);
   const categoryRef = useRef(null);
 
@@ -147,7 +181,7 @@ function CreateTicket() {
   });
 
   return (
-    <div className="flex flex-col justify-start items-start gap-8 py-8 px-72 w-full min-h-screen overflow-hidden">
+    <div className="flex flex-col justify-start items-start gap-8 py-8 px-4 md:px-72 w-full min-h-screen overflow-hidden mb-20">
       <div className="flex flex-row justify-start items-center gap-3 text-white">
         <div className="bg-orange-500/10 p-3 rounded-lg">
           <Plus className="text-orange-500" />
@@ -155,76 +189,53 @@ function CreateTicket() {
         <span className="text-2xl font-bold text-white">Create New Ticket</span>
       </div>
       <form
-        className="flex flex-row justify-between items-start rounded-md w-full bg-gray-800/50 p-10 border-lg"
+        className="flex flex-col md:flex-row justify-between items-start rounded-md w-full bg-gray-800/50 py-10 px-4 md:px-16 border-lg"
         onSubmit={formik.handleSubmit}
       >
-        <div className="mt-14 w-[15%]">
-          <ol className="relative text-gray-500 border-s border-gray-200 dark:border-gray-700 dark:text-gray-400">
+        <div className="mt-4 w-full md:w-[20%]">
+          <ol className="relative text-gray-500 border-s border-gray-200">
             {steps.map((step, index) => (
               <li
                 key={index}
-                className={`mb-10 ms-6 ${
+                className={`mb-16 ms-6 ${
                   index === steps.length - 1 ? "mb-0" : ""
-                }`}
+                } cursor-pointer`}
+                onClick={() => handleScrollToSection(step.ref)}
               >
-                <span className="absolute flex items-center justify-center -start-2.5 h-5 w-5 bg-orange-700 rounded-full ring-4 ring-orange-500">
-                  <span
-                    className={`absolute flex items-center justify-center h-2.5 w-2.5 rounded-full ring-2 ${
-                      currentStep >= index
-                        ? "bg-orange-700 ring-orange-500 "
-                        : "bg-white ring-gray-300 "
-                    }`}
-                  >
-                    {currentStep > index && (
-                      <svg
-                        className="w-6 h-6 text-gray-800"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="m5 12 4.7 4.5 9.3-9"
-                        />
-                      </svg>
-                    )}
-                  </span>
+                <span className="text-white font-bold absolute flex items-center justify-center -start-2.5 h-5 w-5 bg-orange-500 rounded-full ring-4 ring-orange-500">
+                  {index + 1}
                 </span>
-                <h3 className="font-medium leading-tight">{step}</h3>
+                <h3 className="font-medium leading-tight">{step.name}</h3>
               </li>
             ))}
           </ol>
         </div>
-        <div className="flex flex-col justify-start items-start gap-8 w-full">
+        <div className="flex flex-col justify-start items-start gap-8 w-full md:w-[80%]">
           <div className="flex flex-col justify-start items-start gap-6 w-full">
             <label
               className="text-xl font-medium text-orange-500"
               htmlFor="imageUrl"
+              ref={ticketImage}
             >
               1. Ticket Image
-              {/* (<span className="text-red-500">*</span>) */}
             </label>
             {formik.touched.imageUrl && formik.errors.imageUrl && (
               <div className="text-red-500 text-sm">
                 {formik.errors.imageUrl}
               </div>
             )}
-            <div className="flex flex-col justify-center items-center gap-6 w-5/6 border rounded-lg p-10">
+            <div className="flex flex-col justify-center items-center gap-6 w-full border rounded-lg p-4 md:p-10">
               {imageUrl ? (
                 <img
                   src={imageUrl}
                   alt="Uploaded"
-                  className="min-w-full max-w-md rounded-lg"
+                  className="lg:min-w-full w-[100%] max-w-md rounded-lg"
                 />
               ) : (
                 <img
                   src="https://ehs.stanford.edu/wp-content/uploads/missing-image.png"
                   alt="upload_image"
-                  className="min-w-full max-w-md rounded-lg"
+                  className="lg:min-w-full w-[100%] max-w-md rounded-lg"
                 />
               )}
               <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-orange-500 text-orange-500 rounded-md hover:bg-orange-600 hover:text-white transition-colors">
@@ -240,10 +251,11 @@ function CreateTicket() {
             </div>
           </div>
 
-          <div className="flex flex-col justify-start items-start gap-5 w-5/6">
+          <div className="flex flex-col justify-start items-start gap-5 w-full">
             <label
               className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
               htmlFor="ticketName"
+              ref={ticketName}
             >
               2. Ticket Name
             </label>
@@ -262,10 +274,11 @@ function CreateTicket() {
             )}
           </div>
 
-          <div className="flex flex-col justify-start items-start gap-5 w-5/6">
+          <div className="flex flex-col justify-start items-start gap-5 w-full">
             <label
               className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
               htmlFor="serialNumber"
+              ref={serialNumber}
             >
               3. Serial Number
             </label>
@@ -284,10 +297,11 @@ function CreateTicket() {
             )}
           </div>
 
-          <div className="flex flex-col justify-start items-start gap-5 w-5/6">
+          <div className="flex flex-col justify-start items-start gap-5 w-full">
             <label
               className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
               htmlFor="ticketDescription"
+              ref={ticketDescription}
             >
               4. Ticket Description
             </label>
@@ -307,9 +321,12 @@ function CreateTicket() {
               )}
           </div>
 
-          <div className="flex flex-row justify-start items-start gap-20 w-5/6">
-            <div className="flex flex-col justify-start items-start gap-5 w-1/2">
-              <label className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer">
+          <div className="flex flex-col md:flex-row justify-start items-start gap-5 md:gap-20 w-full">
+            <div className="flex flex-col justify-start items-start gap-5 w-full md:w-1/2">
+              <label
+                className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
+                ref={category}
+              >
                 5. Category
               </label>
               <div
@@ -340,8 +357,11 @@ function CreateTicket() {
               </div>
             </div>
 
-            <div className="flex flex-col justify-start items-start gap-5 w-1/2">
-              <label className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer">
+            <div className="flex flex-col justify-start items-start gap-5 w-full md:w-1/2">
+              <label
+                className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
+                ref={event}
+              >
                 6. Event
               </label>
               <div
@@ -372,10 +392,11 @@ function CreateTicket() {
             </div>
           </div>
 
-          <div className="flex flex-col justify-start items-start gap-5 w-5/12 pr-10 relative">
+          <div className="flex flex-col justify-start items-start gap-5 w-full md:w-1/2 pr-10 relative">
             <label
               className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
               htmlFor="ticketPrice"
+              ref={ticketPrice}
             >
               7. Ticket Price
             </label>
@@ -407,7 +428,7 @@ function CreateTicket() {
               </div>
             )}
           </div>
-          <div className="flex flex-row justify-center items-center w-5/6 mt-10">
+          <div className="flex flex-row justify-center items-center w-full mt-10">
             <button
               type="submit"
               className="bg-orange-500 text-white font-bold py-2 px-6 rounded-md"
