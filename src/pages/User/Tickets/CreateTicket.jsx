@@ -5,7 +5,7 @@ import { getAllCategoryApi } from "../../../services/categoryApi";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import axiosInstance from "../../../config/axiosConfig";
-import { postTicketApi } from "../../../services/ticket";
+import { postTicketApi, uploadTicketApi } from "../../../services/ticket";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
@@ -24,14 +24,14 @@ function CreateTicket() {
   const category = useRef(null);
   const event = useRef(null);
   const ticketPrice = useRef(null);
-
+  const eventRef = useRef(null);
+  const categoryRef = useRef(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const handleScrollToSection = (section) => {
     console.log(section);
     section.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
-  const [imageUrl, setImageUrl] = useState(
-    "https://salt.tkbcdn.com/ts/ds/92/72/1e/f512ada4512f5f41ec44723925e84c38.png",
-  );
+  const [imageUrl, setImageUrl] = useState("");
 
   const steps = [
     {
@@ -64,10 +64,6 @@ function CreateTicket() {
     },
   ];
 
-  const [currentStep, setCurrentStep] = useState(10);
-  const eventRef = useRef(null);
-  const categoryRef = useRef(null);
-
   useEffect(() => {
     const getEvent = async () => {
       const response = await getAllEventApi();
@@ -91,21 +87,19 @@ function CreateTicket() {
 
     const formData = new FormData();
     formData.append("file", file);
-
     try {
-      const response = await axiosInstance.post(
-        "/Tickets/upload-image",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        },
-      );
-      setImageUrl(response.data.result);
-      formik.setFieldValue("imageUrl", response.data.result);
+      const response = await uploadTicketApi(formData, setUploadProgress);
+
+      if (response?.data?.result) {
+        setImageUrl(response.data.result);
+        formik.setFieldValue("imageUrl", response.data.result);
+        setUploadProgress(0);
+      }
     } catch (error) {
-      console.error("Image upload failed:", error);
+      toast.error("Failed to upload image. Please try again");
+      console.log(error);
+
+      return;
     }
   };
 
@@ -193,7 +187,7 @@ function CreateTicket() {
         onSubmit={formik.handleSubmit}
       >
         <div className="mt-4 w-full md:w-[20%]">
-          <ol className="relative text-gray-500 border-s border-gray-200">
+          <ol className="relative text-gray-500 border-s border-orange-500">
             {steps.map((step, index) => (
               <li
                 key={index}
@@ -229,18 +223,25 @@ function CreateTicket() {
                 <img
                   src={imageUrl}
                   alt="Uploaded"
-                  className="lg:min-w-full w-[100%] max-w-md rounded-lg"
+                  className="lg:min-w-full h-[500px] w-full max-w-md rounded-lg object-cover"
                 />
               ) : (
                 <img
                   src="https://ehs.stanford.edu/wp-content/uploads/missing-image.png"
                   alt="upload_image"
-                  className="lg:min-w-full w-[100%] max-w-md rounded-lg"
+                  className="lg:min-w-full h-[500px] w-full max-w-md rounded-lg object-cover"
                 />
               )}
               <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-orange-500 text-orange-500 rounded-md hover:bg-orange-600 hover:text-white transition-colors">
-                <Upload className="mr-2" />
-                <span className="text-lg">Upload</span>
+                {uploadProgress > 0 ? (
+                  <span className="text-lg">Loading {uploadProgress} %</span>
+                ) : (
+                  <>
+                    <Upload className="mr-2" />
+                    <span className="text-lg">Upload</span>
+                  </>
+                )}
+
                 <input
                   type="file"
                   accept="image/*"
