@@ -158,6 +158,47 @@ function CreateTicket() {
         className="flex flex-row justify-between items-start rounded-md w-full bg-gray-800/50 p-10 border-lg"
         onSubmit={formik.handleSubmit}
       >
+        <div className="mt-14 w-[15%]">
+          <ol className="relative text-gray-500 border-s border-gray-200 dark:border-gray-700 dark:text-gray-400">
+            {steps.map((step, index) => (
+              <li
+                key={index}
+                className={`mb-10 ms-6 ${
+                  index === steps.length - 1 ? "mb-0" : ""
+                }`}
+              >
+                <span className="absolute flex items-center justify-center -start-2.5 h-5 w-5 bg-orange-700 rounded-full ring-4 ring-orange-500">
+                  <span
+                    className={`absolute flex items-center justify-center h-2.5 w-2.5 rounded-full ring-2 ${
+                      currentStep >= index
+                        ? "bg-orange-700 ring-orange-500 "
+                        : "bg-white ring-gray-300 "
+                    }`}
+                  >
+                    {currentStep > index && (
+                      <svg
+                        className="w-6 h-6 text-gray-800"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="m5 12 4.7 4.5 9.3-9"
+                        />
+                      </svg>
+                    )}
+                  </span>
+                </span>
+                <h3 className="font-medium leading-tight">{step}</h3>
+              </li>
+            ))}
+          </ol>
+        </div>
         <div className="flex flex-col justify-start items-start gap-8 w-full">
           <div className="flex flex-col justify-start items-start gap-6 w-full">
             <label
@@ -201,7 +242,7 @@ function CreateTicket() {
 
           <div className="flex flex-col justify-start items-start gap-5 w-5/6">
             <label
-              className="flex flex-row text-lg font-medium text-orange-500"
+              className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
               htmlFor="ticketName"
             >
               2. Ticket Name
@@ -223,7 +264,7 @@ function CreateTicket() {
 
           <div className="flex flex-col justify-start items-start gap-5 w-5/6">
             <label
-              className="flex flex-row text-lg font-medium text-orange-500"
+              className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
               htmlFor="serialNumber"
             >
               3. Serial Number
@@ -245,7 +286,7 @@ function CreateTicket() {
 
           <div className="flex flex-col justify-start items-start gap-5 w-5/6">
             <label
-              className="flex flex-row text-lg font-medium text-orange-500"
+              className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
               htmlFor="ticketDescription"
             >
               4. Ticket Description
@@ -268,7 +309,7 @@ function CreateTicket() {
 
           <div className="flex flex-row justify-start items-start gap-20 w-5/6">
             <div className="flex flex-col justify-start items-start gap-5 w-1/2">
-              <label className="flex flex-row text-lg font-medium text-orange-500">
+              <label className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer">
                 5. Category
               </label>
               <div
@@ -300,7 +341,7 @@ function CreateTicket() {
             </div>
 
             <div className="flex flex-col justify-start items-start gap-5 w-1/2">
-              <label className="flex flex-row text-lg font-medium text-orange-500">
+              <label className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer">
                 6. Event
               </label>
               <div
@@ -333,7 +374,7 @@ function CreateTicket() {
 
           <div className="flex flex-col justify-start items-start gap-5 w-5/12 pr-10 relative">
             <label
-              className="flex flex-row text-lg font-medium text-orange-500"
+              className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
               htmlFor="ticketPrice"
             >
               7. Ticket Price
@@ -374,47 +415,6 @@ function CreateTicket() {
               Submit
             </button>
           </div>
-        </div>
-        <div className="mt-14 w-[15%]">
-          <ol className="relative text-gray-500 border-s border-gray-200 dark:border-gray-700 dark:text-gray-400">
-            {steps.map((step, index) => (
-              <li
-                key={index}
-                className={`mb-10 ms-6 ${
-                  index === steps.length - 1 ? "mb-0" : ""
-                }`}
-              >
-                <span className="absolute flex items-center justify-center -start-2.5 h-5 w-5 bg-orange-700 rounded-full ring-4 ring-orange-500">
-                  <span
-                    className={`absolute flex items-center justify-center h-2.5 w-2.5 rounded-full ring-2 ${
-                      currentStep >= index
-                        ? "bg-orange-700 ring-orange-500 "
-                        : "bg-white ring-gray-300 "
-                    }`}
-                  >
-                    {currentStep > index && (
-                      <svg
-                        className="w-6 h-6 text-gray-800"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="m5 12 4.7 4.5 9.3-9"
-                        />
-                      </svg>
-                    )}
-                  </span>
-                </span>
-                <h3 className="font-medium leading-tight">{step}</h3>
-              </li>
-            ))}
-          </ol>
         </div>
       </form>
     </div>
