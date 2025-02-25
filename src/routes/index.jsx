@@ -38,7 +38,7 @@ const publicRoutes = [
   { path: "forgot-password", element: <ForgotPassword /> },
   { path: "tickets", element: <Ticket /> },
   { path: "events", element: <EventsPage /> },
-  { path: "events/:eventId", element: <EventDetails /> }, // Thêm dòng này
+  { path: "events/:eventId", element: <EventDetails /> },
 ];
 
 const privateRoutes = [
@@ -64,7 +64,7 @@ export const router = createBrowserRouter([
       ...publicRoutes,
       {
         element: (
-          <PrivateRoute allowedRoles={[ROLES.MEMBER || ROLES.ORGANIZATION]} />
+          <PrivateRoute allowedRoles={[ROLES.MEMBER, ROLES.ORGANIZATION]} />
         ),
         children: privateRoutes,
       },

@@ -284,3 +284,4 @@ export const MobileMenu = ({
     </AnimatePresence>
   );
 };
+export default MobileMenu;
