@@ -520,88 +520,60 @@ const Checkout = () => {
       ]);
     }
   };
-  // Modify the generatePayOSLink function to include localStorage saving
   const generatePayOSLink = async () => {
-    if (!currentOrder?.orderId) return;
+    if (!currentOrder?.orderId) return null;
 
     try {
       setIsGeneratingQR(true);
 
-      // Đầu tiên, tạo link thanh toán
       const response = await axiosInstance.post(
         "api/Payment/create-payment-link",
         {
           orderNumber: currentOrder.orderNumber || 0,
           customerId: currentOrder.userId || "",
+          amount: currentOrder.totalPrice || 0,
+          description: `Payment for Order #${currentOrder.orderNumber}`,
           cancelUrl: `${window.location.origin}/order-confirmation/${currentOrder.orderId}?cancel=true`,
           returnUrl: `${window.location.origin}/order-confirmation/${currentOrder.orderId}?code=00&status=PAID`,
         },
       );
 
-      if (response.data && response.data.isSuccess) {
-        // Extract checkout URL and transaction ID from the response
+      if (
+        response.data?.isSuccess &&
+        response.data.result?.result?.checkoutUrl
+      ) {
+        // Extract checkout URL and transaction ID
         const result = response.data.result?.result;
-        const checkoutUrl = result?.checkoutUrl;
+        const checkoutUrl = result.checkoutUrl;
         const transactionId = response.data.paymentTransactionId;
 
-        if (checkoutUrl && transactionId) {
-          // Save transaction ID to localStorage
-          localStorage.setItem(
-            `order_${currentOrder.orderId}_transaction`,
-            transactionId,
-          );
+        // Save transaction ID to localStorage
+        localStorage.setItem(
+          `order_${currentOrder.orderId}_transaction`,
+          transactionId,
+        );
 
-          // Lưu các giá trị vào state
-          setPayosCheckoutUrl(checkoutUrl);
-          setPaymentTransactionId(transactionId);
+        // Update state
+        setPayosCheckoutUrl(checkoutUrl);
+        setPaymentTransactionId(transactionId);
 
-          // Rest of the existing code remains the same...
-          try {
-            // Lưu transactionId vào hệ thống của bạn
-            await axiosInstance.put(
-              `api/Order/${currentOrder.orderId}/transaction`,
-              {
-                transactionId: transactionId,
-              },
-            );
-
-            // Tạo returnUrl mới có chứa transactionId
-            const newReturnUrl = `${window.location.origin}/order-confirmation/${currentOrder.orderId}?code=00&status=PAID&transactionId=${transactionId}`;
-
-            // Cập nhật returnUrl trong hệ thống PayOS nếu API hỗ trợ
-            try {
-              await axiosInstance.put(
-                `api/Payment/${transactionId}/update-return-url`,
-                {
-                  returnUrl: newReturnUrl,
-                },
-              );
-            } catch (updateError) {
-              console.log(
-                "Không thể cập nhật returnUrl tại PayOS, sẽ xử lý transactionId ở client side",
-              );
-            }
-          } catch (err) {
-            console.error("Error updating transaction ID:", err);
-          }
-
-          return checkoutUrl;
-        } else {
-          toast.error("Không thể tạo link thanh toán PayOS.");
-          return null;
-        }
+        return checkoutUrl;
       } else {
-        toast.error("Không thể tạo link thanh toán.");
+        // Handle error cases
+        toast.error(
+          response.data?.message || "Không thể tạo liên kết thanh toán PayOS",
+        );
         return null;
       }
     } catch (error) {
-      toast.error("Lỗi kết nối đến hệ thống thanh toán.");
+      console.error("Error generating PayOS link:", error);
+      toast.error("Lỗi kết nối đến hệ thống thanh toán");
       return null;
     } finally {
       setIsGeneratingQR(false);
     }
   };
-  // Handle payment button click
+
   const handleConfirmOrder = async () => {
     if (!currentOrder) {
       toast.error("Không tìm thấy thông tin đơn hàng");
@@ -611,31 +583,15 @@ const Checkout = () => {
     try {
       setProcessingPayment(true);
 
-      // For PayOS, if we have the checkout URL, open it in a new tab
-      if (payosCheckoutUrl) {
-        // Use the existing transaction ID if available
-        const transactionParam = paymentTransactionId
-          ? `&transactionId=${encodeURIComponent(paymentTransactionId)}`
-          : "";
+      // Generate PayOS link if not already exists
+      const checkoutUrl = payosCheckoutUrl || (await generatePayOSLink());
 
-        const url = `${payosCheckoutUrl}${transactionParam}`;
-        window.open(url, "_blank");
+      if (checkoutUrl) {
+        // Open PayOS checkout in a new window
+        window.open(checkoutUrl, "_blank");
         toast.info("Vui lòng hoàn tất thanh toán trong cửa sổ mới");
       } else {
-        // Generate link if we don't have it yet
-        const url = await generatePayOSLink();
-        if (url) {
-          // The transaction ID is already stored in state from generatePayOSLink
-          const transactionParam = paymentTransactionId
-            ? `&transactionId=${encodeURIComponent(paymentTransactionId)}`
-            : "";
-
-          const fullUrl = `${url}${transactionParam}`;
-          window.open(fullUrl, "_blank");
-          toast.info("Vui lòng hoàn tất thanh toán trong cửa sổ mới");
-        } else {
-          toast.error("Không thể tạo liên kết thanh toán PayOS");
-        }
+        toast.error("Không thể tạo liên kết thanh toán");
       }
     } catch (error) {
       toast.error(error.message || "Thanh toán thất bại");
