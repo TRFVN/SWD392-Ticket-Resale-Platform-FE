@@ -1,6 +1,12 @@
-import React, { memo } from "react";
+import React, { memo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { LogIn, UserPlus } from "lucide-react";
+
+// Predefined animation variants
+const buttonVariants = {
+  hover: { scale: 1.03 },
+  tap: { scale: 0.97 },
+};
 
 /**
  * GuestButtons - Component displaying login and registration buttons for guest users
@@ -12,11 +18,14 @@ import { LogIn, UserPlus } from "lucide-react";
  */
 export const GuestButtons = memo(
   ({ onNavigate, className = "", isMobile = false }) => {
-    // Animation variants
-    const buttonVariants = {
-      hover: { scale: 1.03 },
-      tap: { scale: 0.97 },
-    };
+    // Memoized navigation handlers
+    const navigateToLogin = useCallback(() => {
+      onNavigate("/login");
+    }, [onNavigate]);
+
+    const navigateToSignup = useCallback(() => {
+      onNavigate("/signup");
+    }, [onNavigate]);
 
     // Mobile layout
     if (isMobile) {
@@ -26,7 +35,7 @@ export const GuestButtons = memo(
             variants={buttonVariants}
             whileHover="hover"
             whileTap="tap"
-            onClick={() => onNavigate("/login")}
+            onClick={navigateToLogin}
             className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl
             bg-gradient-to-r from-orange-500 to-orange-600
             text-white font-medium shadow-sm hover:shadow-md
@@ -42,7 +51,7 @@ export const GuestButtons = memo(
             variants={buttonVariants}
             whileHover="hover"
             whileTap="tap"
-            onClick={() => onNavigate("/signup")}
+            onClick={navigateToSignup}
             className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl
             border-2 border-orange-500 text-orange-600 dark:text-orange-500
             font-medium bg-transparent relative overflow-hidden group
@@ -61,14 +70,14 @@ export const GuestButtons = memo(
       );
     }
 
-    // Desktop layout
+    // Desktop layout - optimized with simpler structure
     return (
       <div className={`flex items-center gap-3 ${className}`}>
         <motion.button
           variants={buttonVariants}
           whileHover="hover"
           whileTap="tap"
-          onClick={() => onNavigate("/login")}
+          onClick={navigateToLogin}
           className="px-4 py-2 rounded-xl
           bg-gradient-to-r from-orange-500 to-orange-600
           text-white font-medium shadow-sm hover:shadow-md
@@ -85,7 +94,7 @@ export const GuestButtons = memo(
           variants={buttonVariants}
           whileHover="hover"
           whileTap="tap"
-          onClick={() => onNavigate("/signup")}
+          onClick={navigateToSignup}
           className="px-4 py-2 rounded-xl border border-orange-500 
           text-orange-500 font-medium relative overflow-hidden group
           transition-all duration-300 flex items-center gap-2

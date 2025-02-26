@@ -1,6 +1,17 @@
 import React, { memo } from "react";
 import { motion } from "framer-motion";
 
+// Predefined animation variants
+const buttonVariants = {
+  hover: { scale: 1.05 },
+  tap: { scale: 0.95 },
+};
+
+const badgeVariants = {
+  initial: { scale: 0.5, opacity: 0 },
+  animate: { scale: 1, opacity: 1 },
+};
+
 /**
  * NavButton - A modern animated button for navigation actions
  *
@@ -16,8 +27,9 @@ export const NavButton = memo(
   ({ icon: Icon, badge, onClick, label, className = "", active = false }) => {
     return (
       <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        variants={buttonVariants}
+        whileHover="hover"
+        whileTap="tap"
         onClick={onClick}
         className={`relative p-2.5 rounded-full 
         ${
@@ -31,7 +43,7 @@ export const NavButton = memo(
         ${className}`}
         aria-label={label}
       >
-        {/* Icon */}
+        {/* Icon with conditional styling for active state */}
         <Icon
           className={`w-5 h-5 
         ${
@@ -43,11 +55,12 @@ export const NavButton = memo(
         transition-colors duration-300`}
         />
 
-        {/* Badge */}
+        {/* Badge with optimized animation */}
         {badge && (
           <motion.span
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            variants={badgeVariants}
+            initial="initial"
+            animate="animate"
             className="absolute -top-1.5 -right-1.5 min-w-5 h-5 flex items-center justify-center 
             px-1.5 text-xs font-medium text-white
             bg-gradient-to-r from-orange-500 to-orange-600 
@@ -58,7 +71,7 @@ export const NavButton = memo(
           </motion.span>
         )}
 
-        {/* Hover ripple effect */}
+        {/* Hover ripple effect - optimized for performance */}
         <span
           className="absolute inset-0 rounded-full bg-orange-500/0 
         group-hover:bg-orange-500/10 dark:group-hover:bg-orange-500/20
@@ -66,7 +79,7 @@ export const NavButton = memo(
         transition-all duration-300 ease-out"
         />
 
-        {/* Active dot indicator */}
+        {/* Active dot indicator with layout animation */}
         {active && (
           <motion.span
             layoutId="nav-active-indicator"

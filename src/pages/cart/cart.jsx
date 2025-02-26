@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Ticket, Trash2, Loader2, ShoppingBag } from "lucide-react";
+import {
+  Ticket,
+  Trash2,
+  Loader2,
+  ShoppingBag,
+  CheckCircle,
+  Circle,
+  ArrowRight,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
@@ -12,7 +20,7 @@ const formatCurrency = (amount) => {
   }).format(amount);
 };
 
-const CartItem = ({ ticket, onRemove }) => {
+const CartItem = ({ ticket, onRemove, isSelected, onToggleSelect }) => {
   const isDarkMode = useSelector((state) => state.theme?.isDarkMode || false);
 
   return (
@@ -21,8 +29,25 @@ const CartItem = ({ ticket, onRemove }) => {
         isDarkMode
           ? "bg-gray-800/50 border-gray-700"
           : "bg-white/50 border-gray-200"
-      } backdrop-blur rounded-xl border transition-colors`}
+      } ${
+        isSelected ? "border-orange-500 border-2" : "border"
+      } backdrop-blur rounded-xl transition-all hover:shadow-md`}
     >
+      {/* Selection */}
+      <div className="flex items-center">
+        <button
+          onClick={() => onToggleSelect(ticket.cartItemId)}
+          className="focus:outline-none"
+          aria-label={isSelected ? "Deselect item" : "Select item"}
+        >
+          {isSelected ? (
+            <CheckCircle className="w-6 h-6 text-orange-500" />
+          ) : (
+            <Circle className="w-6 h-6 text-gray-400" />
+          )}
+        </button>
+      </div>
+
       {/* Image */}
       <div className="relative w-full sm:w-32 h-32 overflow-hidden rounded-lg">
         <img
@@ -30,6 +55,11 @@ const CartItem = ({ ticket, onRemove }) => {
           alt={ticket.ticketName}
           className="h-full w-full object-cover"
         />
+        {isSelected && (
+          <div className="absolute inset-0 bg-orange-500/10 flex items-center justify-center">
+            <CheckCircle className="w-10 h-10 text-orange-500" />
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -43,7 +73,7 @@ const CartItem = ({ ticket, onRemove }) => {
             {ticket.ticketName}
           </h3>
           <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
-            {ticket.eventName}
+            {ticket.eventName || "Event"}
           </p>
         </div>
 
@@ -69,7 +99,14 @@ const CartItem = ({ ticket, onRemove }) => {
   );
 };
 
-const CartSummary = ({ totalAmount, itemCount, onCheckout, isLoading }) => {
+const CartSummary = ({
+  totalAmount,
+  itemCount,
+  selectedCount,
+  onCheckout,
+  isLoading,
+  showOnlySelected,
+}) => {
   const isDarkMode = useSelector((state) => state.theme?.isDarkMode || false);
 
   return (
@@ -78,7 +115,7 @@ const CartSummary = ({ totalAmount, itemCount, onCheckout, isLoading }) => {
         isDarkMode
           ? "bg-gray-800/50 border-gray-700"
           : "bg-white/50 border-gray-200"
-      } backdrop-blur rounded-xl border p-6 space-y-6 transition-colors`}
+      } backdrop-blur rounded-xl border p-6 space-y-6 transition-colors sticky top-4`}
     >
       <h2
         className={`text-xl font-bold ${
@@ -94,7 +131,11 @@ const CartSummary = ({ totalAmount, itemCount, onCheckout, isLoading }) => {
             isDarkMode ? "text-gray-400" : "text-gray-600"
           }`}
         >
-          <span>Subtotal ({itemCount} items)</span>
+          <span>
+            {showOnlySelected
+              ? `Selected (${selectedCount}/${itemCount})`
+              : `Subtotal (${itemCount} items)`}
+          </span>
           <span>{formatCurrency(totalAmount)}</span>
         </div>
 
@@ -112,7 +153,7 @@ const CartSummary = ({ totalAmount, itemCount, onCheckout, isLoading }) => {
 
       <button
         onClick={onCheckout}
-        disabled={isLoading || itemCount === 0}
+        disabled={isLoading || selectedCount === 0}
         className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 
           disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-6 rounded-lg 
           transition-colors font-medium"
@@ -123,9 +164,72 @@ const CartSummary = ({ totalAmount, itemCount, onCheckout, isLoading }) => {
             Processing...
           </>
         ) : (
-          <>Checkout Now</>
+          <>
+            Checkout Now
+            <ArrowRight className="w-5 h-5" />
+          </>
         )}
       </button>
+    </div>
+  );
+};
+
+const CartActions = ({
+  onSelectAll,
+  onUnselectAll,
+  selectedCount,
+  totalCount,
+  toggleShowSelected,
+  showOnlySelected,
+}) => {
+  const isDarkMode = useSelector((state) => state.theme?.isDarkMode || false);
+
+  return (
+    <div className={`flex flex-wrap gap-3 mb-6 items-center`}>
+      <button
+        onClick={onSelectAll}
+        className={`px-4 py-2 rounded-lg text-sm ${
+          isDarkMode
+            ? "bg-gray-800 hover:bg-gray-700 text-white"
+            : "bg-gray-100 hover:bg-gray-200 text-gray-800"
+        } transition-colors`}
+      >
+        Select All
+      </button>
+
+      <button
+        onClick={onUnselectAll}
+        className={`px-4 py-2 rounded-lg text-sm ${
+          isDarkMode
+            ? "bg-gray-800 hover:bg-gray-700 text-white"
+            : "bg-gray-100 hover:bg-gray-200 text-gray-800"
+        } transition-colors`}
+      >
+        Unselect All
+      </button>
+
+      <div className="flex-1"></div>
+
+      <button
+        onClick={toggleShowSelected}
+        className={`px-4 py-2 rounded-lg text-sm ${
+          showOnlySelected
+            ? "bg-orange-500 text-white hover:bg-orange-600"
+            : isDarkMode
+            ? "bg-gray-800 hover:bg-gray-700 text-white"
+            : "bg-gray-100 hover:bg-gray-200 text-gray-800"
+        } transition-colors`}
+      >
+        {showOnlySelected ? "Show All Items" : "Show Selected Only"}
+      </button>
+
+      <div
+        className={`px-4 py-2 rounded-lg text-sm ${
+          isDarkMode ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-700"
+        }`}
+      >
+        {selectedCount} of {totalCount} selected
+      </div>
     </div>
   );
 };
@@ -202,7 +306,9 @@ const ErrorState = ({ error, onRetry }) => {
 };
 
 const Cart = () => {
-  const [cart, setCart] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState(new Set());
+  const [showOnlySelected, setShowOnlySelected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -212,11 +318,24 @@ const Cart = () => {
     fetchCart();
   }, []);
 
+  // Select all items by default when cart is loaded
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      const allIds = new Set(cartItems.map((item) => item.cartItemId));
+      setSelectedItems(allIds);
+    }
+  }, [cartItems]);
+
   const fetchCart = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("api/Cart/GetCart");
-      setCart(response.data.result);
+      const response = await axiosInstance.get("api/Cart/GetCartItem");
+
+      if (response.data.isSuccess) {
+        setCartItems(response.data.result || []);
+      } else {
+        throw new Error(response.data.message || "Failed to fetch cart");
+      }
     } catch (err) {
       setError(err.message || "Failed to fetch cart");
       toast.error("Failed to load cart");
@@ -227,31 +346,114 @@ const Cart = () => {
 
   const handleRemoveFromCart = async (ticketId) => {
     try {
-      await axiosInstance.delete(
-        `app/Cart/RemoveFromCart/?ticketId=${ticketId}`,
+      const response = await axiosInstance.delete(
+        `api/Cart/RemoveFromCart/?ticketId=${ticketId}`,
       );
-      await fetchCart();
-      toast.success("Ticket removed from cart");
+
+      if (response.data.isSuccess) {
+        await fetchCart();
+        toast.success("Ticket removed from cart");
+      } else {
+        throw new Error(response.data.message || "Failed to remove ticket");
+      }
     } catch (error) {
-      toast.error("Failed to remove ticket");
+      toast.error(error.message || "Failed to remove ticket");
     }
+  };
+
+  const handleToggleSelect = (cartItemId) => {
+    setSelectedItems((prev) => {
+      const newSelection = new Set(prev);
+      if (newSelection.has(cartItemId)) {
+        newSelection.delete(cartItemId);
+      } else {
+        newSelection.add(cartItemId);
+      }
+      return newSelection;
+    });
+  };
+
+  const handleSelectAll = () => {
+    const allIds = new Set(cartItems.map((item) => item.cartItemId));
+    setSelectedItems(allIds);
+  };
+
+  const handleUnselectAll = () => {
+    setSelectedItems(new Set());
+  };
+
+  const toggleShowSelected = () => {
+    setShowOnlySelected(!showOnlySelected);
+  };
+
+  // Calculate total amount of selected items
+  const calculateSelectedTotal = () => {
+    return cartItems
+      .filter((item) => selectedItems.has(item.cartItemId))
+      .reduce((sum, item) => sum + (item.ticketPrice || 0), 0);
   };
 
   const handleCheckout = async () => {
+    if (selectedItems.size === 0) {
+      toast.error("Please select at least one item to checkout");
+      return;
+    }
+
     try {
-      toast.success("Proceeding to checkout...");
-      navigate("/checkout");
+      setLoading(true);
+
+      // Get array of selected cartItemIds
+      const selectedItemIds = Array.from(selectedItems);
+      const totalPrice = calculateSelectedTotal();
+
+      // First, use the checkout endpoint
+      const checkoutResponse = await axiosInstance.post("api/Cart/Checkout", {
+        cartItemIds: selectedItemIds,
+      });
+
+      if (!checkoutResponse.data.isSuccess) {
+        throw new Error(checkoutResponse.data.message || "Checkout failed");
+      }
+
+      // Then, create an order using the Order API
+      const orderResponse = await axiosInstance.post("api/Order", {
+        checkedOutCartItemIds: selectedItemIds,
+        checkoutTotalPrice: totalPrice,
+      });
+
+      if (orderResponse.data.isSuccess) {
+        toast.success("Order created successfully!");
+        navigate("/checkout", {
+          state: {
+            orderId: orderResponse.data.result?.orderId || null,
+            totalAmount: totalPrice,
+          },
+        });
+      } else {
+        throw new Error(orderResponse.data.message || "Order creation failed");
+      }
     } catch (error) {
-      toast.error("Checkout failed");
+      toast.error(error.message || "Checkout process failed");
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Filter items based on selection preference
+  const displayedItems = showOnlySelected
+    ? cartItems.filter((item) => selectedItems.has(item.cartItemId))
+    : cartItems;
+
   if (loading) return <LoadingState />;
   if (error) return <ErrorState error={error} onRetry={fetchCart} />;
-  if (!cart?.cartItemsDtos?.length) return <EmptyCart />;
+  if (!cartItems.length) return <EmptyCart />;
 
   return (
-    <div className={isDarkMode ? "bg-black" : "bg-gray-50"}>
+    <div
+      className={`${
+        isDarkMode ? "bg-black" : "bg-gray-50"
+      } min-h-screen transition-colors`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
@@ -267,28 +469,54 @@ const Cart = () => {
               isDarkMode ? "text-white" : "text-gray-900"
             }`}
           >
-            Shopping Cart ({cart.cartItemsDtos.length})
+            Shopping Cart ({cartItems.length})
           </h1>
         </div>
+
+        {/* Cart Actions */}
+        <CartActions
+          onSelectAll={handleSelectAll}
+          onUnselectAll={handleUnselectAll}
+          selectedCount={selectedItems.size}
+          totalCount={cartItems.length}
+          toggleShowSelected={toggleShowSelected}
+          showOnlySelected={showOnlySelected}
+        />
 
         {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
-            {cart.cartItemsDtos.map((item) => (
-              <CartItem
-                key={item.ticketId}
-                ticket={item}
-                onRemove={handleRemoveFromCart}
-              />
-            ))}
+            {displayedItems.length === 0 && showOnlySelected ? (
+              <div
+                className={`p-6 rounded-xl text-center ${
+                  isDarkMode
+                    ? "bg-gray-800/50 text-gray-300"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                No items selected. Select items to display them here.
+              </div>
+            ) : (
+              displayedItems.map((item) => (
+                <CartItem
+                  key={item.cartItemId}
+                  ticket={item}
+                  onRemove={handleRemoveFromCart}
+                  isSelected={selectedItems.has(item.cartItemId)}
+                  onToggleSelect={handleToggleSelect}
+                />
+              ))
+            )}
           </div>
 
           <div>
             <CartSummary
-              totalAmount={cart.totalAmount}
-              itemCount={cart.cartItemsDtos.length}
+              totalAmount={calculateSelectedTotal()}
+              itemCount={cartItems.length}
+              selectedCount={selectedItems.size}
               onCheckout={handleCheckout}
               isLoading={loading}
+              showOnlySelected={showOnlySelected}
             />
           </div>
         </div>

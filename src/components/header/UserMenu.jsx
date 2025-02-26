@@ -1,6 +1,5 @@
-import React, { useRef, useEffect } from "react";
+import React, { memo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 import {
   User,
   Heart,
@@ -15,7 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-// Animation variants - optimized for smoother transitions
+// Animation variants defined outside component to avoid recreation
 const menuVariants = {
   closed: {
     opacity: 0,
@@ -55,39 +54,48 @@ const sectionVariants = {
   },
 };
 
-// MenuItem component with enhanced styling and accessibility
-const MenuItem = ({ icon: Icon, label, to, badge, isPro, onItemClick }) => {
-  const navigate = useNavigate();
+const backdropVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 },
+};
 
-  const handleClick = (e) => {
-    e.preventDefault();
-    if (onItemClick) onItemClick();
-    navigate(to);
-  };
+// Memoized MenuItem component with enhanced styling and accessibility
+const MenuItem = memo(
+  ({ icon: Icon, label, to, badge, isPro, onItemClick }) => {
+    const handleClick = useCallback(
+      (e) => {
+        e.preventDefault();
+        if (onItemClick) {
+          onItemClick(to);
+        }
+      },
+      [onItemClick, to],
+    );
 
-  return (
-    <motion.div variants={itemVariants}>
-      <button
-        onClick={handleClick}
-        className="group flex items-center justify-between w-full px-4 py-3
+    return (
+      <motion.div variants={itemVariants}>
+        <button
+          onClick={handleClick}
+          className="group flex items-center justify-between w-full px-4 py-3
           text-gray-700 dark:text-gray-200 
           hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100
           dark:hover:from-gray-800 dark:hover:to-gray-700/70
           transition-all duration-200 rounded-lg mx-1 relative overflow-hidden"
-        aria-label={`Go to ${label}`}
-      >
-        {/* Hover gradient background effect */}
-        <span
-          className="absolute inset-0 bg-gradient-to-r from-orange-50/0 to-orange-100/0 
+          aria-label={`Go to ${label}`}
+        >
+          {/* Hover gradient background effect */}
+          <span
+            className="absolute inset-0 bg-gradient-to-r from-orange-50/0 to-orange-100/0 
           dark:from-orange-900/0 dark:to-orange-800/0 
           group-hover:from-orange-50/50 group-hover:to-orange-100/30
           dark:group-hover:from-orange-900/10 dark:group-hover:to-orange-800/5
           opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"
-        />
+          />
 
-        <div className="flex items-center z-10">
-          <div
-            className="flex items-center justify-center w-10 h-10 rounded-xl mr-3
+          <div className="flex items-center z-10">
+            <div
+              className="flex items-center justify-center w-10 h-10 rounded-xl mr-3
             bg-gradient-to-br from-gray-50 to-gray-100
             dark:from-gray-800 dark:to-gray-750
             text-gray-600 dark:text-gray-400
@@ -96,109 +104,147 @@ const MenuItem = ({ icon: Icon, label, to, badge, isPro, onItemClick }) => {
             group-hover:text-orange-500 dark:group-hover:text-orange-400
             transform-gpu group-hover:scale-110 transition-all duration-200 
             shadow-sm group-hover:shadow-md"
-          >
-            <Icon className="w-5 h-5" />
+            >
+              <Icon className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-medium group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                {label}
+              </p>
+              {isPro && (
+                <span className="text-xs text-orange-600 dark:text-orange-400 font-medium flex items-center">
+                  Pro Feature
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 ml-1"></span>
+                </span>
+              )}
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-medium group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
-              {label}
-            </p>
-            {isPro && (
-              <span className="text-xs text-orange-600 dark:text-orange-400 font-medium flex items-center">
-                Pro Feature
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 ml-1"></span>
-              </span>
-            )}
-          </div>
-        </div>
 
-        <div className="flex items-center gap-2 z-10">
-          {badge && (
-            <span
-              className="px-2 py-0.5 text-xs font-medium rounded-full
+          <div className="flex items-center gap-2 z-10">
+            {badge && (
+              <span
+                className="px-2 py-0.5 text-xs font-medium rounded-full
               bg-orange-100 dark:bg-orange-500/20 
               text-orange-600 dark:text-orange-400 
               group-hover:bg-orange-200 dark:group-hover:bg-orange-500/30
               transition-colors duration-200"
-            >
-              {badge}
-            </span>
-          )}
-          <ChevronRight
-            className="w-4 h-4 text-gray-400 dark:text-gray-500 
+              >
+                {badge}
+              </span>
+            )}
+            <ChevronRight
+              className="w-4 h-4 text-gray-400 dark:text-gray-500 
             opacity-0 group-hover:opacity-100 transition-opacity 
             transform-gpu group-hover:translate-x-1 transition-transform duration-200"
-          />
+            />
+          </div>
+        </button>
+      </motion.div>
+    );
+  },
+);
+
+// Menu section header component
+const SectionHeader = memo(({ title }) => (
+  <motion.div
+    variants={itemVariants}
+    className="px-4 py-2 flex items-center gap-2"
+  >
+    <h3
+      className="text-xs font-semibold text-gray-500 
+      dark:text-gray-400 uppercase tracking-wider"
+    >
+      {title}
+    </h3>
+    <div className="h-px flex-grow bg-gray-100 dark:bg-gray-700"></div>
+  </motion.div>
+));
+
+// Logout button component
+const LogoutButton = memo(({ handleLogout, onClose }) => {
+  const handleClick = useCallback(() => {
+    handleLogout();
+    onClose();
+  }, [handleLogout, onClose]);
+
+  return (
+    <motion.div
+      variants={itemVariants}
+      className="border-t border-gray-200/80 dark:border-gray-700/80 p-2"
+    >
+      <button
+        onClick={handleClick}
+        className="flex items-center w-full px-4 py-3 rounded-xl
+          text-red-600 dark:text-red-400
+          hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100/70
+          dark:hover:from-red-900/20 dark:hover:to-red-800/10
+          transition-all duration-200 group relative overflow-hidden"
+        aria-label="Sign out of your account"
+      >
+        <span
+          className="absolute inset-0 bg-red-50/0 dark:bg-red-900/0 
+          group-hover:bg-red-50/80 dark:group-hover:bg-red-900/20 
+          transition-colors duration-200 rounded-lg"
+        />
+
+        <div
+          className="flex items-center justify-center w-10 h-10 rounded-xl mr-3
+          bg-gradient-to-br from-red-50 to-red-100
+          dark:from-red-900/30 dark:to-red-800/20
+          text-red-600 dark:text-red-400
+          group-hover:shadow-md shadow-sm
+          transform-gpu group-hover:scale-110 transition-all duration-200 z-10"
+        >
+          <LogOut className="w-5 h-5" />
         </div>
+        <span className="font-medium z-10">Sign Out</span>
       </button>
     </motion.div>
   );
-};
+});
 
-// Optimized UserMenu component
-export const UserMenu = ({ isOpen, onClose, handleLogout }) => {
-  const menuRef = useRef(null);
+// Menu data structure defined outside component
+const menuItems = [
+  {
+    section: "Account",
+    items: [
+      { icon: User, label: "My Profile", to: "/profile" },
+      {
+        icon: Bell,
+        label: "Notifications",
+        to: "/notifications",
+        badge: "3",
+      },
+      { icon: Heart, label: "Wishlist", to: "/wishlist", badge: "5" },
+    ],
+  },
+  {
+    section: "Events & Tickets",
+    items: [
+      { icon: Ticket, label: "My Tickets", to: "/tickets" },
+      { icon: Star, label: "Saved Events", to: "/saved" },
+      { icon: Gift, label: "Gift Cards", to: "/gift-cards", isPro: true },
+    ],
+  },
+  {
+    section: "Settings",
+    items: [
+      { icon: CreditCard, label: "Payment Methods", to: "/payments" },
+      { icon: Settings, label: "Account Settings", to: "/settings" },
+      { icon: HelpCircle, label: "Help Center", to: "/help" },
+    ],
+  },
+];
 
-  // Handle click outside to close menu
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target) &&
-        isOpen
-      ) {
-        onClose();
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, onClose]);
-
-  // Handle escape key to close menu
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === "Escape" && isOpen) {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [isOpen, onClose]);
-
-  // Menu data structure
-  const menuItems = [
-    {
-      section: "Account",
-      items: [
-        { icon: User, label: "My Profile", to: "/profile" },
-        {
-          icon: Bell,
-          label: "Notifications",
-          to: "/notifications",
-          badge: "3",
-        },
-        { icon: Heart, label: "Wishlist", to: "/wishlist", badge: "5" },
-      ],
+// Main UserMenu component with optimizations
+export const UserMenu = memo(({ isOpen, onClose, handleLogout }) => {
+  const handleItemClick = useCallback(
+    (path) => {
+      window.location.href = path;
+      onClose();
     },
-    {
-      section: "Events & Tickets",
-      items: [
-        { icon: Ticket, label: "My Tickets", to: "/tickets" },
-        { icon: Star, label: "Saved Events", to: "/saved" },
-        { icon: Gift, label: "Gift Cards", to: "/gift-cards", isPro: true },
-      ],
-    },
-    {
-      section: "Settings",
-      items: [
-        { icon: CreditCard, label: "Payment Methods", to: "/payments" },
-        { icon: Settings, label: "Account Settings", to: "/settings" },
-        { icon: HelpCircle, label: "Help Center", to: "/help" },
-      ],
-    },
-  ];
+    [onClose],
+  );
 
   return (
     <AnimatePresence>
@@ -206,16 +252,19 @@ export const UserMenu = ({ isOpen, onClose, handleLogout }) => {
         <>
           {/* Background overlay */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            key="backdrop"
+            variants={backdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            transition={{ duration: 0.2 }}
             className="fixed inset-0 bg-black/5 dark:bg-black/20 z-40"
             onClick={onClose}
           />
 
           {/* Menu panel */}
           <motion.div
-            ref={menuRef}
+            key="menu-panel"
             variants={menuVariants}
             initial="closed"
             animate="open"
@@ -242,7 +291,7 @@ export const UserMenu = ({ isOpen, onClose, handleLogout }) => {
               </p>
             </motion.div>
 
-            {/* Menu Sections */}
+            {/* Menu Sections with optimized rendering */}
             <div className="py-2 max-h-[60vh] overflow-y-auto">
               {menuItems.map((section, idx) => (
                 <motion.div
@@ -251,24 +300,13 @@ export const UserMenu = ({ isOpen, onClose, handleLogout }) => {
                   variants={sectionVariants}
                   custom={idx}
                 >
-                  <motion.div
-                    variants={itemVariants}
-                    className="px-4 py-2 flex items-center gap-2"
-                  >
-                    <h3
-                      className="text-xs font-semibold text-gray-500 
-                      dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      {section.section}
-                    </h3>
-                    <div className="h-px flex-grow bg-gray-100 dark:bg-gray-700"></div>
-                  </motion.div>
+                  <SectionHeader title={section.section} />
                   <div className="space-y-1 px-1">
                     {section.items.map((item) => (
                       <MenuItem
                         key={item.label}
                         {...item}
-                        onItemClick={onClose}
+                        onItemClick={handleItemClick}
                       />
                     ))}
                   </div>
@@ -277,46 +315,12 @@ export const UserMenu = ({ isOpen, onClose, handleLogout }) => {
             </div>
 
             {/* Sign Out Button */}
-            <motion.div
-              variants={itemVariants}
-              className="border-t border-gray-200/80 dark:border-gray-700/80 p-2"
-            >
-              <button
-                onClick={() => {
-                  handleLogout();
-                  onClose();
-                }}
-                className="flex items-center w-full px-4 py-3 rounded-xl
-                  text-red-600 dark:text-red-400
-                  hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100/70
-                  dark:hover:from-red-900/20 dark:hover:to-red-800/10
-                  transition-all duration-200 group relative overflow-hidden"
-                aria-label="Sign out of your account"
-              >
-                <span
-                  className="absolute inset-0 bg-red-50/0 dark:bg-red-900/0 
-                  group-hover:bg-red-50/80 dark:group-hover:bg-red-900/20 
-                  transition-colors duration-200 rounded-lg"
-                />
-
-                <div
-                  className="flex items-center justify-center w-10 h-10 rounded-xl mr-3
-                  bg-gradient-to-br from-red-50 to-red-100
-                  dark:from-red-900/30 dark:to-red-800/20
-                  text-red-600 dark:text-red-400
-                  group-hover:shadow-md shadow-sm
-                  transform-gpu group-hover:scale-110 transition-all duration-200 z-10"
-                >
-                  <LogOut className="w-5 h-5" />
-                </div>
-                <span className="font-medium z-10">Sign Out</span>
-              </button>
-            </motion.div>
+            <LogoutButton handleLogout={handleLogout} onClose={onClose} />
           </motion.div>
         </>
       )}
     </AnimatePresence>
   );
-};
+});
 
 export default UserMenu;

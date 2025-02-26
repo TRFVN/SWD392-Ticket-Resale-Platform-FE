@@ -201,7 +201,8 @@ const VenuesSection = () => {
       name: "Madison Square Garden",
       location: "New York, USA",
       capacity: "20,000",
-      image: "/api/placeholder/600/400",
+      image:
+        "https://cdn.getyourguide.com/img/tour/a7237530a51c73e9c3cbffb53e681009ed5bb0eeb508a05def92b1be03ff4e3f.jpg/145.jpg",
       eventsCount: 18,
       rating: 4.8,
       featured: true,
@@ -210,7 +211,8 @@ const VenuesSection = () => {
       name: "O2 Arena",
       location: "London, UK",
       capacity: "18,000",
-      image: "/api/placeholder/600/400",
+      image:
+        "https://cdn-ilclnep.nitrocdn.com/TxWSlpwrDODMVOywnTPWFGitmqiOLnnV/assets/images/optimized/kotobuki-international.com/wp-content/uploads/2022/10/02-ARENA-LONDON_proyecto_system_10.jpg",
       eventsCount: 12,
       rating: 4.7,
     },
@@ -218,7 +220,8 @@ const VenuesSection = () => {
       name: "Staples Center",
       location: "Los Angeles, USA",
       capacity: "19,000",
-      image: "/api/placeholder/600/400",
+      image:
+        "https://thanhnien.mediacdn.vn/Uploaded/minhtan/2021_11_18/fexueslwyaioa8p-7026.jpg",
       eventsCount: 15,
       rating: 4.6,
     },
@@ -226,7 +229,8 @@ const VenuesSection = () => {
       name: "Wembley Stadium",
       location: "London, UK",
       capacity: "90,000",
-      image: "/api/placeholder/600/400",
+      image:
+        "https://bookings.wembleytours.com/stadiumtours/images/WEMBLEY_INTERIOR.png",
       eventsCount: 8,
       rating: 4.9,
     },
@@ -234,7 +238,8 @@ const VenuesSection = () => {
       name: "Toyota Center",
       location: "Houston, USA",
       capacity: "18,300",
-      image: "/api/placeholder/600/400",
+      image:
+        "https://www.getzippin.com/hubfs/Checking%20In%20Blog%20Photos/Toyota%20Center%2C%20HTX.jpeg",
       eventsCount: 10,
       rating: 4.5,
     },

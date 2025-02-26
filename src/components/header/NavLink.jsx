@@ -1,6 +1,23 @@
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Calendar, Ticket, TrendingUp, Compass } from "lucide-react";
+
+// Predefined animation variants to avoid recreation on each render
+const itemMobileVariants = {
+  hover: {
+    x: 4,
+    transition: { duration: 0.2 },
+  },
+  tap: {
+    scale: 0.98,
+    transition: { duration: 0.1 },
+  },
+};
+
+const itemDesktopVariants = {
+  hover: { scale: 1.03 },
+  tap: { scale: 0.97 },
+};
 
 /**
  * NavLinks - Navigation links component for header
@@ -13,33 +30,24 @@ import { Calendar, Ticket, TrendingUp, Compass } from "lucide-react";
  */
 export const NavLinks = memo(
   ({ onNavigate, activePath = "", className = "", isMobile = false }) => {
-    // Default navigation items
-    const navItems = [
-      {
-        icon: Calendar,
-        text: "Browse Events",
-        path: "/events",
-        description: "Find upcoming events near you",
-      },
-      {
-        icon: Ticket,
-        text: "Browse Tickets",
-        path: "/tickets",
-        description: "Get tickets for your favorite events",
-      },
-    ];
-
-    // Animation variants for list items
-    const itemVariants = {
-      hover: {
-        x: 4,
-        transition: { duration: 0.2 },
-      },
-      tap: {
-        scale: 0.98,
-        transition: { duration: 0.1 },
-      },
-    };
+    // Navigation items - defined as a useMemo to avoid recreation on each render
+    const navItems = useMemo(
+      () => [
+        {
+          icon: Calendar,
+          text: "Browse Events",
+          path: "/events",
+          description: "Find upcoming events near you",
+        },
+        {
+          icon: Ticket,
+          text: "Browse Tickets",
+          path: "/tickets",
+          description: "Get tickets for your favorite events",
+        },
+      ],
+      [],
+    );
 
     // Render mobile version
     if (isMobile) {
@@ -51,7 +59,7 @@ export const NavLinks = memo(
             return (
               <motion.button
                 key={item.path}
-                variants={itemVariants}
+                variants={itemMobileVariants}
                 whileHover="hover"
                 whileTap="tap"
                 onClick={() => onNavigate(item.path)}
@@ -97,7 +105,7 @@ export const NavLinks = memo(
       );
     }
 
-    // Render desktop version
+    // Render desktop version - optimized with fewer rerenders
     return (
       <div className={`hidden md:flex items-center gap-4 ${className}`}>
         {navItems.map((item) => {
@@ -106,8 +114,9 @@ export const NavLinks = memo(
           return (
             <motion.button
               key={item.path}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              variants={itemDesktopVariants}
+              whileHover="hover"
+              whileTap="tap"
               onClick={() => onNavigate(item.path)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl 
               relative overflow-hidden group
@@ -119,7 +128,7 @@ export const NavLinks = memo(
               transition-all duration-300`}
               aria-current={isActive ? "page" : undefined}
             >
-              {/* Background highlight */}
+              {/* Background highlight with optimized rendering */}
               <span
                 className={`absolute inset-0 rounded-xl transition-opacity duration-300
               ${
@@ -141,7 +150,7 @@ export const NavLinks = memo(
                 {item.text}
               </span>
 
-              {/* Active indicator */}
+              {/* Active indicator with layout animation */}
               {isActive && (
                 <motion.span
                   layoutId="nav-active-indicator"
@@ -157,4 +166,5 @@ export const NavLinks = memo(
     );
   },
 );
+
 export default NavLinks;

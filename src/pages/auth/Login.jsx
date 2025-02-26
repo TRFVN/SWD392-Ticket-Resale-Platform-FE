@@ -1,33 +1,97 @@
 // pages/auth/Login.jsx
-import React, { useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useCallback, memo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { FaGoogle } from "react-icons/fa";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+
+// Assets and components
 import TicketLogo from "../../assets/TicketHub_Logo.png";
 import { LoginForm } from "../../components/auth/login/LoginForm";
 import { SocialButton } from "../../components/auth/login/SocialButton";
-import { useDispatch, useSelector } from "react-redux";
 import { setGoogleLoginSuccess } from "../../store/slice/authSlice";
-import { useAuth } from "../../hooks/useAuth"; // Thay đổi cách import auth
+import { useAuth } from "../../hooks/useAuth";
 
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 500, damping: 30 },
+  },
+};
+
+const logoVariants = {
+  hidden: { scale: 0 },
+  visible: {
+    scale: 1,
+    transition: { type: "spring", stiffness: 260, damping: 20 },
+  },
+};
+
+// Validation schema for login form
 const validationSchema = Yup.object().shape({
   email: Yup.string()
     .email("Invalid email address")
     .required("Email is required"),
   password: Yup.string()
     .required("Password is required")
-    .min(6, "Password must be at least 6 characters"), // Thêm validate password
+    .min(6, "Password must be at least 6 characters"),
   rememberMe: Yup.boolean(),
 });
 
+// Terms section as a separate component for better organization
+const TermsText = memo(() => (
+  <motion.p
+    variants={itemVariants}
+    className="mt-6 text-center text-sm text-gray-600/90 dark:text-gray-400/90 backdrop-blur-sm"
+  >
+    By signing in, you agree to our{" "}
+    <Link
+      to="/terms"
+      className="font-medium text-orange-500 hover:text-orange-400 focus:outline-none focus:underline"
+    >
+      Terms of Service
+    </Link>{" "}
+    and{" "}
+    <Link
+      to="/privacy"
+      className="font-medium text-orange-500 hover:text-orange-400 focus:outline-none focus:underline"
+    >
+      Privacy Policy
+    </Link>
+  </motion.p>
+));
+
+// Main Login Component
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const navigateByRole = () => {
+  const { login, loading, googleLogin } = useAuth();
+
+  // Selectors
+  const googleLoginSuccess = useSelector(
+    (state) => state.auth.googleLoginSuccess,
+  );
+  const isAuthenticated = useSelector((state) => !!state.auth.user);
+
+  // Navigate based on user role
+  const navigateByRole = useCallback(() => {
     const userRole = localStorage.getItem("userRole");
-    console.log("Role from localStorage:", userRole);
 
     switch (userRole?.toUpperCase()) {
       case "ADMIN":
@@ -37,35 +101,29 @@ const Login = () => {
         navigate("/staff/tickets");
         break;
       case "MEMBER":
-        navigate("/");
-        break;
       default:
         navigate("/");
         break;
     }
-  };
+  }, [navigate]);
 
-  const { login, loading, googleLogin } = useAuth();
-  const googleLoginSuccess = useSelector(
-    (state) => state.auth.googleLoginSuccess,
-  );
-  const isAuthenticated = useSelector((state) => !!state.auth.user);
-
-  // Redirect nếu đã login
+  // Redirect if already logged in
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/");
     }
   }, [isAuthenticated, navigate]);
 
+  // Handle Google login success
   useEffect(() => {
     if (googleLoginSuccess) {
       dispatch(setGoogleLoginSuccess(false));
       navigateByRole();
     }
-  }, [googleLoginSuccess, dispatch]);
+  }, [googleLoginSuccess, dispatch, navigateByRole]);
 
-  const handleGoogleLogin = async () => {
+  // Google login handler
+  const handleGoogleLogin = useCallback(async () => {
     try {
       await googleLogin();
     } catch (error) {
@@ -73,30 +131,36 @@ const Login = () => {
         toast.error(error.message || "Failed to login with Google");
       }
     }
-  };
+  }, [googleLogin]);
 
-  const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
-    try {
-      const response = await login(values.email, values.password);
-      if (response?.isSuccess) {
-        // Handle remember me
-        if (values.rememberMe) {
-          localStorage.setItem("rememberMe", "true");
-          localStorage.setItem("email", values.email); // Lưu email nếu remember me
-        } else {
-          localStorage.removeItem("rememberMe");
-          localStorage.removeItem("email");
+  // Form submission handler
+  const handleSubmit = useCallback(
+    async (values, { setSubmitting, setFieldError }) => {
+      try {
+        const response = await login(values.email, values.password);
+
+        if (response?.isSuccess) {
+          // Handle remember me
+          if (values.rememberMe) {
+            localStorage.setItem("rememberMe", "true");
+            localStorage.setItem("email", values.email);
+          } else {
+            localStorage.removeItem("rememberMe");
+            localStorage.removeItem("email");
+          }
+
+          navigateByRole();
+          toast.success("Welcome back!");
         }
-        navigateByRole();
-        toast.success("Welcome back!");
+      } catch (error) {
+        setFieldError("submit", error.message);
+        toast.error(error.message || "Login failed. Please try again.");
+      } finally {
+        setSubmitting(false);
       }
-    } catch (error) {
-      setFieldError("submit", error.message);
-      toast.error(error.message);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    },
+    [login, navigateByRole],
+  );
 
   return (
     <div
@@ -106,26 +170,26 @@ const Login = () => {
       py-12 px-4 sm:px-6 lg:px-8"
     >
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
         className="w-full max-w-md"
       >
         {/* Logo and Header Section */}
         <div className="text-center mb-8">
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            variants={logoVariants}
             className="flex justify-center mb-6"
           >
-            <img src={TicketLogo} alt="TicketHub" className="h-16 w-auto" />
+            <img
+              src={TicketLogo}
+              alt="TicketHub"
+              className="h-16 w-auto drop-shadow-lg"
+              loading="eager"
+            />
           </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
+
+          <motion.div variants={itemVariants}>
             <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
               Welcome Back!
             </h2>
@@ -137,9 +201,7 @@ const Login = () => {
 
         {/* Main Card with Glassmorphism */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          variants={itemVariants}
           className="bg-white/30 dark:bg-gray-800/30
             backdrop-blur-xl backdrop-saturate-150
             border border-white/30 dark:border-gray-700/30
@@ -159,7 +221,10 @@ const Login = () => {
                 className="w-full py-2.5 bg-white/50 dark:bg-gray-800/50 
                   backdrop-blur-md transition-all duration-300
                   hover:bg-white/70 dark:hover:bg-gray-700/70
-                  hover:scale-[1.02] transform"
+                  hover:scale-[1.02] transform
+                  disabled:opacity-70 disabled:cursor-not-allowed
+                  focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+                aria-label="Sign in with Google"
               />
             </div>
 
@@ -193,49 +258,54 @@ const Login = () => {
             </div>
 
             {/* Footer Links */}
-            <div className="mt-6 flex items-center justify-between text-sm">
+            <motion.div
+              variants={itemVariants}
+              className="mt-6 flex items-center justify-between text-sm"
+            >
               <Link
                 to="/forgot-password"
                 className="font-medium text-orange-500 hover:text-orange-400 
-                  transition-colors backdrop-blur-sm"
+                  transition-colors backdrop-blur-sm
+                  focus:outline-none focus:underline"
               >
                 Forgot password?
               </Link>
               <Link
                 to="/signup"
                 className="font-medium text-orange-500 hover:text-orange-400 
-                  transition-colors backdrop-blur-sm"
+                  transition-colors backdrop-blur-sm
+                  focus:outline-none focus:underline"
               >
                 Create account
               </Link>
-            </div>
+            </motion.div>
           </div>
         </motion.div>
 
         {/* Terms Text */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-6 text-center text-sm text-gray-600/90 dark:text-gray-400/90 
-            backdrop-blur-sm"
-        >
-          By signing in, you agree to our{" "}
-          <Link
-            to="/terms"
-            className="font-medium text-orange-500 hover:text-orange-400"
-          >
-            Terms of Service
-          </Link>{" "}
-          and{" "}
-          <Link
-            to="/privacy"
-            className="font-medium text-orange-500 hover:text-orange-400"
-          >
-            Privacy Policy
-          </Link>
-        </motion.p>
+        <TermsText />
       </motion.div>
+
+      {/* Loading Overlay */}
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+          >
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-5 h-5 border-t-2 border-b-2 border-orange-500 rounded-full animate-spin"></div>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Signing in...
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
