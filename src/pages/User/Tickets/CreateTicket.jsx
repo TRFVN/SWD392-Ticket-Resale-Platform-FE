@@ -176,270 +176,276 @@ function CreateTicket() {
   });
 
   return (
-    <div className="flex flex-col justify-start items-start gap-8 py-8 px-4 md:px-72 w-full min-h-screen overflow-hidden mb-20">
-      <div className="flex flex-row justify-start items-center gap-3 text-white">
-        <div className="bg-orange-500/10 p-3 rounded-lg">
-          <Plus className="text-orange-500" />
+    <div className="w-full min-h-screen overflow-hidden mb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-row justify-start items-center gap-3 text-white mb-8">
+          <div className="bg-orange-500/10 p-3 rounded-lg">
+            <Plus className="text-orange-500" />
+          </div>
+          <span className="text-2xl font-bold text-white">
+            Create New Ticket
+          </span>
         </div>
-        <span className="text-2xl font-bold text-white">Create New Ticket</span>
-      </div>
-      <form
-        className="flex flex-col md:flex-row justify-between items-start rounded-md w-full bg-gray-800/50 py-10 px-4 md:px-16 border-lg"
-        onSubmit={formik.handleSubmit}
-      >
-        <div className="mt-4 w-full md:w-[20%]">
-          <ol className="relative text-gray-500 border-s border-orange-500">
-            {steps.map((step, index) => (
-              <li
-                key={index}
-                className={`mb-16 ms-6 ${
-                  index === steps.length - 1 ? "mb-0" : ""
-                } cursor-pointer`}
-                onClick={() => handleScrollToSection(step.ref)}
+        <form
+          className="flex flex-col md:flex-row justify-between items-start rounded-md w-full bg-gray-800/50 py-10 px-4 md:px-16 border-lg"
+          onSubmit={formik.handleSubmit}
+        >
+          <div className="mt-4 w-full md:w-[20%]">
+            <ol className="relative text-gray-500 border-s border-orange-500">
+              {steps.map((step, index) => (
+                <li
+                  key={index}
+                  className={`mb-16 ms-6 ${
+                    index === steps.length - 1 ? "mb-0" : ""
+                  } cursor-pointer`}
+                  onClick={() => handleScrollToSection(step.ref)}
+                >
+                  <span className="text-white font-bold absolute flex items-center justify-center -start-2.5 h-5 w-5 bg-orange-500 rounded-full ring-4 ring-orange-500">
+                    {index + 1}
+                  </span>
+                  <h3 className="font-medium leading-tight">{step.name}</h3>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div className="flex flex-col justify-start items-start gap-8 w-full md:w-[80%]">
+            <div className="flex flex-col justify-start items-start gap-6 w-full">
+              <label
+                className="text-xl font-medium text-orange-500"
+                htmlFor="imageUrl"
+                ref={ticketImage}
               >
-                <span className="text-white font-bold absolute flex items-center justify-center -start-2.5 h-5 w-5 bg-orange-500 rounded-full ring-4 ring-orange-500">
-                  {index + 1}
-                </span>
-                <h3 className="font-medium leading-tight">{step.name}</h3>
-              </li>
-            ))}
-          </ol>
-        </div>
-        <div className="flex flex-col justify-start items-start gap-8 w-full md:w-[80%]">
-          <div className="flex flex-col justify-start items-start gap-6 w-full">
-            <label
-              className="text-xl font-medium text-orange-500"
-              htmlFor="imageUrl"
-              ref={ticketImage}
-            >
-              1. Ticket Image
-            </label>
-            {formik.touched.imageUrl && formik.errors.imageUrl && (
-              <div className="text-red-500 text-sm">
-                {formik.errors.imageUrl}
-              </div>
-            )}
-            <div className="flex flex-col justify-center items-center gap-6 w-full border rounded-lg p-4 md:p-10">
-              {imageUrl ? (
-                <img
-                  src={imageUrl}
-                  alt="Uploaded"
-                  className="lg:min-w-full h-[500px] w-full max-w-md rounded-lg object-cover"
-                />
-              ) : (
-                <img
-                  src="https://ehs.stanford.edu/wp-content/uploads/missing-image.png"
-                  alt="upload_image"
-                  className="lg:min-w-full h-[500px] w-full max-w-md rounded-lg object-cover"
-                />
-              )}
-              <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-orange-500 text-orange-500 rounded-md hover:bg-orange-600 hover:text-white transition-colors">
-                {uploadProgress > 0 ? (
-                  <span className="text-lg">Loading {uploadProgress} %</span>
-                ) : (
-                  <>
-                    <Upload className="mr-2" />
-                    <span className="text-lg">Upload</span>
-                  </>
-                )}
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
+                1. Ticket Image
               </label>
-            </div>
-          </div>
-
-          <div className="flex flex-col justify-start items-start gap-5 w-full">
-            <label
-              className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
-              htmlFor="ticketName"
-              ref={ticketName}
-            >
-              2. Ticket Name
-            </label>
-            <input
-              type="text"
-              id="ticketName"
-              name="ticketName"
-              className="border rounded-md px-3 py-2 w-full bg-gray-800/50"
-              value={formik.values.ticketName}
-              onChange={formik.handleChange}
-            />
-            {formik.touched.ticketName && formik.errors.ticketName && (
-              <div className="text-red-500 text-sm">
-                {formik.errors.ticketName}
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-col justify-start items-start gap-5 w-full">
-            <label
-              className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
-              htmlFor="serialNumber"
-              ref={serialNumber}
-            >
-              3. Serial Number
-            </label>
-            <input
-              type="text"
-              id="serialNumber"
-              name="serialNumber"
-              className="border rounded-md px-3 py-2 w-full bg-gray-800/50"
-              value={formik.values.serialNumber}
-              onChange={formik.handleChange}
-            />
-            {formik.touched.serialNumber && formik.errors.serialNumber && (
-              <div className="text-red-500 text-sm">
-                {formik.errors.serialNumber}
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-col justify-start items-start gap-5 w-full">
-            <label
-              className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
-              htmlFor="ticketDescription"
-              ref={ticketDescription}
-            >
-              4. Ticket Description
-            </label>
-            <textarea
-              id="ticketDescription"
-              name="ticketDescription"
-              className="border rounded-md px-3 py-2 w-full bg-gray-800/50"
-              rows={7}
-              value={formik.values.ticketDescription}
-              onChange={formik.handleChange}
-            />
-            {formik.touched.ticketDescription &&
-              formik.errors.ticketDescription && (
+              {formik.touched.imageUrl && formik.errors.imageUrl && (
                 <div className="text-red-500 text-sm">
-                  {formik.errors.ticketDescription}
+                  {formik.errors.imageUrl}
                 </div>
               )}
-          </div>
-
-          <div className="flex flex-col md:flex-row justify-start items-start gap-5 md:gap-20 w-full">
-            <div className="flex flex-col justify-start items-start gap-5 w-full md:w-1/2">
-              <label
-                className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
-                ref={category}
-              >
-                5. Category
-              </label>
-              <div
-                className="cursor-pointer w-full relative"
-                onClick={() => setOpenCategoryList((prev) => !prev)}
-                ref={categoryRef}
-              >
-                <div className="border rounded-md py-2 px-4 w-full text-white">
-                  {chosenCategory.categoryName ||
-                    "-- Please select a category --"}
-                </div>
-                {openCategoryList && (
-                  <div className="z-10 absolute mt-5 bg-white rounded-lg shadow w-full">
-                    <ul className="h-auto py-2 overflow-y-auto text-gray-700">
-                      {categoryList.map((category, index) => (
-                        <li key={index}>
-                          <div
-                            className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => handleCategorySelect(category)}
-                          >
-                            {category.categoryName}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+              <div className="flex flex-col justify-center items-center gap-6 w-full border rounded-lg p-4 md:p-10">
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt="Uploaded"
+                    className="lg:min-w-full h-[500px] w-full max-w-md rounded-lg object-cover"
+                  />
+                ) : (
+                  <img
+                    src="https://ehs.stanford.edu/wp-content/uploads/missing-image.png"
+                    alt="upload_image"
+                    className="lg:min-w-full h-[500px] w-full max-w-md rounded-lg object-cover"
+                  />
                 )}
+                <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-orange-500 text-orange-500 rounded-md hover:bg-orange-600 hover:text-white transition-colors">
+                  {uploadProgress > 0 ? (
+                    <span className="text-lg">Loading {uploadProgress} %</span>
+                  ) : (
+                    <>
+                      <Upload className="mr-2" />
+                      <span className="text-lg">Upload</span>
+                    </>
+                  )}
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
               </div>
             </div>
 
-            <div className="flex flex-col justify-start items-start gap-5 w-full md:w-1/2">
+            <div className="flex flex-col justify-start items-start gap-5 w-full">
               <label
                 className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
-                ref={event}
+                htmlFor="ticketName"
+                ref={ticketName}
               >
-                6. Event
+                2. Ticket Name
               </label>
-              <div
-                className="cursor-pointer w-full relative"
-                onClick={() => setOpenEventList((prev) => !prev)}
-                ref={eventRef}
-              >
-                <div className="border rounded-md py-2 px-4 w-full text-white">
-                  {chosenEvent.eventName || "-- Please select an event --"}
-                </div>
-                {openEventList && (
-                  <div className="z-10 absolute mt-5 bg-white rounded-lg shadow w-full">
-                    <ul className="h-auto py-2 overflow-y-auto text-gray-700">
-                      {eventList.map((event, index) => (
-                        <li key={index}>
-                          <div
-                            className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => handleEventSelect(event)}
-                          >
-                            {event.eventName}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col justify-start items-start gap-5 w-full md:w-1/2 pr-10 relative">
-            <label
-              className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
-              htmlFor="ticketPrice"
-              ref={ticketPrice}
-            >
-              7. Ticket Price
-            </label>
-            <div className="relative w-full">
               <input
                 type="text"
-                id="ticketPrice"
-                name="ticketPrice"
-                className="border rounded-md px-3 py-2 w-full bg-gray-800/50 pr-8"
-                value={
-                  formik.values.ticketPrice
-                    ? Number(formik.values.ticketPrice).toLocaleString("vi-VN")
-                    : ""
-                }
-                onChange={(e) => {
-                  const rawValue = e.target.value.replace(/\D/g, "");
-                  if (/^\d*$/.test(rawValue)) {
-                    formik.setFieldValue("ticketPrice", rawValue);
-                  }
-                }}
+                id="ticketName"
+                name="ticketName"
+                className="border rounded-md px-3 py-2 w-full bg-gray-800/50"
+                value={formik.values.ticketName}
+                onChange={formik.handleChange}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                ₫
-              </span>
+              {formik.touched.ticketName && formik.errors.ticketName && (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.ticketName}
+                </div>
+              )}
             </div>
-            {formik.touched.ticketPrice && formik.errors.ticketPrice && (
-              <div className="text-red-500 text-sm">
-                {formik.errors.ticketPrice}
+
+            <div className="flex flex-col justify-start items-start gap-5 w-full">
+              <label
+                className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
+                htmlFor="serialNumber"
+                ref={serialNumber}
+              >
+                3. Serial Number
+              </label>
+              <input
+                type="text"
+                id="serialNumber"
+                name="serialNumber"
+                className="border rounded-md px-3 py-2 w-full bg-gray-800/50"
+                value={formik.values.serialNumber}
+                onChange={formik.handleChange}
+              />
+              {formik.touched.serialNumber && formik.errors.serialNumber && (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.serialNumber}
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col justify-start items-start gap-5 w-full">
+              <label
+                className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
+                htmlFor="ticketDescription"
+                ref={ticketDescription}
+              >
+                4. Ticket Description
+              </label>
+              <textarea
+                id="ticketDescription"
+                name="ticketDescription"
+                className="border rounded-md px-3 py-2 w-full bg-gray-800/50"
+                rows={7}
+                value={formik.values.ticketDescription}
+                onChange={formik.handleChange}
+              />
+              {formik.touched.ticketDescription &&
+                formik.errors.ticketDescription && (
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.ticketDescription}
+                  </div>
+                )}
+            </div>
+
+            <div className="flex flex-col md:flex-row justify-start items-start gap-5 md:gap-20 w-full">
+              <div className="flex flex-col justify-start items-start gap-5 w-full md:w-1/2">
+                <label
+                  className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
+                  ref={category}
+                >
+                  5. Category
+                </label>
+                <div
+                  className="cursor-pointer w-full relative"
+                  onClick={() => setOpenCategoryList((prev) => !prev)}
+                  ref={categoryRef}
+                >
+                  <div className="border rounded-md py-2 px-4 w-full text-white">
+                    {chosenCategory.categoryName ||
+                      "-- Please select a category --"}
+                  </div>
+                  {openCategoryList && (
+                    <div className="z-10 absolute mt-5 bg-white rounded-lg shadow w-full">
+                      <ul className="h-auto py-2 overflow-y-auto text-gray-700">
+                        {categoryList.map((category, index) => (
+                          <li key={index}>
+                            <div
+                              className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                              onClick={() => handleCategorySelect(category)}
+                            >
+                              {category.categoryName}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
+
+              <div className="flex flex-col justify-start items-start gap-5 w-full md:w-1/2">
+                <label
+                  className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
+                  ref={event}
+                >
+                  6. Event
+                </label>
+                <div
+                  className="cursor-pointer w-full relative"
+                  onClick={() => setOpenEventList((prev) => !prev)}
+                  ref={eventRef}
+                >
+                  <div className="border rounded-md py-2 px-4 w-full text-white">
+                    {chosenEvent.eventName || "-- Please select an event --"}
+                  </div>
+                  {openEventList && (
+                    <div className="z-10 absolute mt-5 bg-white rounded-lg shadow w-full">
+                      <ul className="h-auto py-2 overflow-y-auto text-gray-700">
+                        {eventList.map((event, index) => (
+                          <li key={index}>
+                            <div
+                              className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                              onClick={() => handleEventSelect(event)}
+                            >
+                              {event.eventName}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col justify-start items-start gap-5 w-full md:w-1/2 pr-10 relative">
+              <label
+                className="flex flex-row text-lg font-medium text-orange-500 cursor-pointer"
+                htmlFor="ticketPrice"
+                ref={ticketPrice}
+              >
+                7. Ticket Price
+              </label>
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  id="ticketPrice"
+                  name="ticketPrice"
+                  className="border rounded-md px-3 py-2 w-full bg-gray-800/50 pr-8"
+                  value={
+                    formik.values.ticketPrice
+                      ? Number(formik.values.ticketPrice).toLocaleString(
+                          "vi-VN",
+                        )
+                      : ""
+                  }
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, "");
+                    if (/^\d*$/.test(rawValue)) {
+                      formik.setFieldValue("ticketPrice", rawValue);
+                    }
+                  }}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  ₫
+                </span>
+              </div>
+              {formik.touched.ticketPrice && formik.errors.ticketPrice && (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.ticketPrice}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-row justify-center items-center w-full mt-10">
+              <button
+                type="submit"
+                className="bg-orange-500 text-white font-bold py-2 px-6 rounded-md"
+              >
+                Submit
+              </button>
+            </div>
           </div>
-          <div className="flex flex-row justify-center items-center w-full mt-10">
-            <button
-              type="submit"
-              className="bg-orange-500 text-white font-bold py-2 px-6 rounded-md"
-            >
-              Submit
-            </button>
-          </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
