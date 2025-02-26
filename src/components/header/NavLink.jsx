@@ -66,8 +66,8 @@ export const NavLinks = memo(
                 className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl
                 ${
                   isActive
-                    ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
-                    : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/70"
+                    ? "bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-300"
+                    : "bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
                 }
                 transition-all duration-200`}
                 aria-current={isActive ? "page" : undefined}
@@ -76,8 +76,8 @@ export const NavLinks = memo(
                   className={`flex items-center justify-center w-10 h-10 rounded-lg
                 ${
                   isActive
-                    ? "bg-white dark:bg-gray-700 text-orange-500"
-                    : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                    ? "bg-white dark:bg-gray-600 text-orange-500"
+                    : "bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300"
                 }
                 shadow-sm transition-colors`}
                 >
@@ -86,7 +86,7 @@ export const NavLinks = memo(
 
                 <div className="flex flex-col flex-1">
                   <span className="font-medium">{item.text}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                  <span className="text-xs text-gray-500 dark:text-gray-300">
                     {item.description}
                   </span>
                 </div>
@@ -105,7 +105,7 @@ export const NavLinks = memo(
       );
     }
 
-    // Render desktop version - optimized with fewer rerenders
+    // Render desktop version - optimized with fewer rerenders and better dark mode
     return (
       <div className={`hidden md:flex items-center gap-4 ${className}`}>
         {navItems.map((item) => {
@@ -122,8 +122,8 @@ export const NavLinks = memo(
               relative overflow-hidden group
               ${
                 isActive
-                  ? "text-orange-600 dark:text-orange-400"
-                  : "text-gray-700 dark:text-gray-300"
+                  ? "text-orange-600 dark:text-orange-300"
+                  : "text-gray-700 dark:text-gray-200"
               }
               transition-all duration-300`}
               aria-current={isActive ? "page" : undefined}
@@ -133,18 +133,18 @@ export const NavLinks = memo(
                 className={`absolute inset-0 rounded-xl transition-opacity duration-300
               ${
                 isActive
-                  ? "bg-orange-50 dark:bg-orange-900/20 opacity-100"
-                  : "bg-gradient-to-r from-orange-50 to-orange-100 dark:from-gray-800/50 dark:to-gray-700/50 opacity-0 group-hover:opacity-100"
+                  ? "bg-orange-50 dark:bg-orange-900/30 opacity-100"
+                  : "bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 opacity-0 group-hover:opacity-100"
               }`}
               />
 
               {/* Icon */}
-              <item.icon className="w-5 h-5 text-orange-500 relative z-10" />
+              <item.icon className="w-5 h-5 text-orange-500 dark:text-orange-400 relative z-10" />
 
               {/* Text */}
               <span
                 className="font-medium relative z-10 
-              group-hover:text-orange-600 dark:group-hover:text-orange-400 
+              group-hover:text-orange-600 dark:group-hover:text-orange-300 
               transition-colors"
               >
                 {item.text}
