@@ -22,6 +22,8 @@ import CreateTicket from "../pages/User/Tickets/CreateTicket";
 import MyTicketsPage from "../pages/User/Tickets/MyTickets";
 import EventsPage from "../pages/tickets/Events/Event";
 import EventDetails from "../pages/tickets/Events/EventDetails";
+import Checkout from "../pages/checkout/Checkout";
+import OrderConfirmation from "../pages/order-confirmation/orderconfirmation";
 const ROLES = {
   ADMIN: "ADMIN",
   STAFF: "STAFF",
@@ -54,6 +56,11 @@ const privateRoutes = [
     ],
   },
   { path: "mytickets", element: <MyTicketsPage /> },
+  { path: "checkout", element: <Checkout /> },
+  {
+    path: "order-confirmation/:orderId",
+    element: <OrderConfirmation />,
+  },
 ];
 
 export const router = createBrowserRouter([

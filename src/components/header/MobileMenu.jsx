@@ -1,3 +1,4 @@
+import React, { memo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -18,8 +19,10 @@ import {
   LogIn,
   UserPlus,
 } from "lucide-react";
+import { SearchBar } from "./SearchBar";
 
-const MenuItem = ({ icon: Icon, label, badge, onClick }) => (
+// Optimized MenuItem component with memoization
+const MenuItem = memo(({ icon: Icon, label, badge, onClick }) => (
   <motion.button
     whileHover={{ scale: 1.02 }}
     whileTap={{ scale: 0.98 }}
@@ -48,8 +51,9 @@ const MenuItem = ({ icon: Icon, label, badge, onClick }) => (
       </span>
     )}
   </motion.button>
-);
+));
 
+// Predefined menu sections to avoid recreation on each render
 const GuestMenuSections = [
   {
     title: "General",
@@ -100,188 +104,256 @@ const AuthenticatedMenuSections = [
   },
 ];
 
-export const MobileMenu = ({
-  isOpen,
-  onClose,
-  isDarkMode,
-  dispatch,
-  toggleTheme,
-  user,
-  isAuthenticated,
-  onNavigate,
-  handleLogout,
-}) => {
-  const menuSections = isAuthenticated
-    ? AuthenticatedMenuSections
-    : GuestMenuSections;
+// Animation variants defined outside component to avoid recreation
+const backdropVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.2 },
+  },
+  exit: {
+    opacity: 0,
+    transition: { duration: 0.2 },
+  },
+};
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-            onClick={onClose}
-          />
+const menuPanelVariants = {
+  hidden: { x: "100%" },
+  visible: {
+    x: 0,
+    transition: {
+      type: "spring",
+      damping: 30,
+      stiffness: 300,
+    },
+  },
+  exit: {
+    x: "100%",
+    transition: {
+      type: "spring",
+      damping: 30,
+      stiffness: 300,
+    },
+  },
+};
 
-          {/* Menu Panel */}
-          <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed top-0 right-0 bottom-0 w-[85%] max-w-md
+const buttonVariants = {
+  hover: { scale: 1.05 },
+  tap: { scale: 0.95 },
+};
+
+// Main MobileMenu component
+export const MobileMenu = memo(
+  ({
+    isOpen,
+    onClose,
+    isDarkMode,
+    dispatch,
+    toggleTheme,
+    user,
+    isAuthenticated,
+    onNavigate,
+    handleLogout,
+    searchValue,
+    onSearchChange,
+  }) => {
+    const menuSections = isAuthenticated
+      ? AuthenticatedMenuSections
+      : GuestMenuSections;
+
+    // Optimized handlers
+    const handleThemeToggle = useCallback(() => {
+      dispatch(toggleTheme());
+    }, [dispatch, toggleTheme]);
+
+    const handleItemClick = useCallback(
+      (path) => {
+        onNavigate(path);
+        onClose();
+      },
+      [onNavigate, onClose],
+    );
+
+    const handleLogoutClick = useCallback(() => {
+      handleLogout();
+      onClose();
+    }, [handleLogout, onClose]);
+
+    return (
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop with optimized animation */}
+            <motion.div
+              key="backdrop"
+              variants={backdropVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+              onClick={onClose}
+            />
+
+            {/* Menu Panel with optimized animation */}
+            <motion.div
+              key="menu-panel"
+              variants={menuPanelVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="fixed top-0 right-0 bottom-0 w-[85%] max-w-md
               bg-white dark:bg-gray-900 z-50 shadow-2xl"
-          >
-            <div className="flex flex-col h-full">
-              {/* Header */}
-              <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-                <div className="flex items-center justify-between">
-                  <motion.button
-                    onClick={onClose}
-                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg
+            >
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                  <div className="flex items-center justify-between">
+                    <motion.button
+                      onClick={onClose}
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg
                       transition-colors duration-200"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                  </motion.button>
-                  <motion.button
-                    onClick={() => dispatch(toggleTheme())}
-                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg
+                      variants={buttonVariants}
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
+                      <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                    </motion.button>
+                    <motion.button
+                      onClick={handleThemeToggle}
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg
                       transition-colors duration-200"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {isDarkMode ? (
-                      <Sun className="w-5 h-5 text-orange-500" />
-                    ) : (
-                      <Moon className="w-5 h-5 text-gray-500" />
-                    )}
-                  </motion.button>
-                </div>
-              </div>
-
-              {/* User Profile Section */}
-              {isAuthenticated ? (
-                <div className="px-4 py-6 border-b border-gray-200 dark:border-gray-800">
-                  <div className="flex items-center">
-                    <div className="relative">
-                      <img
-                        src={user?.avatar || "/api/placeholder/40/40"}
-                        alt="Profile"
-                        className="w-12 h-12 rounded-full object-cover border-2 
-                          border-orange-500 dark:border-orange-400"
-                      />
-                      <div
-                        className="absolute bottom-0 right-0 w-3 h-3 
-                        bg-green-500 rounded-full border-2 border-white dark:border-gray-900"
-                      />
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        {user?.fullName || "User"}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {user?.email || "user@example.com"}
-                      </p>
-                    </div>
+                      variants={buttonVariants}
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
+                      {isDarkMode ? (
+                        <Sun className="w-5 h-5 text-orange-500" />
+                      ) : (
+                        <Moon className="w-5 h-5 text-gray-500" />
+                      )}
+                    </motion.button>
                   </div>
                 </div>
-              ) : (
-                <div className="px-4 py-6 border-b border-gray-200 dark:border-gray-800 space-y-3">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      onNavigate("/login");
-                      onClose();
-                    }}
-                    className="w-full flex items-center justify-center px-4 py-3 
+
+                {/* Search bar for mobile */}
+                <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                  <SearchBar
+                    value={searchValue}
+                    onChange={onSearchChange}
+                    onClear={() => onSearchChange({ target: { value: "" } })}
+                    placeholder="Search events, venues..."
+                    showFilter={false}
+                  />
+                </div>
+
+                {/* User Profile Section */}
+                {isAuthenticated ? (
+                  <div className="px-4 py-6 border-b border-gray-200 dark:border-gray-800">
+                    <div className="flex items-center">
+                      <div className="relative">
+                        <img
+                          src={user?.avatar || "/api/placeholder/40/40"}
+                          alt="Profile"
+                          className="w-12 h-12 rounded-full object-cover border-2 
+                          border-orange-500 dark:border-orange-400"
+                        />
+                        <div
+                          className="absolute bottom-0 right-0 w-3 h-3 
+                        bg-green-500 rounded-full border-2 border-white dark:border-gray-900"
+                        />
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                          {user?.fullName || "User"}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {user?.email || "user@example.com"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="px-4 py-6 border-b border-gray-200 dark:border-gray-800 space-y-3">
+                    <motion.button
+                      variants={buttonVariants}
+                      whileHover="hover"
+                      whileTap="tap"
+                      onClick={() => handleItemClick("/login")}
+                      className="w-full flex items-center justify-center px-4 py-3 
                       bg-orange-500 text-white font-medium rounded-lg
                       hover:bg-orange-600 transition-colors duration-200"
-                  >
-                    <LogIn className="w-5 h-5 mr-2" />
-                    Login
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      onNavigate("/register");
-                      onClose();
-                    }}
-                    className="w-full flex items-center justify-center px-4 py-3 
+                    >
+                      <LogIn className="w-5 h-5 mr-2" />
+                      Login
+                    </motion.button>
+                    <motion.button
+                      variants={buttonVariants}
+                      whileHover="hover"
+                      whileTap="tap"
+                      onClick={() => handleItemClick("/register")}
+                      className="w-full flex items-center justify-center px-4 py-3 
                       border border-orange-500 text-orange-500 font-medium rounded-lg
                       hover:bg-orange-50 dark:hover:bg-orange-500/10 
                       transition-colors duration-200"
-                  >
-                    <UserPlus className="w-5 h-5 mr-2" />
-                    Register
-                  </motion.button>
-                </div>
-              )}
+                    >
+                      <UserPlus className="w-5 h-5 mr-2" />
+                      Register
+                    </motion.button>
+                  </div>
+                )}
 
-              {/* Menu Sections */}
-              <div className="flex-1 overflow-y-auto">
-                <div className="px-4 py-6 space-y-8">
-                  {menuSections.map((section) => (
-                    <div key={section.title}>
-                      <h3
-                        className="text-xs font-semibold text-gray-500 
+                {/* Menu Sections with optimized rendering */}
+                <div className="flex-1 overflow-y-auto">
+                  <div className="px-4 py-6 space-y-8">
+                    {menuSections.map((section) => (
+                      <div key={section.title}>
+                        <h3
+                          className="text-xs font-semibold text-gray-500 
                         dark:text-gray-400 uppercase tracking-wider mb-3"
-                      >
-                        {section.title}
-                      </h3>
-                      <div className="space-y-1">
-                        {section.items.map((item) => (
-                          <MenuItem
-                            key={item.label}
-                            icon={item.icon}
-                            label={item.label}
-                            badge={item.badge}
-                            onClick={() => {
-                              onNavigate(item.path);
-                              onClose();
-                            }}
-                          />
-                        ))}
+                        >
+                          {section.title}
+                        </h3>
+                        <div className="space-y-1">
+                          {section.items.map((item) => (
+                            <MenuItem
+                              key={item.label}
+                              icon={item.icon}
+                              label={item.label}
+                              badge={item.badge}
+                              onClick={() => handleItemClick(item.path)}
+                            />
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Bottom Actions */}
-              {isAuthenticated && (
-                <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-                  <motion.button
-                    onClick={() => {
-                      handleLogout();
-                      onClose();
-                    }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full flex items-center justify-center px-4 py-3
+                {/* Bottom Actions */}
+                {isAuthenticated && (
+                  <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+                    <motion.button
+                      onClick={handleLogoutClick}
+                      variants={buttonVariants}
+                      whileHover="hover"
+                      whileTap="tap"
+                      className="w-full flex items-center justify-center px-4 py-3
                       text-red-600 dark:text-red-400 font-medium
                       hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg
                       transition-colors duration-200"
-                  >
-                    <LogOut className="w-5 h-5 mr-2" />
-                    Sign out
-                  </motion.button>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  );
-};
+                    >
+                      <LogOut className="w-5 h-5 mr-2" />
+                      Sign out
+                    </motion.button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    );
+  },
+);
+
 export default MobileMenu;

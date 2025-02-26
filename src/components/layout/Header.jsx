@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, memo } from "react";
+import React, { useState, useRef, useEffect, memo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Menu as MenuIcon, X, Plus } from "lucide-react";
@@ -17,7 +17,7 @@ import NavButton from "../header/NavButton";
 import NavLinks from "../header/NavLink";
 import GuestButtons from "../header/GuestButton";
 
-// Memoized UserActions component
+// Memoized UserActions component with useCallback for handlers
 const UserActions = memo(({ user, onNavigate }) => {
   const actions = [
     {
@@ -48,9 +48,100 @@ const UserActions = memo(({ user, onNavigate }) => {
   );
 });
 
+// Optimize user profile button as a separate component
+const UserProfileButton = memo(({ user, isUserMenuOpen, toggleUserMenu }) => (
+  <motion.button
+    whileHover={{ scale: 1.03 }}
+    whileTap={{ scale: 0.97 }}
+    onClick={toggleUserMenu}
+    className="flex items-center gap-3 p-1.5 rounded-xl
+      bg-gradient-to-r from-orange-500/10 to-orange-600/10 
+      hover:from-orange-500/20 hover:to-orange-600/20
+      transition-all duration-300 group"
+  >
+    <div className="w-9 h-9 rounded-lg overflow-hidden border-2 border-orange-500 shadow-sm group-hover:shadow-md transition-shadow">
+      <img
+        src={user.avatarUrl || "/assets/None_Avatar.jpg"}
+        alt="Avatar"
+        className="w-full h-full object-cover"
+      />
+    </div>
+    <div className="hidden lg:block text-left">
+      <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
+        {user.fullName}
+      </p>
+      <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+    </div>
+    <motion.span
+      animate={{ rotate: isUserMenuOpen ? 180 : 0 }}
+      transition={{ duration: 0.3 }}
+      className="flex items-center justify-center"
+    >
+      <X
+        className={`w-4 h-4 text-gray-600 dark:text-gray-400 
+          absolute transition-opacity duration-300 
+          ${isUserMenuOpen ? "opacity-100" : "opacity-0"}`}
+      />
+      <svg
+        className={`w-4 h-4 text-gray-600 dark:text-gray-400 
+          transition-opacity duration-300 
+          ${isUserMenuOpen ? "opacity-0" : "opacity-100"}`}
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M19 9l-7 7-7-7"
+        />
+      </svg>
+    </motion.span>
+  </motion.button>
+));
+
+// Optimize mobile menu toggle button
+const MobileMenuToggle = memo(({ isOpen, toggleMobileMenu }) => (
+  <motion.button
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    onClick={toggleMobileMenu}
+    className="sm:hidden p-2.5 rounded-full bg-gray-100/80 dark:bg-gray-800/80 
+      hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300"
+    aria-label="Toggle mobile menu"
+  >
+    <AnimatePresence mode="wait">
+      {isOpen ? (
+        <motion.div
+          key="close"
+          initial={{ rotate: -90, opacity: 0 }}
+          animate={{ rotate: 0, opacity: 1 }}
+          exit={{ rotate: 90, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <X className="w-5 h-5 text-orange-500" />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="menu"
+          initial={{ rotate: 90, opacity: 0 }}
+          animate={{ rotate: 0, opacity: 1 }}
+          exit={{ rotate: -90, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <MenuIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </motion.button>
+));
+
+// Main Header component
 const Header = () => {
+  // State with optimized default values
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(window.scrollY > 10);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -60,58 +151,88 @@ const Header = () => {
   const { user, logout } = useAuth();
   const userMenuRef = useRef(null);
 
-  // Handle scroll and click outside effects
+  // Memoized handler functions to prevent unnecessary re-renders
+  const toggleUserMenu = useCallback(() => {
+    setIsUserMenuOpen((prev) => !prev);
+  }, []);
+
+  const toggleMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen((prev) => !prev);
+  }, []);
+
+  const handleThemeToggle = useCallback(() => {
+    dispatch(toggleTheme());
+  }, [dispatch]);
+
+  // Optimized scroll event handler with throttling
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 10);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Optimized click outside handler
+  useEffect(() => {
+    if (!isUserMenuOpen) return;
+
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setIsUserMenuOpen(false);
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
     document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isUserMenuOpen]);
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  // Handle navigation and close menus
-  const handleNavigate = (path) => {
+  // Memoized navigation handler
+  const handleNavigate = useCallback((path) => {
     window.location.href = path;
     setIsMobileMenuOpen(false);
-  };
+    setIsUserMenuOpen(false);
+  }, []);
 
-  // Handle user logout
-  const handleLogout = async () => {
+  // Memoized logout handler
+  const handleLogout = useCallback(async () => {
     try {
       await logout();
       window.location.href = "/login";
     } catch (error) {
       console.error("Logout failed:", error);
     }
-  };
+  }, [logout]);
 
-  // Handle search input change
-  const handleSearchChange = (e) => {
+  // Memoized search handlers
+  const handleSearchChange = useCallback((e) => {
     setSearchValue(e.target.value);
-  };
+  }, []);
 
-  // Handle search input focus
-  const handleSearchFocus = () => {
+  const handleSearchFocus = useCallback(() => {
     setIsSearchFocused(true);
-  };
+  }, []);
 
-  // Handle search input blur
-  const handleSearchBlur = () => {
+  const handleSearchBlur = useCallback(() => {
     setIsSearchFocused(false);
-  };
+  }, []);
 
-  // Handle search clear
-  const handleSearchClear = () => {
+  const handleSearchClear = useCallback(() => {
     setSearchValue("");
+  }, []);
+
+  // Animation variants defined outside render function
+  const logoHoverVariants = {
+    hover: { scale: 1.03 },
+    tap: { scale: 0.97 },
   };
 
   return (
@@ -134,8 +255,9 @@ const Header = () => {
           <div className="flex items-center justify-between h-20">
             {/* Logo with hover effect */}
             <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              variants={logoHoverVariants}
+              whileHover="hover"
+              whileTap="tap"
               onClick={() => handleNavigate("/")}
               className="flex items-center gap-3 group transition-transform duration-300"
             >
@@ -156,8 +278,11 @@ const Header = () => {
               </div>
             </motion.button>
 
-            {/* Navigation Links */}
-            <NavLinks onNavigate={handleNavigate} />
+            {/* Navigation Links - memoized internally */}
+            <NavLinks
+              onNavigate={handleNavigate}
+              activePath={window.location.pathname}
+            />
 
             {/* Search and Actions */}
             <div className="flex items-center gap-4">
@@ -173,7 +298,7 @@ const Header = () => {
 
               <ThemeToggleButton
                 isDarkMode={isDarkMode}
-                onClick={() => dispatch(toggleTheme())}
+                onClick={handleThemeToggle}
               />
 
               {user ? (
@@ -181,57 +306,11 @@ const Header = () => {
                   <UserActions user={user} onNavigate={handleNavigate} />
 
                   <div className="relative" ref={userMenuRef}>
-                    <motion.button
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                      className="flex items-center gap-3 p-1.5 rounded-xl
-                        bg-gradient-to-r from-orange-500/10 to-orange-600/10 
-                        hover:from-orange-500/20 hover:to-orange-600/20
-                        transition-all duration-300 group"
-                    >
-                      <div className="w-9 h-9 rounded-lg overflow-hidden border-2 border-orange-500 shadow-sm group-hover:shadow-md transition-shadow">
-                        <img
-                          src={user.avatarUrl || "/assets/None_Avatar.jpg"}
-                          alt="Avatar"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="hidden lg:block text-left">
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                          {user.fullName}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {user.email}
-                        </p>
-                      </div>
-                      <motion.span
-                        animate={{ rotate: isUserMenuOpen ? 180 : 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="flex items-center justify-center"
-                      >
-                        <X
-                          className={`w-4 h-4 text-gray-600 dark:text-gray-400 
-                            absolute transition-opacity duration-300 
-                            ${isUserMenuOpen ? "opacity-100" : "opacity-0"}`}
-                        />
-                        <svg
-                          className={`w-4 h-4 text-gray-600 dark:text-gray-400 
-                            transition-opacity duration-300 
-                            ${isUserMenuOpen ? "opacity-0" : "opacity-100"}`}
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      </motion.span>
-                    </motion.button>
+                    <UserProfileButton
+                      user={user}
+                      isUserMenuOpen={isUserMenuOpen}
+                      toggleUserMenu={toggleUserMenu}
+                    />
 
                     <UserMenu
                       isOpen={isUserMenuOpen}
@@ -245,57 +324,33 @@ const Header = () => {
               )}
 
               {/* Mobile Menu Button with animation */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="sm:hidden p-2.5 rounded-full bg-gray-100/80 dark:bg-gray-800/80 
-                  hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300"
-                aria-label="Toggle mobile menu"
-              >
-                <AnimatePresence mode="wait">
-                  {isMobileMenuOpen ? (
-                    <motion.div
-                      key="close"
-                      initial={{ rotate: -90, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: 90, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <X className="w-5 h-5 text-orange-500" />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="menu"
-                      initial={{ rotate: 90, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: -90, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <MenuIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
+              <MobileMenuToggle
+                isOpen={isMobileMenuOpen}
+                toggleMobileMenu={toggleMobileMenu}
+              />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      <MobileMenu
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-        searchValue={searchValue}
-        onSearchChange={handleSearchChange}
-        onNavigate={handleNavigate}
-        user={user}
-        handleLogout={handleLogout}
-        isDarkMode={isDarkMode}
-        toggleTheme={() => dispatch(toggleTheme())}
-      />
+      {/* Mobile Menu - Only render when needed */}
+      {isMobileMenuOpen && (
+        <MobileMenu
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
+          searchValue={searchValue}
+          onSearchChange={handleSearchChange}
+          onNavigate={handleNavigate}
+          user={user}
+          handleLogout={handleLogout}
+          isDarkMode={isDarkMode}
+          dispatch={dispatch}
+          toggleTheme={toggleTheme}
+          isAuthenticated={!!user}
+        />
+      )}
     </header>
   );
 };
 
-export default Header;
+export default memo(Header);

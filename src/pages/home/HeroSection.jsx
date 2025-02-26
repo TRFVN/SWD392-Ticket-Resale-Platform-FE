@@ -117,7 +117,7 @@ function HeroSection() {
           className="w-full h-full"
         >
           <img
-            src={Banner}
+            src="https://images.alphacoders.com/117/1178907.jpg"
             alt=""
             className="w-full h-full object-cover"
             role="presentation"
