@@ -256,8 +256,6 @@ const SuccessState = ({ order }) => {
     </div>
   );
 };
-
-// Main Order Confirmation component
 const OrderConfirmation = () => {
   const { orderId } = useParams();
   const location = useLocation();
@@ -271,21 +269,27 @@ const OrderConfirmation = () => {
   // Parse query parameters
   const queryParams = new URLSearchParams(location.search);
   const code = queryParams.get("code");
-  const transactionId = queryParams.get("id");
   const cancelled = queryParams.get("cancel") === "true";
   const paymentStatus = queryParams.get("status");
-  const orderCode = queryParams.get("orderCode");
 
   // On component mount, confirm payment and fetch order details
   useEffect(() => {
     if (orderId) {
+      // Retrieve transaction ID from localStorage
+      const storedTransactionId = localStorage.getItem(
+        `order_${orderId}_transaction`,
+      );
+
       if (
         code === "00" &&
-        transactionId &&
+        storedTransactionId &&
         !cancelled &&
         paymentStatus === "PAID"
       ) {
-        confirmPayment();
+        // Remove the transaction ID from localStorage after retrieval
+        localStorage.removeItem(`order_${orderId}_transaction`);
+
+        confirmPayment(storedTransactionId);
       } else {
         // If payment was not successful, just fetch the order
         fetchOrderDetails();
@@ -297,7 +301,7 @@ const OrderConfirmation = () => {
   }, [orderId]);
 
   // Confirm payment with the API
-  const confirmPayment = async () => {
+  const confirmPayment = async (transactionId) => {
     try {
       setLoading(true);
 

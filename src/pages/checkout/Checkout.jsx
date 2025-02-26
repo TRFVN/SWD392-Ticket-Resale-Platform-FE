@@ -227,6 +227,7 @@ const PaymentInfoForm = ({
   order,
   isGeneratingQR,
   payosCheckoutUrl,
+  paymentTransactionId,
   generatePayOSLink,
 }) => {
   const isDarkMode = useSelector((state) => state.theme?.isDarkMode || false);
@@ -298,6 +299,15 @@ const PaymentInfoForm = ({
               <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
                 Thanh toán an toàn qua cổng PayOS
               </p>
+              {paymentTransactionId && (
+                <p
+                  className={`mt-2 text-xs ${
+                    isDarkMode ? "text-gray-500" : "text-gray-400"
+                  }`}
+                >
+                  Transaction ID: {paymentTransactionId}
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-3 w-full max-w-md">
               <button
@@ -423,6 +433,7 @@ const Checkout = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState(null);
   const [payosCheckoutUrl, setPayosCheckoutUrl] = useState("");
+  const [paymentTransactionId, setPaymentTransactionId] = useState("");
   const [isGeneratingQR, setIsGeneratingQR] = useState(false);
 
   // Hooks
@@ -509,13 +520,14 @@ const Checkout = () => {
       ]);
     }
   };
-
-  // Generate payment link for PayOS
+  // Modify the generatePayOSLink function to include localStorage saving
   const generatePayOSLink = async () => {
     if (!currentOrder?.orderId) return;
 
     try {
       setIsGeneratingQR(true);
+
+      // Đầu tiên, tạo link thanh toán
       const response = await axiosInstance.post(
         "api/Payment/create-payment-link",
         {
@@ -527,10 +539,52 @@ const Checkout = () => {
       );
 
       if (response.data && response.data.isSuccess) {
-        // Extract checkout URL from the response
-        const checkoutUrl = response.data.result?.result?.checkoutUrl;
-        if (checkoutUrl) {
+        // Extract checkout URL and transaction ID from the response
+        const result = response.data.result?.result;
+        const checkoutUrl = result?.checkoutUrl;
+        const transactionId = response.data.paymentTransactionId;
+
+        if (checkoutUrl && transactionId) {
+          // Save transaction ID to localStorage
+          localStorage.setItem(
+            `order_${currentOrder.orderId}_transaction`,
+            transactionId,
+          );
+
+          // Lưu các giá trị vào state
           setPayosCheckoutUrl(checkoutUrl);
+          setPaymentTransactionId(transactionId);
+
+          // Rest of the existing code remains the same...
+          try {
+            // Lưu transactionId vào hệ thống của bạn
+            await axiosInstance.put(
+              `api/Order/${currentOrder.orderId}/transaction`,
+              {
+                transactionId: transactionId,
+              },
+            );
+
+            // Tạo returnUrl mới có chứa transactionId
+            const newReturnUrl = `${window.location.origin}/order-confirmation/${currentOrder.orderId}?code=00&status=PAID&transactionId=${transactionId}`;
+
+            // Cập nhật returnUrl trong hệ thống PayOS nếu API hỗ trợ
+            try {
+              await axiosInstance.put(
+                `api/Payment/${transactionId}/update-return-url`,
+                {
+                  returnUrl: newReturnUrl,
+                },
+              );
+            } catch (updateError) {
+              console.log(
+                "Không thể cập nhật returnUrl tại PayOS, sẽ xử lý transactionId ở client side",
+              );
+            }
+          } catch (err) {
+            console.error("Error updating transaction ID:", err);
+          }
+
           return checkoutUrl;
         } else {
           toast.error("Không thể tạo link thanh toán PayOS.");
@@ -547,7 +601,6 @@ const Checkout = () => {
       setIsGeneratingQR(false);
     }
   };
-
   // Handle payment button click
   const handleConfirmOrder = async () => {
     if (!currentOrder) {
@@ -560,13 +613,25 @@ const Checkout = () => {
 
       // For PayOS, if we have the checkout URL, open it in a new tab
       if (payosCheckoutUrl) {
-        window.open(payosCheckoutUrl, "_blank");
+        // Use the existing transaction ID if available
+        const transactionParam = paymentTransactionId
+          ? `&transactionId=${encodeURIComponent(paymentTransactionId)}`
+          : "";
+
+        const url = `${payosCheckoutUrl}${transactionParam}`;
+        window.open(url, "_blank");
         toast.info("Vui lòng hoàn tất thanh toán trong cửa sổ mới");
       } else {
         // Generate link if we don't have it yet
         const url = await generatePayOSLink();
         if (url) {
-          window.open(url, "_blank");
+          // The transaction ID is already stored in state from generatePayOSLink
+          const transactionParam = paymentTransactionId
+            ? `&transactionId=${encodeURIComponent(paymentTransactionId)}`
+            : "";
+
+          const fullUrl = `${url}${transactionParam}`;
+          window.open(fullUrl, "_blank");
           toast.info("Vui lòng hoàn tất thanh toán trong cửa sổ mới");
         } else {
           toast.error("Không thể tạo liên kết thanh toán PayOS");
@@ -805,6 +870,7 @@ const Checkout = () => {
               order={currentOrder}
               isGeneratingQR={isGeneratingQR}
               payosCheckoutUrl={payosCheckoutUrl}
+              paymentTransactionId={paymentTransactionId}
               generatePayOSLink={generatePayOSLink}
             />
           </div>

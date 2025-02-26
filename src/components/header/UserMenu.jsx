@@ -221,7 +221,7 @@ const menuItems = [
   {
     section: "Events & Tickets",
     items: [
-      { icon: Ticket, label: "My Tickets", to: "/tickets" },
+      { icon: Ticket, label: "My Tickets", to: "/mytickets" },
       { icon: Star, label: "Saved Events", to: "/saved" },
       { icon: Gift, label: "Gift Cards", to: "/gift-cards", isPro: true },
     ],
