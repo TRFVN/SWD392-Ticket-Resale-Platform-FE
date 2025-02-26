@@ -406,7 +406,6 @@ const Checkout = () => {
       ]);
     }
   };
-
   // Generate PayOS payment link - Key functionality with localStorage
   const generatePayOSLink = async () => {
     if (!currentOrder?.orderId) return null;
@@ -426,24 +425,43 @@ const Checkout = () => {
         },
       );
 
+      console.log("Payment link response:", response.data); // Để debug
+
       if (
         response.data?.isSuccess &&
         response.data.result?.result?.checkoutUrl
       ) {
-        // Extract checkout URL and transaction ID
+        // Extract checkout URL
         const result = response.data.result?.result;
         const checkoutUrl = result.checkoutUrl;
-        const transactionId = response.data.paymentTransactionId;
+
+        // Extract transaction ID - ĐÂY LÀ PHẦN CẦN THAY ĐỔI
+        // transactionId có thể nằm ở một trong hai vị trí
+        const transactionId =
+          response.data.result?.paymentTransactionId ||
+          response.data.paymentTransactionId;
+
+        // Log to make sure we got the right value
+        console.log("Transaction ID for localStorage:", transactionId);
 
         // Important: Save transaction ID to localStorage
-        localStorage.setItem(
-          `order_${currentOrder.orderId}_transaction`,
-          transactionId,
-        );
+        if (transactionId) {
+          localStorage.setItem(
+            `order_${currentOrder.orderId}_transaction`,
+            transactionId,
+          );
+          console.log(
+            "Saved transaction ID to localStorage:",
+            `order_${currentOrder.orderId}_transaction =`,
+            transactionId,
+          );
+        } else {
+          console.error("No transaction ID found in response");
+        }
 
         // Update state
         setPayosCheckoutUrl(checkoutUrl);
-        setPaymentTransactionId(transactionId);
+        setPaymentTransactionId(transactionId || "");
 
         return checkoutUrl;
       } else {
