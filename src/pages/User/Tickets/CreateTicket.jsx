@@ -91,6 +91,7 @@ function CreateTicket() {
       const response = await uploadTicketApi(formData, setUploadProgress);
 
       if (response?.data?.result) {
+        toast.success("Upload image successfully");
         setImageUrl(response.data.result);
         formik.setFieldValue("imageUrl", response.data.result);
         setUploadProgress(0);
