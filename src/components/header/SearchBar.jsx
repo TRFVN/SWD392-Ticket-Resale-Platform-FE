@@ -65,14 +65,14 @@ export const SearchBar = memo(
           animate={isFocused ? "focused" : "unfocused"}
           variants={focusRingVariants}
           transition={{ duration: 0.2 }}
-          className="absolute inset-0 rounded-full bg-orange-500/10 dark:bg-orange-500/20 -z-10 
-          shadow-[0_0_0_2px_rgba(249,115,22,0.2)] dark:shadow-[0_0_0_2px_rgba(249,115,22,0.3)]"
+          className="absolute inset-0 rounded-full bg-orange-500/15 dark:bg-orange-500/30 -z-10 
+          shadow-[0_0_0_2px_rgba(249,115,22,0.2)] dark:shadow-[0_0_0_2px_rgba(249,115,22,0.4)]"
         />
 
         {/* Input with leading search icon */}
         <div className="relative">
           <div
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-300
           flex items-center justify-center"
           >
             <Search
@@ -90,18 +90,18 @@ export const SearchBar = memo(
             placeholder={placeholder}
             aria-label="Search"
             className="w-full py-3 px-5 pl-12 pr-24 rounded-full 
-            bg-gray-100/80 dark:bg-gray-800/80 backdrop-blur-sm
-            border border-gray-200 dark:border-gray-700
+            bg-gray-100/80 dark:bg-gray-700/90 backdrop-blur-sm
+            border border-gray-200 dark:border-gray-600
             text-gray-900 dark:text-gray-100
             focus:outline-none focus:border-orange-400 dark:focus:border-orange-500
-            placeholder-gray-500 dark:placeholder-gray-400
+            placeholder-gray-500 dark:placeholder-gray-300
             transition-all duration-300"
           />
 
           {/* Action buttons container - optimized for fewer DOM operations */}
           <div
             className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1
-          bg-gray-100/60 dark:bg-gray-800/60 rounded-full backdrop-blur-sm pr-1"
+          bg-gray-100/60 dark:bg-gray-700/60 rounded-full backdrop-blur-sm pr-1"
           >
             {/* Clear button - only shown when there's text */}
             <AnimatePresence>
@@ -115,8 +115,8 @@ export const SearchBar = memo(
                   whileTap="tap"
                   onClick={handleClear}
                   aria-label="Clear search"
-                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200
-                  hover:bg-gray-200/80 dark:hover:bg-gray-700/80 rounded-full
+                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white
+                  hover:bg-gray-200/80 dark:hover:bg-gray-600/80 rounded-full
                   transition-colors duration-200"
                 >
                   <X className="w-4 h-4" />
@@ -131,8 +131,8 @@ export const SearchBar = memo(
                 whileHover="hover"
                 whileTap="tap"
                 aria-label="Filter search results"
-                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200
-                hover:bg-gray-200/80 dark:hover:bg-gray-700/80 rounded-full
+                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white
+                hover:bg-gray-200/80 dark:hover:bg-gray-600/80 rounded-full
                 transition-colors duration-200"
               >
                 <Filter className="w-4 h-4" />
@@ -156,8 +156,8 @@ export const SearchBar = memo(
         </div>
 
         {/* Subtle decorative elements with optimized opacity transition */}
-        <div className="absolute left-10 top-0 w-6 h-1 bg-gradient-to-r from-orange-400/0 via-orange-400/20 to-orange-400/0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="absolute right-10 bottom-0 w-6 h-1 bg-gradient-to-r from-orange-400/0 via-orange-400/20 to-orange-400/0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute left-10 top-0 w-6 h-1 bg-gradient-to-r from-orange-400/0 via-orange-400/30 to-orange-400/0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute right-10 bottom-0 w-6 h-1 bg-gradient-to-r from-orange-400/0 via-orange-400/30 to-orange-400/0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
     );
   },
