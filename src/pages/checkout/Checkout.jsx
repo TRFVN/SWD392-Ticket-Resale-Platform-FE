@@ -152,7 +152,7 @@ const OrderSummary = ({ order, onConfirmOrder, isProcessing }) => {
           }`}
         >
           <span>Subtotal</span>
-          <span>{formatCurrency(order.totalPrice || 0)}</span>
+          <span>{formatCurrency(order.totalPrice || 0.0)}</span>
         </div>
 
         <div
@@ -195,34 +195,11 @@ const OrderSummary = ({ order, onConfirmOrder, isProcessing }) => {
           </>
         )}
       </button>
-
-      <div className="pt-4">
-        <h3
-          className={`text-sm font-medium mb-2 ${
-            isDarkMode ? "text-gray-300" : "text-gray-700"
-          }`}
-        >
-          Secured Payment
-        </h3>
-        <div
-          className={`flex gap-3 ${
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          }`}
-        >
-          <div
-            className={`p-2 rounded ${
-              isDarkMode ? "bg-gray-700" : "bg-gray-100"
-            }`}
-          >
-            <img src="/api/placeholder/40/24" alt="PayOS" className="h-6" />
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
 
-// Component for payment information form
+// Payment information form - simplified
 const PaymentInfoForm = ({
   order,
   isGeneratingQR,
@@ -265,7 +242,7 @@ const PaymentInfoForm = ({
           </p>
         </div>
 
-        {/* Show PayOS QR code if available */}
+        {/* Show loading state */}
         {isGeneratingQR && (
           <div className="py-8 flex flex-col items-center">
             <Loader2 className="w-10 h-10 text-orange-500 animate-spin mb-4" />
@@ -336,92 +313,6 @@ const PaymentInfoForm = ({
   );
 };
 
-// Component for customer information form
-const CustomerInfoForm = () => {
-  const isDarkMode = useSelector((state) => state.theme?.isDarkMode || false);
-
-  return (
-    <div
-      className={`${
-        isDarkMode
-          ? "bg-gray-800/50 border-gray-700"
-          : "bg-white/50 border-gray-200"
-      } backdrop-blur rounded-xl border p-6 mb-6 transition-colors`}
-    >
-      <h2
-        className={`text-xl font-bold mb-6 ${
-          isDarkMode ? "text-white" : "text-gray-900"
-        }`}
-      >
-        <div className="flex items-center gap-2">
-          <User className="w-5 h-5 text-orange-500" />
-          Contact Information
-        </div>
-      </h2>
-
-      <form className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label
-              className={`block text-sm font-medium mb-1 ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              Full Name
-            </label>
-            <input
-              type="text"
-              className={`w-full p-3 rounded-lg border ${
-                isDarkMode
-                  ? "bg-gray-700 border-gray-600 text-white"
-                  : "bg-white border-gray-300 text-gray-900"
-              } focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors`}
-              placeholder="Your name"
-            />
-          </div>
-          <div>
-            <label
-              className={`block text-sm font-medium mb-1 ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              Email
-            </label>
-            <input
-              type="email"
-              className={`w-full p-3 rounded-lg border ${
-                isDarkMode
-                  ? "bg-gray-700 border-gray-600 text-white"
-                  : "bg-white border-gray-300 text-gray-900"
-              } focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors`}
-              placeholder="email@example.com"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label
-            className={`block text-sm font-medium mb-1 ${
-              isDarkMode ? "text-gray-300" : "text-gray-700"
-            }`}
-          >
-            Phone Number
-          </label>
-          <input
-            type="tel"
-            className={`w-full p-3 rounded-lg border ${
-              isDarkMode
-                ? "bg-gray-700 border-gray-600 text-white"
-                : "bg-white border-gray-300 text-gray-900"
-            } focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors`}
-            placeholder="(+84) 123 456 789"
-          />
-        </div>
-      </form>
-    </div>
-  );
-};
-
 // Main Checkout component
 const Checkout = () => {
   // State management
@@ -441,7 +332,7 @@ const Checkout = () => {
   const location = useLocation();
   const isDarkMode = useSelector((state) => state.theme?.isDarkMode || false);
 
-  // Get order ID from state (if navigated from Cart) or URL params
+  // Get order ID from URL params
   const orderId =
     location.state?.orderId ||
     new URLSearchParams(location.search).get("orderId");
@@ -452,7 +343,6 @@ const Checkout = () => {
     if (orderId) {
       fetchOrderDetails(orderId);
     } else {
-      // No order ID found, show error
       setLoading(false);
       setError("No order found. Please go back to your cart and try again.");
     }
@@ -466,8 +356,6 @@ const Checkout = () => {
 
       if (response.data.isSuccess) {
         setCurrentOrder(response.data.result);
-
-        // Fetch cart items associated with this order
         await fetchOrderItems(id);
       } else {
         throw new Error(
@@ -482,16 +370,14 @@ const Checkout = () => {
     }
   };
 
-  // Fetch items for this order
+  // Fetch items for this order (simplified)
   const fetchOrderItems = async (orderId) => {
     try {
       const response = await axiosInstance.get(`api/Order/${orderId}/items`);
-
       if (response.data.isSuccess) {
         setOrderItems(response.data.result || []);
       } else {
-        // If API for order items doesn't exist yet, use mock data
-        // This can be removed once the API is implemented
+        // Fallback for testing
         setOrderItems([
           {
             id: 1,
@@ -506,7 +392,7 @@ const Checkout = () => {
       }
     } catch (error) {
       console.error("Error fetching order items:", error);
-      // Use mock data as fallback
+      // Fallback data
       setOrderItems([
         {
           id: 1,
@@ -520,6 +406,8 @@ const Checkout = () => {
       ]);
     }
   };
+
+  // Generate PayOS payment link - Key functionality with localStorage
   const generatePayOSLink = async () => {
     if (!currentOrder?.orderId) return null;
 
@@ -547,7 +435,7 @@ const Checkout = () => {
         const checkoutUrl = result.checkoutUrl;
         const transactionId = response.data.paymentTransactionId;
 
-        // Save transaction ID to localStorage
+        // Important: Save transaction ID to localStorage
         localStorage.setItem(
           `order_${currentOrder.orderId}_transaction`,
           transactionId,
@@ -559,7 +447,6 @@ const Checkout = () => {
 
         return checkoutUrl;
       } else {
-        // Handle error cases
         toast.error(
           response.data?.message || "Không thể tạo liên kết thanh toán PayOS",
         );
@@ -574,6 +461,7 @@ const Checkout = () => {
     }
   };
 
+  // Handle confirm order
   const handleConfirmOrder = async () => {
     if (!currentOrder) {
       toast.error("Không tìm thấy thông tin đơn hàng");
@@ -582,12 +470,9 @@ const Checkout = () => {
 
     try {
       setProcessingPayment(true);
-
-      // Generate PayOS link if not already exists
       const checkoutUrl = payosCheckoutUrl || (await generatePayOSLink());
 
       if (checkoutUrl) {
-        // Open PayOS checkout in a new window
         window.open(checkoutUrl, "_blank");
         toast.info("Vui lòng hoàn tất thanh toán trong cửa sổ mới");
       } else {
@@ -600,7 +485,7 @@ const Checkout = () => {
     }
   };
 
-  // Delete Order Function
+  // Handle delete order
   const handleDeleteOrder = async () => {
     if (!currentOrder?.orderId) return;
 
@@ -624,7 +509,7 @@ const Checkout = () => {
     }
   };
 
-  // Delete Confirmation Modal
+  // Delete Confirmation Modal - Simplified
   const DeleteConfirmationModal = () => {
     if (!showDeleteConfirm) return null;
 
@@ -718,7 +603,6 @@ const Checkout = () => {
     );
   }
 
-  // If no order is found after loading completes
   if (!currentOrder && !loading) {
     return (
       <ErrorState
@@ -788,7 +672,7 @@ const Checkout = () => {
           </span>
         </div>
 
-        {/* Main Content Grid */}
+        {/* Main Content Grid - Simplified */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Form */}
           <div className="lg:col-span-2 space-y-6">
@@ -817,9 +701,6 @@ const Checkout = () => {
                 ))}
               </div>
             </div>
-
-            {/* Customer Information */}
-            <CustomerInfoForm />
 
             {/* Payment Information */}
             <PaymentInfoForm

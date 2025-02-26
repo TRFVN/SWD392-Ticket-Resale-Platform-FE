@@ -51,13 +51,13 @@ const Signup = () => {
 
   const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {
-      // Choose the appropriate signup function based on account type
-      const signupFunction =
-        values.accountType === ACCOUNT_TYPES.INDIVIDUAL
-          ? signupCustomer
-          : signupOrganization;
-
-      await signupFunction(values);
+      // Ensure we're using the correct signup function based on the current account type
+      // This is the critical fix - we need to use the accountType from state, not from values
+      if (accountType === ACCOUNT_TYPES.INDIVIDUAL) {
+        await signupCustomer(values);
+      } else {
+        await signupOrganization(values);
+      }
 
       toast.success("Registration successful! Please verify your email.", {
         onClose: () => {
@@ -70,12 +70,14 @@ const Signup = () => {
         },
       });
     } catch (error) {
+      console.error("Signup error:", error);
       setFieldError("submit", error.message);
       toast.error(error.message || "Registration failed");
     } finally {
       setSubmitting(false);
     }
   };
+
   const handleGoogleSignup = async () => {
     try {
       await googleLogin();
@@ -89,6 +91,7 @@ const Signup = () => {
   };
 
   const currentSteps = signupSteps[accountType];
+
   const isStepValid = (values, errors, step) => {
     const stepFields = currentSteps[step].fields;
     return stepFields.every((field) => values[field] && !errors[field]);
@@ -104,7 +107,7 @@ const Signup = () => {
   };
 
   const handlePreviousStep = () => {
-    setCurrentStep((prev) => prev - 1);
+    setCurrentStep((prev) => Math.max(0, prev - 1));
   };
 
   const handleAccountTypeChange = (type) => {
@@ -154,7 +157,10 @@ const Signup = () => {
 
         {/* Form */}
         <Formik
-          initialValues={initialValues[accountType]}
+          initialValues={{
+            ...initialValues[accountType],
+            accountType: accountType, // Ensure accountType is correctly set in form values
+          }}
           validationSchema={validationSchemas[accountType]}
           onSubmit={handleSubmit}
           enableReinitialize
