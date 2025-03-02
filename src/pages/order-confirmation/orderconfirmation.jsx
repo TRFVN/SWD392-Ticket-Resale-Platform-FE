@@ -256,8 +256,6 @@ const SuccessState = ({ order }) => {
     </div>
   );
 };
-
-// Main Order Confirmation component
 const OrderConfirmation = () => {
   const { orderId } = useParams();
   const location = useLocation();
@@ -271,21 +269,34 @@ const OrderConfirmation = () => {
   // Parse query parameters
   const queryParams = new URLSearchParams(location.search);
   const code = queryParams.get("code");
-  const transactionId = queryParams.get("id");
   const cancelled = queryParams.get("cancel") === "true";
   const paymentStatus = queryParams.get("status");
-  const orderCode = queryParams.get("orderCode");
 
-  // On component mount, confirm payment and fetch order details
   useEffect(() => {
     if (orderId) {
-      if (
-        code === "00" &&
-        transactionId &&
-        !cancelled &&
-        paymentStatus === "PAID"
-      ) {
-        confirmPayment();
+      // Log để debug
+      console.log("OrderId detected:", orderId);
+      console.log("URL parameters:", location.search);
+
+      // Retrieve transaction ID from localStorage
+      const key = `order_${orderId}_transaction`;
+      const storedTransactionId = localStorage.getItem(key);
+      console.log(
+        "Transaction ID from localStorage:",
+        key,
+        "=",
+        storedTransactionId,
+      );
+
+      if (code === "00" && !cancelled && paymentStatus === "PAID") {
+        if (storedTransactionId) {
+          // Xác nhận thanh toán với transactionId lấy được
+          confirmPayment(storedTransactionId);
+        } else {
+          console.error("No transaction ID found in localStorage");
+          setError("Payment transaction information not found");
+          setLoading(false);
+        }
       } else {
         // If payment was not successful, just fetch the order
         fetchOrderDetails();
@@ -294,10 +305,8 @@ const OrderConfirmation = () => {
       setLoading(false);
       setError("Invalid order information");
     }
-  }, [orderId]);
-
-  // Confirm payment with the API
-  const confirmPayment = async () => {
+  }, [orderId, code, cancelled, paymentStatus]);
+  const confirmPayment = async (transactionId) => {
     try {
       setLoading(true);
 
@@ -317,27 +326,26 @@ const OrderConfirmation = () => {
       console.log("Confirming payment with transaction ID:", transactionId);
       console.log("Order Number:", orderNumber);
 
-      // Now confirm the payment with the exact API endpoint and body format
-      const response = await axiosInstance.post(
-        "api/Payment/confirm-payment",
-        {
-          orderNumber: orderNumber,
-          paymentTransactionId: transactionId,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
+      // Now confirm the payment
+      const response = await axiosInstance.post("api/Payment/confirm-payment", {
+        orderNumber: orderNumber,
+        paymentTransactionId: transactionId,
+      });
 
       if (response.data.isSuccess) {
+        // Thành công - xóa transactionId khỏi localStorage
+        localStorage.removeItem(`order_${orderId}_transaction`);
+        console.log(
+          "Removed transaction ID from localStorage after successful confirmation",
+        );
+
         setPaymentConfirmed(true);
         toast.success("Payment confirmed successfully!");
       } else {
         throw new Error(response.data.message || "Payment confirmation failed");
       }
     } catch (err) {
+      console.error("Payment confirmation error:", err);
       setError(err.message || "Failed to confirm payment");
       toast.error("Payment confirmation failed");
     } finally {

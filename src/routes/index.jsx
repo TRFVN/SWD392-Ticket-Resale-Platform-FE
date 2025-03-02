@@ -24,6 +24,7 @@ import EventsPage from "../pages/tickets/Events/Event";
 import EventDetails from "../pages/tickets/Events/EventDetails";
 import Checkout from "../pages/checkout/Checkout";
 import OrderConfirmation from "../pages/order-confirmation/orderconfirmation";
+import ResetPassword from "../pages/auth/ResetPassword";
 const ROLES = {
   ADMIN: "ADMIN",
   STAFF: "STAFF",
@@ -38,6 +39,8 @@ const publicRoutes = [
   { path: "about", element: <About /> },
   { path: "verify-email", element: <VerifyEmail /> },
   { path: "forgot-password", element: <ForgotPassword /> },
+  { path: "reset-password", element: <ResetPassword /> },
+
   { path: "tickets", element: <Ticket /> },
   { path: "events", element: <EventsPage /> },
   { path: "events/:eventId", element: <EventDetails /> },

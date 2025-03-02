@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import { FaEnvelope, FaArrowLeft } from "react-icons/fa";
 import axios from "axios";
 import TicketLogo from "../../assets/TicketHub_Logo.png";
+import axiosInstance from "../../config/axiosConfig";
 
 const ForgotPassword = () => {
   const [submitStatus, setSubmitStatus] = useState({ type: "", message: "" });
@@ -18,10 +19,9 @@ const ForgotPassword = () => {
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      const response = await axios.post(
-        "https://tickethub-f6gxgnhngpbue9gs.southeastasia-01.azurewebsites.net/api/Auth/forgot-password",
-        { email: values.email },
-      );
+      const response = await axiosInstance.post("password/forgot", {
+        email: values.email,
+      });
 
       setSubmitStatus({
         type: "success",

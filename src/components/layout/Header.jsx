@@ -1,434 +1,223 @@
-import React, { useState, useRef, useEffect, memo, useCallback } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Menu as MenuIcon, X, Plus } from "lucide-react";
+import React, { memo, lazy, Suspense, useState, useEffect } from "react";
+import { useHeaderScroll } from "../../hooks/useHeaderScroll";
+import HeaderLogo from "../header/header/HeaderLogo";
+import DesktopNav from "../header/header/DesktopNav";
+import SearchBar from "../header/header/SearchBar";
+import ThemeToggle from "../header/header/ThemeToggle";
+import UserMenu from "../header/UserMenu";
+import MobileMenuButton from "../header/MobileMenu/MobileMenuButton";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  actionsVariants,
+  getHeaderState,
+  headerVariants,
+  logoVariants,
+  navVariants,
+} from "../header/animations";
+// Import optimized animation variants
+// Lazy load mobile navigation to improve initial load performance
+const MobileNav = lazy(() => import("../header/MobileMenu"));
 
-// Import separated components
-import { toggleTheme } from "../../store/slice/themeSlice";
-import { useAuth } from "../../hooks/useAuth";
-import TicketLogo from "../../assets/TicketHub_Logo.png";
+/**
+ * Modern Header Component - With compact scrolling mode
+ *
+ * Features:
+ * - Normal mode: Shows complete header with logo, nav, and actions
+ * - Compact mode: Only shows navigation when scrolled down
+ */ const Header = () => {
+  const {
+    headerRef,
+    spacerRef,
+    isHeaderVisible,
+    isScrolled,
+    isMenuOpen,
+    isCompactMode,
+    toggleMenu,
+    closeMenu,
+  } = useHeaderScroll();
 
-// Import the modularized components
-import { MobileMenu } from "../header/MobileMenu";
-import { SearchBar } from "../header/SearchBar";
-import { UserMenu } from "../header/UserMenu";
-import ThemeToggleButton from "../common/ThemeToggleButton";
-import NavButton from "../header/NavButton";
-import NavLinks from "../header/NavLink";
-import GuestButtons from "../header/GuestButton";
-
-// Memoized UserActions component with useCallback for handlers
-const UserActions = memo(({ user, onNavigate }) => {
-  const actions = [
-    {
-      icon: Plus,
-      path: "/create-ticket",
-      label: "Create Ticket",
-    },
-    {
-      icon: ShoppingCart,
-      path: "/cart",
-      label: "Cart",
-      badge: "2",
-    },
-  ];
-
-  return (
-    <div className="hidden sm:flex items-center gap-3">
-      {actions.map((action) => (
-        <NavButton
-          key={action.path}
-          icon={action.icon}
-          badge={action.badge}
-          onClick={() => onNavigate(action.path)}
-          label={action.label}
-        />
-      ))}
-    </div>
+  // State to track window size and force mobile mode if needed
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1200,
   );
-});
+  const [forceMobileMode, setForceMobileMode] = useState(false);
 
-// Optimize user profile button as a separate component
-const UserProfileButton = memo(({ user, isUserMenuOpen, toggleUserMenu }) => (
-  <motion.button
-    whileHover={{ scale: 1.03 }}
-    whileTap={{ scale: 0.97 }}
-    onClick={toggleUserMenu}
-    className="flex items-center gap-3 p-1.5 rounded-xl
-      bg-gradient-to-r from-orange-500/15 to-orange-600/15 
-      hover:from-orange-500/25 hover:to-orange-600/25
-      dark:from-orange-500/20 dark:to-orange-600/20
-      dark:hover:from-orange-500/30 dark:hover:to-orange-600/30
-      transition-all duration-300 group"
-  >
-    <div className="w-9 h-9 rounded-lg overflow-hidden border-2 border-orange-500 shadow-sm group-hover:shadow-md transition-shadow">
-      <img
-        src={user.avatarUrl || "/assets/None_Avatar.jpg"}
-        alt="Avatar"
-        className="w-full h-full object-cover"
-      />
-    </div>
-    <div className="hidden lg:block text-left">
-      <p className="text-sm font-medium text-gray-700 dark:text-gray-100">
-        {user.fullName}
-      </p>
-      <p className="text-xs text-gray-500 dark:text-gray-300">{user.email}</p>
-    </div>
-    <motion.span
-      animate={{ rotate: isUserMenuOpen ? 180 : 0 }}
-      transition={{ duration: 0.3 }}
-      className="flex items-center justify-center"
-    >
-      <X
-        className={`w-4 h-4 text-gray-600 dark:text-gray-300 
-          absolute transition-opacity duration-300 
-          ${isUserMenuOpen ? "opacity-100" : "opacity-0"}`}
-      />
-      <svg
-        className={`w-4 h-4 text-gray-600 dark:text-gray-300 
-          transition-opacity duration-300 
-          ${isUserMenuOpen ? "opacity-0" : "opacity-100"}`}
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M19 9l-7 7-7-7"
-        />
-      </svg>
-    </motion.span>
-  </motion.button>
-));
+  // Responsive breakpoints
+  const MOBILE_BREAKPOINT = 768; // Standard mobile breakpoint
+  const TABLET_BREAKPOINT = 1024; // Tablet breakpoint
+  const COMPACT_BREAKPOINT = 1140; // When to start hiding elements on medium screens
 
-// Optimize mobile menu toggle button
-const MobileMenuToggle = memo(({ isOpen, toggleMobileMenu }) => (
-  <motion.button
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
-    onClick={toggleMobileMenu}
-    className="sm:hidden p-2.5 rounded-full bg-gray-100/80 dark:bg-gray-700/80 
-      hover:bg-gray-200 dark:hover:bg-gray-600/90 transition-all duration-300"
-    aria-label="Toggle mobile menu"
-  >
-    <AnimatePresence mode="wait">
-      {isOpen ? (
-        <motion.div
-          key="close"
-          initial={{ rotate: -90, opacity: 0 }}
-          animate={{ rotate: 0, opacity: 1 }}
-          exit={{ rotate: 90, opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <X className="w-5 h-5 text-orange-500" />
-        </motion.div>
-      ) : (
-        <motion.div
-          key="menu"
-          initial={{ rotate: 90, opacity: 0 }}
-          animate={{ rotate: 0, opacity: 1 }}
-          exit={{ rotate: -90, opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <MenuIcon className="w-5 h-5 text-gray-600 dark:text-gray-200" />
-        </motion.div>
-      )}
-    </AnimatePresence>
-  </motion.button>
-));
+  // Get current header state for animations
+  const headerState = getHeaderState(isCompactMode);
 
-// Main Header component
-const Header = () => {
-  // State with optimized default values
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(window.scrollY > 10);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const [isHovering, setIsHovering] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  // Compute header background class
+  const headerBgClass = isScrolled
+    ? "bg-light-primary/90 dark:bg-dark-primary/95 backdrop-blur-md shadow-sm border-b border-gray-200/50 dark:border-gray-800/50"
+    : "bg-light-primary dark:bg-dark-primary";
 
-  const dispatch = useDispatch();
-  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
-  const { user, logout } = useAuth();
-  const userMenuRef = useRef(null);
-  const headerRef = useRef(null);
-
-  // Memoized handler functions to prevent unnecessary re-renders
-  const toggleUserMenu = useCallback(() => {
-    setIsUserMenuOpen((prev) => !prev);
-  }, []);
-
-  const toggleMobileMenu = useCallback(() => {
-    setIsMobileMenuOpen((prev) => !prev);
-  }, []);
-
-  const handleThemeToggle = useCallback(() => {
-    dispatch(toggleTheme());
-  }, [dispatch]);
-
-  // Optimized scroll event handler with throttling
+  // Monitor window resize for responsive behavior
   useEffect(() => {
-    let ticking = false;
+    // Handler to update window width
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setWindowWidth(width);
 
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
+      // Force mobile menu when width gets too small to prevent overlap
+      setForceMobileMode(width < TABLET_BREAKPOINT);
 
-          // Check if scrolled past threshold
-          setIsScrolled(currentScrollY > 10);
-
-          // Show header when scrolling up or at top of page
-          // Hide header when scrolling down (and not hovering)
-          if (currentScrollY <= 0) {
-            setIsHeaderVisible(true); // Always show at top of page
-          } else if (!isHovering) {
-            setIsHeaderVisible(
-              currentScrollY < lastScrollY || currentScrollY < 50,
-            );
-          }
-
-          setLastScrollY(currentScrollY);
-          ticking = false;
-        });
-        ticking = true;
+      // Auto-close mobile menu when resizing larger
+      if (width >= TABLET_BREAKPOINT && isMenuOpen) {
+        closeMenu();
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY, isHovering]);
+    // Add event listener
+    window.addEventListener("resize", handleResize);
 
-  // Handle mouse hover on top of page
-  const handleMouseEnter = useCallback(() => {
-    setIsHovering(true);
-    setIsHeaderVisible(true);
-  }, []);
+    // Initial check
+    handleResize();
 
-  const handleMouseLeave = useCallback(() => {
-    setIsHovering(false);
-    if (window.scrollY > 50 && window.scrollY > lastScrollY) {
-      setIsHeaderVisible(false);
-    }
-  }, [lastScrollY]);
+    // Clean up
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isMenuOpen, closeMenu]);
 
-  // Optimized click outside handler
-  useEffect(() => {
-    if (!isUserMenuOpen) return;
+  // Determine if we should show mobile nav based on window width or forced state
+  const showMobileNav = windowWidth < MOBILE_BREAKPOINT || forceMobileMode;
 
-    const handleClickOutside = (event) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-        setIsUserMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isUserMenuOpen]);
-
-  // Memoized navigation handler
-  const handleNavigate = useCallback((path) => {
-    window.location.href = path;
-    setIsMobileMenuOpen(false);
-    setIsUserMenuOpen(false);
-  }, []);
-
-  // Memoized logout handler
-  const handleLogout = useCallback(async () => {
-    try {
-      await logout();
-      window.location.href = "/login";
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  }, [logout]);
-
-  // Memoized search handlers
-  const handleSearchChange = useCallback((e) => {
-    setSearchValue(e.target.value);
-  }, []);
-
-  const handleSearchFocus = useCallback(() => {
-    setIsSearchFocused(true);
-  }, []);
-
-  const handleSearchBlur = useCallback(() => {
-    setIsSearchFocused(false);
-  }, []);
-
-  const handleSearchClear = useCallback(() => {
-    setSearchValue("");
-  }, []);
-
-  // Animation variants defined outside render function
-  const logoHoverVariants = {
-    hover: { scale: 1.03 },
-    tap: { scale: 0.97 },
-  };
-
-  // Header container animation variants
-  const containerVariants = {
-    visible: { opacity: 1, y: 0, transition: { duration: 0.7 } },
-    hidden: { opacity: 0, y: -100, transition: { duration: 0.7 } },
-  };
+  // Determine if we should hide certain elements based on window width
+  const hideSecondaryElements =
+    windowWidth < COMPACT_BREAKPOINT && windowWidth >= MOBILE_BREAKPOINT;
 
   return (
     <>
-      {/* Hover detection area - always at top of screen */}
-      <div
-        className="fixed top-0 left-0 right-0 h-6 z-50"
-        onMouseEnter={handleMouseEnter}
-      />
-
-      <motion.div
-        ref={headerRef}
-        className="fixed top-0 left-0 right-0 z-40"
-        initial="visible"
-        animate={isHeaderVisible ? "visible" : "hidden"}
-        variants={containerVariants}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+      {/* Skip link for accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-20 focus:left-4 z-50 
+        bg-white dark:bg-gray-800 px-4 py-2 text-primary dark:text-primary-light rounded-md"
       >
-        <div
-          className={`transition-all duration-500 ${
-            isScrolled ? "pt-4 px-4 sm:px-6 lg:px-8" : "pt-0 px-0"
-          }`}
-        >
+        Đi đến nội dung chính
+      </a>
+
+      {/* Main Header */}
+      <motion.header
+        ref={headerRef}
+        className={`fixed top-0 left-0 w-full z-50 ${headerBgClass} will-change-transform`}
+        initial="hidden"
+        animate={isHeaderVisible ? "visible" : "hidden"}
+        variants={headerVariants}
+      >
+        <div className="max-w-screen-xl mx-auto">
           <div
-            className={`transition-all duration-500 ease-in-out ${
-              isScrolled ? "max-w-7xl mx-auto" : "w-full"
+            className={`px-3 py-2 sm:px-4 lg:px-6 transition-all duration-300 ${
+              isCompactMode ? "py-1.5" : "py-2"
             }`}
           >
-            <header
-              className={`transition-all duration-500 
-                ${
-                  isScrolled
-                    ? "rounded-2xl shadow-lg dark:shadow-black/40 bg-white/90 dark:bg-gray-800/95 backdrop-blur-lg"
-                    : "rounded-none shadow-md bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm"
+            <div className="flex items-center justify-between gap-1 md:gap-3">
+              {/* Left: Logo - Hidden in compact mode but always visible on mobile */}
+              <motion.div
+                className="flex-shrink-0"
+                initial="normal"
+                animate={
+                  !showMobileNav && headerState === "compact"
+                    ? "compact"
+                    : "normal"
                 }
-              `}
-            >
-              <div
-                className={`border-b transition-colors duration-500 ${
-                  isScrolled
-                    ? "border-gray-200 dark:border-gray-700"
-                    : "border-transparent"
-                }`}
+                variants={logoVariants}
               >
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <div className="flex items-center justify-between h-16 sm:h-20">
-                    {/* Logo with hover effect */}
-                    <motion.button
-                      variants={logoHoverVariants}
-                      whileHover="hover"
-                      whileTap="tap"
-                      onClick={() => handleNavigate("/")}
-                      className="flex items-center gap-3 group transition-transform duration-300"
-                    >
-                      <div className="h-10 w-10 rounded-xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow duration-300">
-                        <img
-                          src={TicketLogo}
-                          alt="Logo"
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <div className="hidden sm:block">
-                        <h1 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
-                          TicketHub
-                        </h1>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          Best resell platform
-                        </p>
-                      </div>
-                    </motion.button>
+                <HeaderLogo condensed={hideSecondaryElements} />
+              </motion.div>
 
-                    {/* Navigation Links - memoized internally */}
-                    <NavLinks
-                      onNavigate={handleNavigate}
-                      activePath={window.location.pathname}
-                    />
-
-                    {/* Search and Actions */}
-                    <div className="flex items-center gap-4">
-                      <div className="hidden sm:block">
-                        <SearchBar
-                          value={searchValue}
-                          onChange={handleSearchChange}
-                          onFocus={handleSearchFocus}
-                          onBlur={handleSearchBlur}
-                          onClear={handleSearchClear}
-                        />
-                      </div>
-
-                      <ThemeToggleButton
-                        isDarkMode={isDarkMode}
-                        onClick={handleThemeToggle}
-                      />
-
-                      {user ? (
-                        <div className="flex items-center gap-4">
-                          <UserActions
-                            user={user}
-                            onNavigate={handleNavigate}
-                          />
-
-                          <div className="relative" ref={userMenuRef}>
-                            <UserProfileButton
-                              user={user}
-                              isUserMenuOpen={isUserMenuOpen}
-                              toggleUserMenu={toggleUserMenu}
-                            />
-
-                            <UserMenu
-                              isOpen={isUserMenuOpen}
-                              onClose={() => setIsUserMenuOpen(false)}
-                              handleLogout={handleLogout}
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        <GuestButtons onNavigate={handleNavigate} />
-                      )}
-
-                      {/* Mobile Menu Button with animation */}
-                      <MobileMenuToggle
-                        isOpen={isMobileMenuOpen}
-                        toggleMobileMenu={toggleMobileMenu}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Mobile Menu - Only render when needed */}
-              {isMobileMenuOpen && (
-                <MobileMenu
-                  isOpen={isMobileMenuOpen}
-                  onClose={() => setIsMobileMenuOpen(false)}
-                  searchValue={searchValue}
-                  onSearchChange={handleSearchChange}
-                  onNavigate={handleNavigate}
-                  user={user}
-                  handleLogout={handleLogout}
-                  isDarkMode={isDarkMode}
-                  dispatch={dispatch}
-                  toggleTheme={toggleTheme}
-                  isAuthenticated={!!user}
-                />
+              {/* Center: Navigation - Desktop Only */}
+              {!showMobileNav && (
+                <motion.div
+                  className="relative z-10 flex-grow flex justify-center overflow-hidden"
+                  initial="normal"
+                  animate={headerState}
+                  variants={navVariants}
+                >
+                  <DesktopNav hideSecondary={hideSecondaryElements} />
+                </motion.div>
               )}
-            </header>
-          </div>
-        </div>
-      </motion.div>
 
-      {/* Empty spacer that matches the header height to prevent content jump */}
-      <div className="h-16 sm:h-20"></div>
+              {/* Right: Actions */}
+              <div className="flex items-center gap-1 sm:gap-2 md:gap-3 flex-shrink-0">
+                {/* Mobile Menu Button - Only on small screens */}
+                {showMobileNav && (
+                  <div className="order-last">
+                    <MobileMenuButton
+                      isOpen={isMenuOpen}
+                      onClick={toggleMenu}
+                    />
+                  </div>
+                )}
+
+                {/* Search Bar */}
+                <motion.div
+                  className="relative z-30"
+                  initial="normal"
+                  animate={
+                    !showMobileNav && headerState === "compact"
+                      ? "compact"
+                      : "normal"
+                  }
+                  variants={actionsVariants}
+                >
+                  <SearchBar mini={hideSecondaryElements || showMobileNav} />
+                </motion.div>
+
+                {/* Theme Toggle */}
+                <motion.div
+                  className="z-20"
+                  initial="normal"
+                  animate={
+                    !showMobileNav && headerState === "compact"
+                      ? "compact"
+                      : "normal"
+                  }
+                  variants={actionsVariants}
+                >
+                  <ThemeToggle />
+                </motion.div>
+
+                {/* User Menu */}
+                <motion.div
+                  className="z-20"
+                  initial="normal"
+                  animate={
+                    !showMobileNav && headerState === "compact"
+                      ? "compact"
+                      : "normal"
+                  }
+                  variants={actionsVariants}
+                >
+                  <UserMenu />
+                </motion.div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Navigation with AnimatePresence for proper exit animations */}
+          <Suspense fallback={null}>
+            <AnimatePresence mode="wait">
+              {isMenuOpen && showMobileNav && (
+                <MobileNav isOpen={isMenuOpen} onItemClick={closeMenu} />
+              )}
+            </AnimatePresence>
+          </Suspense>
+        </div>
+      </motion.header>
+
+      {/* Spacer to prevent content from hiding under header */}
+      <div
+        ref={spacerRef}
+        className="h-14 sm:h-16 md:h-18"
+        id="main-content"
+        aria-hidden="true"
+      ></div>
     </>
   );
 };
 
+// Memoize for performance
 export default memo(Header);
