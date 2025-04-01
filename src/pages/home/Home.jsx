@@ -3,8 +3,6 @@ import HeroSection from "./HeroSection";
 import FeaturedEvents from "./FeatureEvent";
 import CategoriesSection from "./CategoriesSection";
 import VenuesSection from "./VenuesSection";
-import TestimonialsSection from "./TestimonialsSection";
-import NewsSection from "./NewsSection";
 import FAQSection from "./FAQSection";
 import NewsletterSection from "./NewSletterSection";
 
@@ -15,8 +13,6 @@ const Home = () => {
       <FeaturedEvents />
       <CategoriesSection />
       <VenuesSection />
-      <TestimonialsSection />
-      <NewsSection />
       <FAQSection />
       <NewsletterSection />
     </div>

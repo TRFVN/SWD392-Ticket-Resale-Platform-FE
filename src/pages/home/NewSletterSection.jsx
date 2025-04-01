@@ -46,6 +46,8 @@ const BenefitCard = memo(({ title, description, icon: Icon, index }) => (
   </motion.div>
 ));
 
+BenefitCard.displayName = "BenefitCard";
+
 // Status message component
 const StatusMessage = memo(({ status }) => {
   const isSuccess = status === "success";
@@ -64,21 +66,20 @@ const StatusMessage = memo(({ status }) => {
         <>
           <CheckCircle className="w-5 h-5 text-white flex-shrink-0" />
           <p className="text-white text-sm">
-            Thanks for subscribing! Please check your email to confirm your
-            subscription.
+            Cảm ơn bạn đã đăng ký! Vui lòng kiểm tra email để xác nhận đăng ký.
           </p>
         </>
       ) : (
         <>
           <AlertCircle className="w-5 h-5 text-white flex-shrink-0" />
-          <p className="text-white text-sm">
-            Something went wrong. Please try again.
-          </p>
+          <p className="text-white text-sm">Đã xảy ra lỗi. Vui lòng thử lại.</p>
         </>
       )}
     </motion.div>
   );
 });
+
+StatusMessage.displayName = "StatusMessage";
 
 // Main component
 const NewsletterSection = () => {
@@ -90,20 +91,19 @@ const NewsletterSection = () => {
   const benefits = [
     {
       icon: Calendar,
-      title: "Early Access",
+      title: "Ưu tiên đặt vé",
       description:
-        "Get first access to ticket sales and exclusive presales for top events",
+        "Nhận thông báo sớm và ưu tiên đặt vé cho các sự kiện hot nhất",
     },
     {
       icon: Bell,
-      title: "Personalized Updates",
-      description:
-        "Receive notifications about events matching your interests and preferences",
+      title: "Thông báo tùy chỉnh",
+      description: "Nhận thông báo về các sự kiện phù hợp với sở thích của bạn",
     },
     {
       icon: Gift,
-      title: "Special Offers",
-      description: "Exclusive discounts and promotions just for subscribers",
+      title: "Ưu đãi đặc biệt",
+      description: "Nhận các ưu đãi và khuyến mãi độc quyền",
     },
   ];
 
@@ -154,15 +154,15 @@ const NewsletterSection = () => {
             variants={itemVariants}
             className="text-4xl md:text-5xl font-bold text-white mb-6"
           >
-            Stay Updated with Event Alerts
+            Đăng Ký Nhận Thông Báo Sự Kiện
           </motion.h2>
 
           <motion.p
             variants={itemVariants}
             className="text-lg md:text-xl text-white/90 mb-10"
           >
-            Get personalized event recommendations and exclusive offers
-            delivered right to your inbox
+            Nhận thông tin về các sự kiện mới nhất và ưu đãi đặc biệt trực tiếp
+            trong hộp thư của bạn
           </motion.p>
 
           {/* Newsletter Form */}
@@ -175,7 +175,7 @@ const NewsletterSection = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
+                    placeholder="Nhập email của bạn"
                     className="w-full pl-12 pr-4 py-3.5 rounded-lg bg-white/95 
                       text-gray-900 placeholder-gray-500 focus:outline-none 
                       focus:ring-2 focus:ring-white/30 shadow-xl"
@@ -206,11 +206,11 @@ const NewsletterSection = () => {
                         }}
                         className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
                       />
-                      <span>Subscribing</span>
+                      <span>Đang đăng ký...</span>
                     </>
                   ) : (
                     <>
-                      <span>Subscribe Now</span>
+                      <span>Đăng ký ngay</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
@@ -228,19 +228,19 @@ const NewsletterSection = () => {
                 variants={itemVariants}
                 className="mt-4 text-sm text-white/80"
               >
-                By subscribing, you agree to our{" "}
+                Bằng cách đăng ký, bạn đồng ý với{" "}
                 <button
                   type="button"
                   className="underline hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/30 rounded"
                 >
-                  Privacy Policy
+                  Chính sách bảo mật
                 </button>{" "}
-                and{" "}
+                và{" "}
                 <button
                   type="button"
                   className="underline hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/30 rounded"
                 >
-                  Terms of Service
+                  Điều khoản sử dụng
                 </button>
               </motion.p>
             </form>

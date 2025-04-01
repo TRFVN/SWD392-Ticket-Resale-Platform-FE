@@ -38,7 +38,7 @@ const SectionTitle = memo(({ title, subtitle }) => (
     >
       <span className="w-12 h-1 bg-orange-500 rounded-full"></span>
       <span className="text-orange-500 font-semibold uppercase tracking-wider">
-        FAQ
+        Câu hỏi thường gặp
       </span>
       <span className="w-12 h-1 bg-orange-500 rounded-full"></span>
     </motion.div>
@@ -58,6 +58,8 @@ const SectionTitle = memo(({ title, subtitle }) => (
     </motion.p>
   </motion.div>
 ));
+
+SectionTitle.displayName = "SectionTitle";
 
 // Optimized FAQ Item component
 const FAQItem = memo(({ question, answer, isOpen, onToggle, index }) => {
@@ -134,12 +136,12 @@ const FAQItem = memo(({ question, answer, isOpen, onToggle, index }) => {
 
               {/* Optional: "Was this helpful?" buttons */}
               <div className="flex items-center gap-3 mt-4 text-sm text-gray-500">
-                <span>Was this helpful?</span>
+                <span>Thông tin này có hữu ích?</span>
                 <button className="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                  Yes
+                  Có
                 </button>
                 <button className="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                  No
+                  Không
                 </button>
               </div>
             </div>
@@ -149,6 +151,8 @@ const FAQItem = memo(({ question, answer, isOpen, onToggle, index }) => {
     </motion.div>
   );
 });
+
+FAQItem.displayName = "FAQItem";
 
 // Main component
 const FAQSection = () => {
@@ -166,32 +170,42 @@ const FAQSection = () => {
     setSearchQuery(e.target.value);
   }, []);
 
-  // FAQ data
+  // FAQ data with Vietnamese content
   const faqs = [
     {
-      question: "How do I purchase tickets?",
+      question: "Làm thế nào để mua vé sự kiện?",
       answer:
-        "Simply browse events, select your desired tickets, and proceed to checkout. We accept all major payment methods including credit cards, PayPal, and Apple Pay. After purchase, tickets will be delivered to your email or available in your account.",
+        "Bạn có thể dễ dàng mua vé bằng cách duyệt danh sách sự kiện, chọn vé mong muốn và tiến hành thanh toán. Chúng tôi chấp nhận tất cả các phương thức thanh toán phổ biến bao gồm thẻ tín dụng, ví điện tử và chuyển khoản ngân hàng. Sau khi mua, vé sẽ được gửi đến email của bạn hoặc có sẵn trong tài khoản.",
     },
     {
-      question: "Can I get a refund for my tickets?",
+      question: "Tôi có thể hoàn tiền vé không?",
       answer:
-        "Refund policies vary by event. Please check the specific event's terms and conditions for details. Generally, most events allow refunds up to 48 hours before the event starts. For special circumstances, please contact our support team.",
+        "Chính sách hoàn tiền khác nhau tùy theo từng sự kiện. Vui lòng kiểm tra điều khoản và điều kiện cụ thể của sự kiện để biết chi tiết. Thông thường, hầu hết các sự kiện cho phép hoàn tiền trong vòng 48 giờ trước khi sự kiện bắt đầu. Trong trường hợp đặc biệt, vui lòng liên hệ với đội ngũ hỗ trợ của chúng tôi.",
     },
     {
-      question: "How do I transfer tickets to someone else?",
+      question: "Làm thế nào để chuyển vé cho người khác?",
       answer:
-        "You can easily transfer tickets through your account dashboard or the mobile app. Go to 'My Tickets', select the ticket you want to transfer, click 'Transfer', and enter the recipient's email address. They'll receive instructions to claim the tickets.",
+        "Bạn có thể dễ dàng chuyển vé thông qua trang quản lý tài khoản hoặc ứng dụng di động. Vào phần 'Vé của tôi', chọn vé muốn chuyển, nhấp vào 'Chuyển vé' và nhập địa chỉ email của người nhận. Họ sẽ nhận được hướng dẫn để nhận vé.",
     },
     {
-      question: "Are the tickets guaranteed authentic?",
+      question: "Vé có được đảm bảo chính hãng không?",
       answer:
-        "Yes, all tickets purchased through our platform are 100% guaranteed authentic. We work directly with event organizers and verified resellers. If you ever encounter an issue with ticket validity, we offer a full refund guarantee.",
+        "Vâng, tất cả vé được mua thông qua nền tảng của chúng tôi đều được đảm bảo 100% chính hãng. Chúng tôi làm việc trực tiếp với ban tổ chức sự kiện và các đại lý được xác minh. Nếu bạn gặp vấn đề về tính hợp lệ của vé, chúng tôi sẽ hoàn tiền đầy đủ.",
     },
     {
-      question: "What happens if my event gets postponed or cancelled?",
+      question: "Điều gì xảy ra nếu sự kiện bị hoãn hoặc hủy?",
       answer:
-        "If an event is postponed, your tickets will automatically be valid for the new date. If an event is cancelled, you'll automatically receive a refund to your original payment method within 10-14 business days.",
+        "Nếu sự kiện bị hoãn, vé của bạn sẽ tự động có hiệu lực cho ngày mới. Nếu sự kiện bị hủy, bạn sẽ tự động nhận được hoàn tiền vào phương thức thanh toán ban đầu trong vòng 10-14 ngày làm việc.",
+    },
+    {
+      question: "Tôi có thể mua vé trực tiếp tại cửa không?",
+      answer:
+        "Có, một số sự kiện cho phép mua vé trực tiếp tại cửa. Tuy nhiên, chúng tôi khuyến nghị mua vé trước qua nền tảng để đảm bảo có chỗ và nhận được các ưu đãi đặc biệt. Vui lòng kiểm tra thông tin chi tiết của từng sự kiện.",
+    },
+    {
+      question: "Làm thế nào để tôi nhận được thông báo về sự kiện mới?",
+      answer:
+        "Bạn có thể đăng ký nhận thông báo bằng cách tạo tài khoản và chọn các danh mục sự kiện yêu thích. Chúng tôi sẽ gửi email thông báo về các sự kiện mới phù hợp với sở thích của bạn.",
     },
   ];
 
@@ -207,85 +221,55 @@ const FAQSection = () => {
   return (
     <section className="py-24 bg-gray-50 dark:bg-gray-800/50 relative overflow-hidden">
       {/* Decorative elements */}
-      <div className="absolute top-0 left-0 w-1/2 h-64 bg-orange-50 dark:bg-orange-950/10 rounded-br-full -z-10" />
-      <div className="absolute bottom-0 right-0 w-1/3 h-1/2 bg-gray-100 dark:bg-gray-700/20 rounded-tl-3xl -z-10" />
+      <div className="absolute top-1/2 left-0 w-64 h-64 bg-orange-500/5 rounded-full -translate-y-1/2 -translate-x-1/2 blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-400/5 rounded-full translate-y-1/2 translate-x-1/4 blur-3xl" />
 
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-6 relative z-10">
         <SectionTitle
-          title="Frequently Asked Questions"
-          subtitle="Got questions? We've got answers to help you navigate our platform"
+          title="Câu Hỏi Thường Gặp"
+          subtitle="Tìm câu trả lời cho những thắc mắc phổ biến"
         />
 
         {/* Search bar */}
-        <motion.div
-          variants={itemVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="max-w-3xl mx-auto mb-12"
-        >
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="w-5 h-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search for answers..."
-              value={searchQuery}
-              onChange={handleSearch}
-              className="w-full py-3.5 pl-12 pr-4 rounded-xl bg-white dark:bg-gray-700 
-                border border-gray-200 dark:border-gray-600
-                focus:outline-none focus:ring-2 focus:ring-orange-500/40
-                text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
-            />
-          </div>
-        </motion.div>
-
-        {/* FAQ items */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="max-w-3xl mx-auto divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800 rounded-xl shadow-sm"
+          className="max-w-xl mx-auto mb-12"
         >
-          {filteredFaqs.length > 0 ? (
-            filteredFaqs.map((faq, index) => (
-              <FAQItem
-                key={`faq-${index}`}
-                question={faq.question}
-                answer={faq.answer}
-                isOpen={activeIndex === index}
-                onToggle={() => handleToggle(index)}
-                index={index}
-              />
-            ))
-          ) : (
-            <motion.div variants={itemVariants} className="py-12 text-center">
-              <p className="text-gray-500 dark:text-gray-400">
-                No matching questions found. Try a different search term.
-              </p>
-            </motion.div>
-          )}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm câu hỏi..."
+              value={searchQuery}
+              onChange={handleSearch}
+              className="w-full pl-12 pr-4 py-3 rounded-full bg-white dark:bg-gray-800 
+                border border-gray-200 dark:border-gray-700 focus:border-orange-500 
+                focus:ring-2 focus:ring-orange-500/20 transition-all duration-300"
+            />
+          </div>
         </motion.div>
 
-        {/* Contact support link */}
+        {/* FAQ list */}
         <motion.div
-          variants={itemVariants}
+          variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true }}
-          className="text-center mt-12"
+          viewport={{ once: true, margin: "-100px" }}
+          className="max-w-3xl mx-auto space-y-4"
         >
-          <p className="text-gray-600 dark:text-gray-300">
-            Can't find what you're looking for?{" "}
-            <a
-              href="#"
-              className="text-orange-500 hover:text-orange-600 font-medium"
-            >
-              Contact our support team
-            </a>
-          </p>
+          {filteredFaqs.map((faq, index) => (
+            <FAQItem
+              key={index}
+              question={faq.question}
+              answer={faq.answer}
+              isOpen={activeIndex === index}
+              onToggle={() => handleToggle(index)}
+              index={index}
+            />
+          ))}
         </motion.div>
       </div>
     </section>

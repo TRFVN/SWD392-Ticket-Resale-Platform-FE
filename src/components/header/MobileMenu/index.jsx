@@ -1,14 +1,23 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Ticket, Calendar, MapPin, TrendingUp, PlusCircle } from "lucide-react";
+import {
+  Ticket,
+  Calendar,
+  MapPin,
+  TrendingUp,
+  PlusCircle,
+  ShoppingCart,
+  Info,
+} from "lucide-react";
 import { useNavigationItems } from "../../../hooks/useNavigationItems";
+import { Link } from "react-router-dom";
 
 /**
  * Mobile Navigation Menu
  * Modern, animated mobile drawer with glassmorphism
  */
 const MobileNav = ({ isOpen, onItemClick }) => {
-  const { navItems, activeTab, setActiveTab, handleNavigation } =
+  const { navItems, activeTab, setActiveTab, handleNavigation, cartCount } =
     useNavigationItems();
 
   // Icon mapping for navigation items
@@ -53,6 +62,26 @@ const MobileNav = ({ isOpen, onItemClick }) => {
     open: { opacity: 1, x: 0 },
   };
 
+  const MobileNavItem = ({ icon: Icon, label, path, onItemClick, badge }) => (
+    <motion.div variants={itemVariants} whileTap={{ scale: 0.95 }}>
+      <Link
+        to={path}
+        className="flex items-center px-6 py-4 text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        onClick={onItemClick}
+      >
+        <span className="relative">
+          {Icon && <Icon className="w-5 h-5 mr-3" />}
+          {badge && (
+            <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-orange-500 rounded-full">
+              {badge > 99 ? "99+" : badge}
+            </span>
+          )}
+        </span>
+        {label}
+      </Link>
+    </motion.div>
+  );
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -71,104 +100,41 @@ const MobileNav = ({ isOpen, onItemClick }) => {
           />
 
           <div className="px-4 py-3 relative">
-            <ul className="space-y-2 py-2">
-              {navItems.map((item, index) => {
-                const Icon = iconMap[item.id] || Ticket;
-
-                return (
-                  <motion.li
-                    key={item.id}
-                    variants={itemVariants}
-                    custom={index}
-                  >
-                    <motion.a
-                      href={item.path}
-                      className={`
-                        flex items-center gap-3 px-4 py-3 rounded-xl
-                        ${
-                          activeTab === item.id
-                            ? "bg-primary text-white dark:bg-primary-dark"
-                            : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
-                        }
-                        transition-all duration-200
-                      `}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleClick(item.id, item.path);
-                      }}
-                      whileHover={{
-                        x: 5,
-                        transition: { duration: 0.2 },
-                      }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <div
-                        className={`
-                        flex items-center justify-center w-8 h-8 rounded-lg
-                        ${
-                          activeTab === item.id
-                            ? "bg-white/20"
-                            : "bg-primary/10 dark:bg-gray-700"
-                        }
-                      `}
-                      >
-                        <Icon
-                          className={
-                            activeTab === item.id
-                              ? "text-white"
-                              : "text-primary dark:text-gray-300"
-                          }
-                          size={18}
-                        />
-                      </div>
-
-                      <span className="font-medium">{item.label}</span>
-
-                      {item.badge && (
-                        <motion.span
-                          className={`
-                            ml-auto px-2 py-0.5 text-xs rounded-full
-                            ${
-                              activeTab === item.id
-                                ? "bg-white/20 text-white"
-                                : "bg-primary text-white"
-                            }
-                          `}
-                          initial={{ scale: 1 }}
-                          animate={{ scale: [1, 1.15, 1] }}
-                          transition={{
-                            duration: 1.5,
-                            repeat: Infinity,
-                            repeatType: "loop",
-                            repeatDelay: 1,
-                          }}
-                        >
-                          {item.badge}
-                        </motion.span>
-                      )}
-
-                      {/* Arrow indicator for active item */}
-                      {activeTab === item.id && (
-                        <motion.svg
-                          className="w-5 h-5 ml-auto text-white"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          initial={{ x: -5, opacity: 0 }}
-                          animate={{ x: 0, opacity: 1 }}
-                          transition={{ delay: 0.2 }}
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </motion.svg>
-                      )}
-                    </motion.a>
-                  </motion.li>
-                );
-              })}
-            </ul>
+            <nav className="mt-4 border-t border-gray-200 dark:border-gray-800">
+              <motion.div
+                variants={itemVariants}
+                initial="closed"
+                animate="open"
+                className="py-2"
+              >
+                <MobileNavItem
+                  icon={Ticket}
+                  label="Vé"
+                  path="/tickets"
+                  onItemClick={onItemClick}
+                  badge={cartCount}
+                />
+                <MobileNavItem
+                  icon={Calendar}
+                  label="Sự kiện"
+                  path="/events"
+                  onItemClick={onItemClick}
+                />
+                <MobileNavItem
+                  icon={ShoppingCart}
+                  label="Giỏ hàng"
+                  path="/cart"
+                  onItemClick={onItemClick}
+                  badge={cartCount}
+                />
+                <MobileNavItem
+                  icon={Info}
+                  label="Về chúng tôi"
+                  path="/about"
+                  onItemClick={onItemClick}
+                />
+              </motion.div>
+            </nav>
 
             {/* Quick action buttons */}
             <motion.div

@@ -20,15 +20,28 @@ const TicketDetails = () => {
 
   if (!ticket) return null;
 
-  const formatDate = (date) => {
-    return new Intl.DateTimeFormat("vi-VN", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-    }).format(new Date(date));
+  const formatDate = (dateString) => {
+    try {
+      // Check if date string is valid
+      if (!dateString) return "Date not available";
+
+      const date = new Date(dateString);
+
+      // Check if date is valid
+      if (isNaN(date.getTime())) return "Invalid date";
+
+      return new Intl.DateTimeFormat("vi-VN", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      }).format(date);
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Date formatting error";
+    }
   };
 
   return (

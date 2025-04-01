@@ -215,7 +215,7 @@ const SuccessState = ({ order }) => {
 
         <div className="w-full flex gap-2">
           <button
-            onClick={() => navigate("/mytickets")}
+            onClick={() => navigate("/my-tickets")}
             className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg flex items-center justify-center gap-2 transition-colors"
           >
             <Package className="w-4 h-4" />
@@ -264,6 +264,7 @@ const OrderConfirmation = () => {
   const [error, setError] = useState(null);
   const [order, setOrder] = useState(null);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState(null);
   const isDarkMode = useSelector((state) => state.theme?.isDarkMode || false);
 
   // Parse query parameters
@@ -274,31 +275,40 @@ const OrderConfirmation = () => {
 
   useEffect(() => {
     if (orderId) {
-      // Log để debug
+      // Log for debugging
       console.log("OrderId detected:", orderId);
       console.log("URL parameters:", location.search);
 
-      // Retrieve transaction ID from localStorage
-      const key = `order_${orderId}_transaction`;
-      const storedTransactionId = localStorage.getItem(key);
-      console.log(
-        "Transaction ID from localStorage:",
-        key,
-        "=",
-        storedTransactionId,
-      );
+      // Check if cancelled first
+      if (cancelled) {
+        setLoading(false);
+        return;
+      }
 
-      if (code === "00" && !cancelled && paymentStatus === "PAID") {
-        if (storedTransactionId) {
-          // Xác nhận thanh toán với transactionId lấy được
-          confirmPayment(storedTransactionId);
-        } else {
-          console.error("No transaction ID found in localStorage");
-          setError("Payment transaction information not found");
-          setLoading(false);
-        }
+      // Retrieve transaction ID and order number from localStorage
+      const transactionKey = `order_${orderId}_transaction`;
+      const orderNumberKey = `order_${orderId}_number`;
+
+      const storedTransactionId = localStorage.getItem(transactionKey);
+      const storedOrderNumber = localStorage.getItem(orderNumberKey);
+
+      console.log("Transaction ID from localStorage:", storedTransactionId);
+      console.log("Order Number from localStorage:", storedOrderNumber);
+
+      // Check if we came from payment page
+      const fromPayment = code || paymentStatus === "PAID";
+
+      if (storedTransactionId && storedOrderNumber) {
+        // If we have the transaction ID and order number in localStorage, use them
+        confirmPayment(storedTransactionId, storedOrderNumber);
+      } else if (fromPayment) {
+        // If we came from payment but don't have the transaction data
+        setError(
+          "Payment transaction information not found. Please contact support.",
+        );
+        setLoading(false);
       } else {
-        // If payment was not successful, just fetch the order
+        // Normal order view, just fetch the details
         fetchOrderDetails();
       }
     } else {
@@ -306,48 +316,70 @@ const OrderConfirmation = () => {
       setError("Invalid order information");
     }
   }, [orderId, code, cancelled, paymentStatus]);
-  const confirmPayment = async (transactionId) => {
+
+  const confirmPayment = async (transactionId, orderNumber) => {
     try {
       setLoading(true);
 
-      // Fetch order details first to get the order number
-      const orderResponse = await axiosInstance.get(`api/Order/${orderId}`);
-
-      if (!orderResponse.data.isSuccess) {
-        throw new Error(
-          orderResponse.data.message || "Failed to fetch order details",
-        );
-      }
-
-      setOrder(orderResponse.data.result);
-      const orderNumber = orderResponse.data.result.orderNumber;
-
-      // Log to verify what we're sending
+      // Log the payment confirmation details
       console.log("Confirming payment with transaction ID:", transactionId);
       console.log("Order Number:", orderNumber);
 
-      // Now confirm the payment
+      // Make the API call to confirm payment
       const response = await axiosInstance.post("api/Payment/confirm-payment", {
         orderNumber: orderNumber,
         paymentTransactionId: transactionId,
       });
 
       if (response.data.isSuccess) {
-        // Thành công - xóa transactionId khỏi localStorage
+        // Success - clean up localStorage
         localStorage.removeItem(`order_${orderId}_transaction`);
+        localStorage.removeItem(`order_${orderId}_number`);
         console.log(
-          "Removed transaction ID from localStorage after successful confirmation",
+          "Payment data cleared from localStorage after successful confirmation",
         );
 
+        // Store payment details from the response
+        if (response.data.result) {
+          setPaymentDetails(response.data.result);
+
+          // Log the number of tickets assigned
+          if (response.data.result.ticketsAssigned) {
+            console.log(
+              `${response.data.result.ticketsAssigned} tickets assigned successfully`,
+            );
+          }
+
+          // Log transaction ID from response
+          if (response.data.result.transactionId) {
+            console.log(
+              "Confirmed Transaction ID:",
+              response.data.result.transactionId,
+            );
+          }
+        }
+
         setPaymentConfirmed(true);
-        toast.success("Payment confirmed successfully!");
+        toast.success(
+          response.data.message || "Payment confirmed successfully!",
+        );
+
+        // Now fetch order details to display the up-to-date information
+        await fetchOrderDetails();
       } else {
         throw new Error(response.data.message || "Payment confirmation failed");
       }
     } catch (err) {
       console.error("Payment confirmation error:", err);
       setError(err.message || "Failed to confirm payment");
-      toast.error("Payment confirmation failed");
+      toast.error("Payment confirmation failed. Please contact support.");
+
+      // Still try to fetch order details to show at least basic information
+      try {
+        await fetchOrderDetails();
+      } catch (fetchErr) {
+        console.error("Failed to fetch order after payment error:", fetchErr);
+      }
     } finally {
       setLoading(false);
     }
@@ -357,7 +389,7 @@ const OrderConfirmation = () => {
   const fetchOrderDetails = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(`api/Order/${orderId}`);
+      const response = await axiosInstance.get(`api/Order`);
 
       if (response.data.isSuccess) {
         setOrder(response.data.result);
@@ -374,6 +406,42 @@ const OrderConfirmation = () => {
     }
   };
 
+  // Success state component (updated to include payment details if available)
+  const renderSuccessState = () => {
+    return (
+      <div className="flex flex-col items-center justify-center py-8">
+        <div
+          className={`p-4 rounded-full ${
+            isDarkMode ? "bg-green-900/30" : "bg-green-100"
+          } mb-4`}
+        >
+          <CheckCircle className="w-16 h-16 text-green-500" />
+        </div>
+
+        <h2
+          className={`text-2xl font-bold mb-2 ${
+            isDarkMode ? "text-white" : "text-gray-900"
+          }`}
+        >
+          Payment Successful!
+        </h2>
+
+        <p
+          className={`text-center mb-8 max-w-md ${
+            isDarkMode ? "text-gray-400" : "text-gray-600"
+          }`}
+        >
+          {paymentDetails && paymentDetails.ticketsAssigned
+            ? `Thank you for your payment. Your order has been confirmed and ${paymentDetails.ticketsAssigned} ticket(s) are ready.`
+            : "Thank you for your payment. Your order has been confirmed and your tickets are ready."}
+        </p>
+
+        {order && <SuccessState order={order} />}
+      </div>
+    );
+  };
+
+  // Main render logic
   if (loading) {
     return (
       <div className={`min-h-screen ${isDarkMode ? "bg-black" : "bg-gray-50"}`}>
@@ -391,7 +459,7 @@ const OrderConfirmation = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-3 mb-8">
             <button
-              onClick={() => navigate("/checkout")}
+              onClick={() => navigate("/cart")}
               className={`p-2 rounded-lg ${
                 isDarkMode
                   ? "bg-gray-800 hover:bg-gray-700"
@@ -421,7 +489,7 @@ const OrderConfirmation = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-3 mb-8">
             <button
-              onClick={() => navigate("/checkout")}
+              onClick={() => navigate("/cart")}
               className={`p-2 rounded-lg ${
                 isDarkMode
                   ? "bg-gray-800 hover:bg-gray-700"
@@ -461,10 +529,10 @@ const OrderConfirmation = () => {
               Your payment has been cancelled. You can try again from your cart.
             </p>
             <button
-              onClick={() => navigate("/checkout")}
+              onClick={() => navigate("/cart")}
               className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
             >
-              Return to Checkout
+              Return to Cart
             </button>
           </div>
         </div>
@@ -496,7 +564,9 @@ const OrderConfirmation = () => {
           </h1>
         </div>
 
-        {order && <SuccessState order={order} />}
+        {paymentConfirmed
+          ? renderSuccessState()
+          : order && <SuccessState order={order} />}
       </div>
     </div>
   );

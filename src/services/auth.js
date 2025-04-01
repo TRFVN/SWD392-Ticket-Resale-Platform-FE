@@ -38,9 +38,10 @@ const authService = {
     });
     return response.data;
   },
+
   googleLogin: async (token) => {
-    const response = await axiosInstance.post("/sign-in-google", {
-      token,
+    const response = await axiosInstance.post("/sign-in-by-google", {
+      tokenGoogle: token,
     });
     return response.data;
   },

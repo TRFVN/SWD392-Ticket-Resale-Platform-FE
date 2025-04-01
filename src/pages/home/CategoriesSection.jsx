@@ -1,12 +1,15 @@
 import React, { memo } from "react";
 import { motion } from "framer-motion";
 import {
-  BadgeDollarSign,
-  Music,
-  Radio,
-  Theater,
+  MusicIcon,
+  Landmark,
+  Utensils,
+  Users,
+  Ticket,
   ChevronRight,
   Zap,
+  Calendar,
+  Heart,
 } from "lucide-react";
 
 // Animation variants
@@ -36,12 +39,14 @@ const itemVariants = {
 
 // Optimized CategoryCard component
 const CategoryCard = memo(({ icon: Icon, name, count, index }) => {
-  // Generate a gradient based on index for variety
+  // Generate a gradient based on index for variety, using orange colors
   const gradients = [
-    "from-orange-500 to-pink-500",
-    "from-blue-500 to-teal-400",
-    "from-purple-500 to-indigo-500",
-    "from-green-500 to-teal-400",
+    "from-orange-500 to-orange-600",
+    "from-orange-400 to-orange-500",
+    "from-orange-600 to-orange-700",
+    "from-orange-300 to-orange-400",
+    "from-orange-500 to-orange-600",
+    "from-orange-400 to-orange-500",
   ];
 
   return (
@@ -59,7 +64,7 @@ const CategoryCard = memo(({ icon: Icon, name, count, index }) => {
       />
 
       {/* Background pattern (subtle) */}
-      <div className="absolute -right-16 -bottom-16 w-48 h-48 rounded-full bg-gray-100 dark:bg-gray-700/30 z-0" />
+      <div className="absolute -right-16 -bottom-16 w-48 h-48 rounded-full bg-orange-50 dark:bg-orange-900/10 z-0" />
 
       {/* Icon with gradient background */}
       <div
@@ -84,7 +89,7 @@ const CategoryCard = memo(({ icon: Icon, name, count, index }) => {
               gradients[index % gradients.length]
             }`}
           >
-            Explore {name}
+            Khám phá {name}
           </span>
           <motion.div
             initial={{ x: 0 }}
@@ -104,30 +109,34 @@ const CategoryCard = memo(({ icon: Icon, name, count, index }) => {
       {index === 0 && (
         <div
           className="absolute top-4 right-4 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium
-          bg-gradient-to-r from-amber-500 to-amber-600 text-white"
+          bg-gradient-to-r from-orange-500 to-orange-600 text-white"
         >
           <Zap className="w-3 h-3 fill-white" />
-          <span>Popular</span>
+          <span>Phổ biến</span>
         </div>
       )}
     </motion.div>
   );
 });
 
+CategoryCard.displayName = "CategoryCard";
+
 // Main component
 const CategoriesSection = () => {
   const categories = [
-    { icon: Music, name: "Concerts", count: "1.2k+ Events" },
-    { icon: Theater, name: "Theater", count: "850+ Shows" },
-    { icon: BadgeDollarSign, name: "Sports", count: "945+ Matches" },
-    { icon: Radio, name: "Festivals", count: "670+ Events" },
+    { icon: Calendar, name: "Lễ Hội", count: "120+ Sự kiện" },
+    { icon: MusicIcon, name: "Âm Nhạc", count: "85+ Buổi diễn" },
+    { icon: Utensils, name: "Ẩm Thực", count: "90+ Lễ hội" },
+    { icon: Landmark, name: "Văn Hóa", count: "67+ Sự kiện" },
+    { icon: Users, name: "Hội Chợ", count: "56+ Triển lãm" },
+    { icon: Heart, name: "Truyền Thống", count: "45+ Hoạt động" },
   ];
 
   return (
     <section className="py-24 bg-gray-50 dark:bg-gray-800/50 relative overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute top-1/2 left-0 w-64 h-64 bg-orange-500/5 rounded-full -translate-y-1/2 -translate-x-1/2 blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full translate-y-1/2 translate-x-1/4 blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-400/5 rounded-full translate-y-1/2 translate-x-1/4 blur-3xl" />
 
       <div className="container mx-auto px-6 relative z-10">
         <motion.div
@@ -142,21 +151,21 @@ const CategoriesSection = () => {
             className="inline-block px-4 py-1.5 bg-orange-100 dark:bg-orange-900/30 
               text-orange-600 dark:text-orange-400 rounded-full text-sm font-medium mb-4"
           >
-            CATEGORIES
+            DANH MỤC
           </motion.div>
 
           <motion.h2
             variants={itemVariants}
             className="text-4xl font-bold mb-4 text-gray-900 dark:text-white"
           >
-            Discover by Category
+            Khám Phá Theo Thể Loại
           </motion.h2>
 
           <motion.p
             variants={itemVariants}
             className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
           >
-            Find the perfect entertainment for every taste and occasion
+            Tìm sự kiện hoàn hảo cho mọi sở thích và dịp đặc biệt
           </motion.p>
         </motion.div>
 
@@ -165,7 +174,7 @@ const CategoriesSection = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {categories.map((category, index) => (
             <CategoryCard key={category.name} {...category} index={index} />

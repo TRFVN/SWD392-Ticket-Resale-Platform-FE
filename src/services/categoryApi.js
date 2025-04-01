@@ -6,7 +6,7 @@ export const getAllCategoryApi = async () => {
     const response = await axiosInstance.get("/api/Category", {
       params: {
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 100, // Get more categories to ensure we have all options
       },
     });
     if (response.status === 200) {
@@ -33,7 +33,6 @@ export const deleteCategoryApi = async (categoryId) => {
 };
 
 export const postCategoryApi = async (categoryName) => {
-  // console.log(categoryName);
   try {
     const response = await axiosInstance.post("/Category", {
       categoryName: categoryName,
@@ -47,8 +46,8 @@ export const postCategoryApi = async (categoryName) => {
     throw new Error(error.message || "Failed to create category");
   }
 };
+
 export const putCategoryApi = async (category, categoryId) => {
-  // console.log(categoryName);
   try {
     const response = await axiosInstance.post("/Category", {
       categoryId: categoryId,
@@ -58,10 +57,10 @@ export const putCategoryApi = async (category, categoryId) => {
       return response.data.result;
     } else {
       throw new Error(
-        `Failed to create category with name ${category.categoryName}`,
+        `Failed to update category with name ${category.categoryName}`,
       );
     }
   } catch (error) {
-    throw new Error(error.message || "Failed to create category");
+    throw new Error(error.message || "Failed to update category");
   }
 };

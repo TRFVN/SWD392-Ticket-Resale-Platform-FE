@@ -44,7 +44,7 @@ const SectionTitle = memo(({ title, subtitle }) => (
       className="inline-block px-4 py-1.5 bg-orange-100 dark:bg-orange-900/30 
         text-orange-600 dark:text-orange-400 rounded-full text-sm font-medium mb-4"
     >
-      EXPLORE VENUES
+      ĐỊA ĐIỂM
     </motion.div>
 
     <motion.h2
@@ -63,6 +63,8 @@ const SectionTitle = memo(({ title, subtitle }) => (
   </motion.div>
 ));
 
+SectionTitle.displayName = "SectionTitle";
+
 // Event Badge component
 const EventBadge = memo(({ count }) => (
   <div
@@ -70,9 +72,11 @@ const EventBadge = memo(({ count }) => (
     bg-orange-500 text-white rounded-full text-sm font-medium shadow-lg"
   >
     <Calendar className="w-3.5 h-3.5" />
-    <span>{count} Events</span>
+    <span>{count} Sự kiện</span>
   </div>
 ));
+
+EventBadge.displayName = "EventBadge";
 
 // Rating component
 const Rating = memo(({ rating }) => {
@@ -97,6 +101,8 @@ const Rating = memo(({ rating }) => {
     </div>
   );
 });
+
+Rating.displayName = "Rating";
 
 // Enhanced Venue Card
 const VenueCard = memo(
@@ -144,7 +150,7 @@ const VenueCard = memo(
             bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-medium"
             >
               <Star className="w-3.5 h-3.5 fill-white" />
-              <span>Featured Venue</span>
+              <span>Địa điểm nổi bật</span>
             </div>
           )}
 
@@ -168,7 +174,7 @@ const VenueCard = memo(
               </div>
               <div className="flex items-center gap-2 text-white/80">
                 <Users className="w-4 h-4 text-orange-400" />
-                <span>Capacity: {capacity}</span>
+                <span>Sức chứa: {capacity}</span>
               </div>
             </div>
 
@@ -180,7 +186,7 @@ const VenueCard = memo(
                 rounded-full backdrop-blur-sm flex items-center gap-2 text-sm font-medium
                 transition-colors duration-300 group-hover:bg-orange-500"
               >
-                View Events
+                Xem sự kiện
                 <ChevronRight className="w-4 h-4" />
               </motion.button>
             </div>
@@ -191,108 +197,108 @@ const VenueCard = memo(
   },
 );
 
+VenueCard.displayName = "VenueCard";
+
 // Main component
 const VenuesSection = () => {
   const [filter, setFilter] = useState("");
 
-  // Enhanced venue data
+  // Enhanced venue data with Vietnamese venues
   const venues = [
     {
-      name: "Madison Square Garden",
-      location: "New York, USA",
-      capacity: "20,000",
+      name: "Nhà hát Thành phố Hồ Chí Minh",
+      location: "Quận 1, TP.HCM",
+      capacity: "1,800 người",
       image:
-        "https://cdn.getyourguide.com/img/tour/a7237530a51c73e9c3cbffb53e681009ed5bb0eeb508a05def92b1be03ff4e3f.jpg/145.jpg",
-      eventsCount: 18,
+        "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80",
+      eventsCount: "45",
       rating: 4.8,
       featured: true,
     },
     {
-      name: "O2 Arena",
-      location: "London, UK",
-      capacity: "18,000",
+      name: "Trung tâm Hội nghị Quốc gia",
+      location: "Nam Từ Liêm, Hà Nội",
+      capacity: "3,800 người",
       image:
-        "https://cdn-ilclnep.nitrocdn.com/TxWSlpwrDODMVOywnTPWFGitmqiOLnnV/assets/images/optimized/kotobuki-international.com/wp-content/uploads/2022/10/02-ARENA-LONDON_proyecto_system_10.jpg",
-      eventsCount: 12,
+        "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+      eventsCount: "38",
       rating: 4.7,
     },
     {
-      name: "Staples Center",
-      location: "Los Angeles, USA",
-      capacity: "19,000",
+      name: "Cung Văn hóa Lao động",
+      location: "Quận 1, TP.HCM",
+      capacity: "2,500 người",
       image:
-        "https://thanhnien.mediacdn.vn/Uploaded/minhtan/2021_11_18/fexueslwyaioa8p-7026.jpg",
-      eventsCount: 15,
+        "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2073&q=80",
+      eventsCount: "32",
       rating: 4.6,
     },
     {
-      name: "Wembley Stadium",
-      location: "London, UK",
-      capacity: "90,000",
+      name: "Trung tâm Triển lãm Giảng Võ",
+      location: "Đống Đa, Hà Nội",
+      capacity: "1,500 người",
       image:
-        "https://bookings.wembleytours.com/stadiumtours/images/WEMBLEY_INTERIOR.png",
-      eventsCount: 8,
-      rating: 4.9,
+        "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+      eventsCount: "28",
+      rating: 4.5,
     },
     {
-      name: "Toyota Center",
-      location: "Houston, USA",
-      capacity: "18,300",
+      name: "Nhà văn hóa Thanh niên",
+      location: "Quận 1, TP.HCM",
+      capacity: "1,200 người",
       image:
-        "https://www.getzippin.com/hubfs/Checking%20In%20Blog%20Photos/Toyota%20Center%2C%20HTX.jpeg",
-      eventsCount: 10,
-      rating: 4.5,
+        "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2073&q=80",
+      eventsCount: "25",
+      rating: 4.4,
+    },
+    {
+      name: "Cung Thiếu nhi Hà Nội",
+      location: "Ba Đình, Hà Nội",
+      capacity: "800 người",
+      image:
+        "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80",
+      eventsCount: "20",
+      rating: 4.3,
     },
   ];
 
   // Filter venues based on search input
-  const filteredVenues = filter
-    ? venues.filter(
-        (venue) =>
-          venue.name.toLowerCase().includes(filter.toLowerCase()) ||
-          venue.location.toLowerCase().includes(filter.toLowerCase()),
-      )
-    : venues;
-
-  // Handle search input change
-  const handleSearchChange = useCallback((e) => {
-    setFilter(e.target.value);
-  }, []);
+  const filteredVenues = venues.filter(
+    (venue) =>
+      venue.name.toLowerCase().includes(filter.toLowerCase()) ||
+      venue.location.toLowerCase().includes(filter.toLowerCase()),
+  );
 
   return (
-    <section className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-900/30 relative overflow-hidden">
+    <section className="py-24 bg-gray-50 dark:bg-gray-800/50 relative overflow-hidden">
       {/* Decorative elements */}
-      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-orange-50/50 to-transparent dark:from-orange-900/5 dark:to-transparent -z-10" />
-      <div className="absolute bottom-0 right-0 w-1/3 h-1/2 bg-orange-50/30 dark:bg-orange-900/5 rounded-tl-full -z-10" />
+      <div className="absolute top-1/2 left-0 w-64 h-64 bg-orange-500/5 rounded-full -translate-y-1/2 -translate-x-1/2 blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-400/5 rounded-full translate-y-1/2 translate-x-1/4 blur-3xl" />
 
-      <div className="container mx-auto px-6">
-        {/* Section title */}
+      <div className="container mx-auto px-6 relative z-10">
         <SectionTitle
-          title="Popular Venues"
-          subtitle="Explore the most iconic event spaces and find upcoming shows"
+          title="Khám Phá Địa Điểm Tổ Chức"
+          subtitle="Tìm địa điểm hoàn hảo cho sự kiện của bạn"
         />
 
-        {/* Search filter */}
+        {/* Search bar */}
         <motion.div
-          variants={itemVariants}
+          variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true }}
-          className="max-w-md mx-auto mb-12"
+          viewport={{ once: true, margin: "-100px" }}
+          className="max-w-xl mx-auto mb-12"
         >
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="w-5 h-5 text-gray-400" />
-            </div>
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search venues by name or location..."
+              placeholder="Tìm kiếm địa điểm..."
               value={filter}
-              onChange={handleSearchChange}
-              className="w-full py-3 pl-12 pr-4 rounded-xl bg-white dark:bg-gray-800 
-                border border-gray-200 dark:border-gray-700
-                focus:outline-none focus:ring-2 focus:ring-orange-500/40
-                text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
+              onChange={(e) => setFilter(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 rounded-full bg-white dark:bg-gray-800 
+                border border-gray-200 dark:border-gray-700 focus:border-orange-500 
+                focus:ring-2 focus:ring-orange-500/20 transition-all duration-300"
             />
           </div>
         </motion.div>
@@ -303,52 +309,13 @@ const VenuesSection = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           <AnimatePresence>
             {filteredVenues.map((venue, index) => (
               <VenueCard key={venue.name} {...venue} index={index} />
             ))}
           </AnimatePresence>
-        </motion.div>
-
-        {/* No results message */}
-        {filteredVenues.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
-          >
-            <p className="text-gray-500 dark:text-gray-400">
-              No venues found matching your search criteria.
-            </p>
-            <button
-              onClick={() => setFilter("")}
-              className="mt-4 text-orange-500 hover:text-orange-600 font-medium"
-            >
-              Clear search
-            </button>
-          </motion.div>
-        )}
-
-        {/* View all venues button */}
-        <motion.div
-          variants={itemVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="text-center mt-12"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-6 py-3 bg-orange-500 hover:bg-orange-600 
-              text-white rounded-lg font-medium inline-flex items-center gap-2
-              transition-colors shadow-md hover:shadow-lg"
-          >
-            View All Venues
-            <ChevronRight className="w-4 h-4" />
-          </motion.button>
         </motion.div>
       </div>
     </section>
