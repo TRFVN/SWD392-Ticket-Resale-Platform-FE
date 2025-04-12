@@ -330,6 +330,7 @@ const OrderConfirmation = () => {
         orderNumber: orderNumber,
         paymentTransactionId: transactionId,
       });
+      console.log(response.data);
 
       if (response.data.isSuccess) {
         // Success - clean up localStorage
