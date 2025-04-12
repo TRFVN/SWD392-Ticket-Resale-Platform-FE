@@ -16,9 +16,10 @@ import {
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
+import { toast } from "react-toastify";
+import { getEventByUserID, deleteEventApi } from "../../../services/eventApi";
 // Memoized components for better performance
-const EventCard = memo(({ event, onEdit, onDelete, isDarkMode }) => {
+const EventCard = memo(({ event, onEdit, onDelete, isDarkMode, navigate }) => {
   const primaryColor = isDarkMode ? "text-orange-400" : "text-orange-500";
   const primaryBg = isDarkMode ? "bg-orange-500" : "bg-orange-500";
   const primaryBgLight = isDarkMode ? "bg-orange-500/10" : "bg-orange-50";
@@ -47,11 +48,10 @@ const EventCard = memo(({ event, onEdit, onDelete, isDarkMode }) => {
     event.eventImage &&
     (event.eventImage.startsWith("http") ||
       event.eventImage.includes(".appspot.com"));
-  const isPastEvent = new Date(event.eventDate) < new Date();
 
   return (
     <div
-      className={`rounded-3xl overflow-hidden ${bgElevated} border ${borderColor}`}
+      className={`rounded-3xl overflow-hidden ${bgElevated} border ${borderColor} hover:shadow-lg transition-shadow`}
     >
       {/* Banner */}
       <div className="relative h-48 w-full overflow-hidden">
@@ -61,6 +61,10 @@ const EventCard = memo(({ event, onEdit, onDelete, isDarkMode }) => {
               src={event.eventImage}
               alt={event.eventName}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.src =
+                  "https://via.placeholder.com/400x200?text=No+Image";
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-transparent"></div>
           </>
@@ -119,13 +123,19 @@ const EventCard = memo(({ event, onEdit, onDelete, isDarkMode }) => {
         {/* Actions */}
         <div className="absolute top-4 right-4 flex gap-2">
           <button
-            onClick={() => onEdit(event)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(event);
+            }}
             className={`w-8 h-8 rounded-full flex items-center justify-center ${bgElevated} text-white hover:bg-white/10`}
           >
             <Edit size={16} />
           </button>
           <button
-            onClick={() => onDelete(event)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(event);
+            }}
             className={`w-8 h-8 rounded-full flex items-center justify-center ${bgElevated} text-red-400 hover:bg-red-500/10`}
           >
             <Trash2 size={16} />
@@ -150,13 +160,18 @@ const EventCard = memo(({ event, onEdit, onDelete, isDarkMode }) => {
             </div>
             <div className="flex items-center gap-1.5">
               <MapPin className={`w-4 h-4 ${primaryColor}`} />
-              <span className={textSecondary}>{event.location}</span>
+              <span className={`${textSecondary} line-clamp-1`}>
+                {event.location}
+              </span>
             </div>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="text-center">
+            <div
+              className="text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 py-2 rounded-lg"
+              onClick={() => navigate(`/events/${event.eventId}/tickets`)}
+            >
               <div className={`text-2xl font-bold ${primaryColor}`}>
                 {event.ticketTemplates?.length || 0}
               </div>
@@ -174,7 +189,7 @@ const EventCard = memo(({ event, onEdit, onDelete, isDarkMode }) => {
             <div className="text-center">
               <div className={`text-2xl font-bold ${primaryColor}`}>
                 {event.ticketTemplates?.reduce(
-                  (acc, ticket) => acc + ticket.availableQuantity,
+                  (acc, ticket) => acc + (ticket.availableQuantity || 0),
                   0,
                 ) || 0}
               </div>
@@ -194,30 +209,32 @@ const MyEvents = () => {
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const isDarkMode = useSelector((state) => state.theme?.isDarkMode);
   const navigate = useNavigate();
 
-  // Fetch events
   useEffect(() => {
-    // Simulate loading with the provided event data
-    setTimeout(() => {
-      setEvents([
-        {
-          eventId: "1582cc5d-b586-42a6-b78b-4a3856796f14",
-          eventName: "ronaldo ra mắt clb hà nội",
-          eventDate: "2026-02-20T05:20:00Z",
-          eventDescription: "anh 8 hết thời\n",
-          eventImage:
-            "https://storage.googleapis.com/tickethub-af919.appspot.com/EventImages/faaf5002-7b98-401f-b7bc-f4b9ef0bfe00_images.jpg",
-          location: "HCM, Quận Ba Đình, Thành phố Hà Nội",
-          status: 1,
-          categoryId: "841d3c6e-ee0e-49fc-97cf-9620c9d66768",
-          ticketTemplates: [],
-        },
-      ]);
-      setLoading(false);
-    }, 500);
+    fetchMyEvents();
   }, []);
+
+  const fetchMyEvents = async () => {
+    try {
+      setLoading(true);
+      const response = await getEventByUserID();
+
+      if (response && Array.isArray(response)) {
+        setEvents(response);
+      } else {
+        setEvents([]);
+      }
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      toast.error("Không thể tải sự kiện, vui lòng thử lại sau");
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEdit = useCallback(
     (event) => {
@@ -233,11 +250,22 @@ const MyEvents = () => {
 
   const confirmDelete = useCallback(async () => {
     if (!selectedEvent) return;
-    setEvents((prev) =>
-      prev.filter((e) => e.eventId !== selectedEvent.eventId),
-    );
-    setShowDeleteConfirm(false);
-    setSelectedEvent(null);
+
+    try {
+      setDeleteLoading(true);
+      await deleteEventApi(selectedEvent.eventId);
+      setEvents((prev) =>
+        prev.filter((e) => e.eventId !== selectedEvent.eventId),
+      );
+      toast.success("Xóa sự kiện thành công");
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      toast.error("Không thể xóa sự kiện, vui lòng thử lại sau");
+    } finally {
+      setDeleteLoading(false);
+      setShowDeleteConfirm(false);
+      setSelectedEvent(null);
+    }
   }, [selectedEvent]);
 
   const bgBase = isDarkMode ? "bg-gray-900" : "bg-gray-50";
@@ -250,7 +278,7 @@ const MyEvents = () => {
     <div className={`min-h-screen ${bgBase}`}>
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
           <div>
             <h1 className={`text-2xl font-bold ${textPrimary}`}>
               Sự kiện của tôi
@@ -261,7 +289,7 @@ const MyEvents = () => {
           </div>
           <button
             onClick={() => navigate("/events/create")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl ${primaryBg} text-white font-medium hover:bg-orange-600`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl ${primaryBg} text-white font-medium hover:bg-orange-600 transition-colors`}
           >
             <Plus size={18} />
             <span>Tạo sự kiện mới</span>
@@ -274,7 +302,9 @@ const MyEvents = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
           </div>
         ) : events.length === 0 ? (
-          <div className={`text-center py-12 ${textSecondary}`}>
+          <div
+            className={`text-center py-12 ${textSecondary} bg-gray-800/5 dark:bg-white/5 rounded-3xl`}
+          >
             <Calendar className="w-16 h-16 mx-auto mb-4 opacity-50" />
             <p>Bạn chưa tạo sự kiện nào</p>
             <button
@@ -294,6 +324,7 @@ const MyEvents = () => {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 isDarkMode={isDarkMode}
+                navigate={navigate}
               />
             ))}
           </div>
@@ -302,14 +333,14 @@ const MyEvents = () => {
 
       {/* Delete confirmation modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
           <div
             className={`w-full max-w-md mx-4 p-6 rounded-3xl ${
               isDarkMode ? "bg-gray-800" : "bg-white"
-            }`}
+            } shadow-xl`}
           >
             <div className="flex items-center gap-3 mb-4">
-              <AlertCircle className={`w-6 h-6 ${primaryColor}`} />
+              <AlertCircle className={`w-6 h-6 text-red-500`} />
               <h3 className={`text-lg font-medium ${textPrimary}`}>
                 Xác nhận xóa
               </h3>
@@ -322,17 +353,23 @@ const MyEvents = () => {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleteLoading}
                 className={`flex-1 px-4 py-2 rounded-xl border ${
                   isDarkMode ? "border-gray-700" : "border-gray-200"
-                } ${textSecondary} hover:bg-gray-100 dark:hover:bg-gray-700`}
+                } ${textSecondary} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
               >
                 Hủy
               </button>
               <button
                 onClick={confirmDelete}
-                className="flex-1 px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600"
+                disabled={deleteLoading}
+                className="flex-1 px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-colors flex items-center justify-center"
               >
-                Xóa
+                {deleteLoading ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  "Xóa"
+                )}
               </button>
             </div>
           </div>

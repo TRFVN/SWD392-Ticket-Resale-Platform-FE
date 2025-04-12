@@ -17,9 +17,17 @@ import {
   ChevronDown,
   Hash,
   AlertCircle,
+  ArrowLeft,
 } from "lucide-react";
 import { toast } from "react-toastify";
-import { createTicketTemplate } from "../../../services/ticketApi";
+import {
+  createTicketTemplate,
+  getTicketTemplatesByEventId,
+  updateTicketTemplate,
+  deleteTicketTemplate,
+} from "../../../services/ticketApi";
+import { postEventTicket } from "../../../services/ticket";
+import { getEventByIdApi } from "../../../services/eventApi";
 import axiosInstance from "../../../config/axiosConfig";
 
 const TicketTemplateForm = memo(
@@ -34,6 +42,17 @@ const TicketTemplateForm = memo(
     const textSecondary = isDarkMode ? "text-gray-300" : "text-gray-700";
     const borderColor = isDarkMode ? "border-gray-700" : "border-gray-200";
     const bgElevated = isDarkMode ? "bg-gray-800" : "bg-white";
+
+    // Determine if this is a new ticket
+    const isNewTicket =
+      ticket.isNew ||
+      ticket.ticketTemplateId === "3fa85f64-5717-4562-b3fc-2c963f66afa6";
+
+    // Update local state when parent prop changes
+    useEffect(() => {
+      setLocalTicket(ticket);
+      setSerialNumberInput(ticket.serialNumber || "");
+    }, [ticket]);
 
     const handleChange = (field, value) => {
       const updated = { ...localTicket, [field]: value };
@@ -55,29 +74,46 @@ const TicketTemplateForm = memo(
         : "TKT";
 
       const random = Math.random().toString(36).substring(2, 10).toUpperCase();
-      const serialNumber = `${prefix}-${random}-${Date.now()}`;
+      const serialNumber = "skdjashkldjksahdkajshdasjkhdk";
 
       handleSerialNumberChange(serialNumber);
     };
 
     return (
-      <div className={`border ${borderColor} rounded-xl overflow-hidden`}>
+      <div
+        className={`border ${borderColor} rounded-xl overflow-hidden ${
+          isNewTicket ? "border-orange-500 border-opacity-50" : ""
+        }`}
+      >
         {/* Header */}
         <div
-          className={`p-4 ${bgElevated} border-b ${borderColor} cursor-pointer`}
+          className={`p-4 ${bgElevated} border-b ${borderColor} cursor-pointer ${
+            isNewTicket
+              ? "bg-orange-50 dark:bg-orange-900 dark:bg-opacity-20"
+              : ""
+          }`}
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div
-                className={`w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center`}
+                className={`w-10 h-10 rounded-lg ${
+                  isNewTicket ? "bg-orange-500/20" : "bg-orange-500/10"
+                } flex items-center justify-center`}
               >
                 <Ticket className="w-5 h-5 text-orange-500" />
               </div>
               <div>
-                <h3 className={`font-medium ${textPrimary}`}>
-                  {localTicket.ticketName || "Loại vé mới"}
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3 className={`font-medium ${textPrimary}`}>
+                    {localTicket.ticketName || "Loại vé mới"}
+                  </h3>
+                  {isNewTicket && (
+                    <span className="px-2 py-0.5 text-xs bg-orange-100 text-orange-700 dark:bg-orange-900 dark:bg-opacity-50 dark:text-orange-400 rounded-full">
+                      Mới
+                    </span>
+                  )}
+                </div>
                 <p className={`text-sm ${textSecondary}`}>
                   {new Intl.NumberFormat("vi-VN").format(
                     localTicket.ticketPrice || 0,
@@ -288,6 +324,8 @@ const EditEvent = () => {
   const [event, setEvent] = useState(null);
   const [ticketTemplates, setTicketTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Theme colors
   const bgBase = isDarkMode ? "bg-gray-900" : "bg-gray-50";
@@ -296,29 +334,44 @@ const EditEvent = () => {
   const textSecondary = isDarkMode ? "text-gray-300" : "text-gray-700";
   const borderColor = isDarkMode ? "border-gray-700" : "border-gray-200";
 
+  // Fetch event and ticket templates data
   useEffect(() => {
-    // Use the provided event data
-    setEvent({
-      eventId: "1582cc5d-b586-42a6-b78b-4a3856796f14",
-      eventName: "ronaldo ra mắt clb hà nội",
-      eventDate: "2026-02-20T05:20:00Z",
-      eventDescription: "anh 8 hết thời\n",
-      eventImage:
-        "https://storage.googleapis.com/tickethub-af919.appspot.com/EventImages/faaf5002-7b98-401f-b7bc-f4b9ef0bfe00_images.jpg",
-      location: "HCM, Quận Ba Đình, Thành phố Hà Nội",
-      status: 1,
-      categoryId: "841d3c6e-ee0e-49fc-97cf-9620c9d66768",
-    });
+    const fetchData = async () => {
+      try {
+        setFetchLoading(true);
+        setError(null);
+
+        // Fetch event data
+        const eventResponse = await getEventByIdApi(eventId);
+        setEvent(eventResponse);
+
+        // Fetch ticket templates
+        const ticketsResponse = await getTicketTemplatesByEventId(eventId);
+        if (Array.isArray(ticketsResponse)) {
+          setTicketTemplates(ticketsResponse);
+        } else if (ticketsResponse && Array.isArray(ticketsResponse.result)) {
+          setTicketTemplates(ticketsResponse.result);
+        } else {
+          setTicketTemplates([]);
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError(err.message || "Không thể tải dữ liệu, vui lòng thử lại sau");
+        toast.error("Không thể tải dữ liệu, vui lòng thử lại sau");
+      } finally {
+        setFetchLoading(false);
+      }
+    };
+
+    if (eventId) {
+      fetchData();
+    }
   }, [eventId]);
 
   const handleAddTicket = () => {
-    // Generate a random UUID for new ticket
-    const uuid = crypto.randomUUID
-      ? crypto.randomUUID()
-      : "3fa85f64-5717-4562-b3fc-2c963f66afa6";
-
+    // Use the default ticketTemplateId as requested
     const newTicket = {
-      ticketTemplateId: uuid,
+      ticketTemplateId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       ticketName: "",
       eventId: eventId,
       imageTicket: "",
@@ -327,6 +380,7 @@ const EditEvent = () => {
       availableQuantity: 0,
       rank: "",
       serialNumber: "",
+      isNew: true, // Flag to identify new tickets
     };
     setTicketTemplates([...ticketTemplates, newTicket]);
   };
@@ -341,10 +395,32 @@ const EditEvent = () => {
     );
   };
 
-  const handleDeleteTicket = (ticket) => {
-    setTicketTemplates((tickets) =>
-      tickets.filter((t) => t.ticketTemplateId !== ticket.ticketTemplateId),
-    );
+  const handleDeleteTicket = async (ticket) => {
+    // If it's a new ticket that hasn't been saved yet, just remove it from state
+    if (ticket.isNew) {
+      setTicketTemplates((tickets) =>
+        tickets.filter((t) => t.ticketTemplateId !== ticket.ticketTemplateId),
+      );
+      return;
+    }
+
+    try {
+      setLoading(true);
+      // Delete the ticket from the API
+      await deleteTicketTemplate(ticket.ticketTemplateId);
+
+      // Remove from state
+      setTicketTemplates((tickets) =>
+        tickets.filter((t) => t.ticketTemplateId !== ticket.ticketTemplateId),
+      );
+
+      toast.success("Đã xóa loại vé thành công");
+    } catch (error) {
+      console.error("Error deleting ticket:", error);
+      toast.error("Không thể xóa loại vé, vui lòng thử lại sau");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const submitSerialNumbers = async (ticket) => {
@@ -361,7 +437,7 @@ const EditEvent = () => {
 
       // Submit just one serial number per ticket template
       const response = await axiosInstance.post(
-        "api/ticket-serial-number",
+        "/api/ticket-serial-number",
         [serialNumberPayload], // Wrap in array as API expects an array
         {
           headers: {
@@ -373,22 +449,29 @@ const EditEvent = () => {
       return response.data;
     } catch (error) {
       console.error("Error submitting serial number:", error);
-      throw new Error("Failed to submit serial number");
+      throw new Error("Không thể lưu mã số vé");
     }
   };
 
-  const handleSave = async () => {
+  const handleSaveNewTickets = async () => {
     try {
       setLoading(true);
 
-      // Validate tickets before saving
-      if (ticketTemplates.length === 0) {
-        toast.error("Vui lòng thêm ít nhất một loại vé");
+      // Get only new tickets
+      const newTickets = ticketTemplates.filter(
+        (ticket) =>
+          ticket.isNew ||
+          ticket.ticketTemplateId === "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      );
+
+      if (newTickets.length === 0) {
+        toast.info("Không có vé mới để tạo");
         setLoading(false);
         return;
       }
 
-      const invalidTickets = ticketTemplates.filter(
+      // Validate new tickets before saving
+      const invalidTickets = newTickets.filter(
         (ticket) =>
           !ticket.ticketName ||
           !ticket.ticketPrice ||
@@ -403,43 +486,380 @@ const EditEvent = () => {
         return;
       }
 
-      // Validate serial numbers
-      const missingSerialNumbers = ticketTemplates.filter(
-        (ticket) => !ticket.serialNumber,
-      );
+      // Format new tickets according to API requirements
+      const formattedNewTickets = newTickets.map((ticket) => ({
+        ticketTemplateId: ticket.ticketTemplateId,
+        ticketName: ticket.ticketName,
+        eventId: eventId,
+        imageTicket: ticket.imageTicket || "",
+        ticketPrice: ticket.ticketPrice,
+        totalQuantity: ticket.totalQuantity,
+        availableQuantity: ticket.availableQuantity,
+        rank: ticket.rank,
+        isValid: true,
+      }));
 
-      if (missingSerialNumbers.length > 0) {
-        toast.error("Vui lòng nhập mã số vé cho mỗi loại vé");
-        setLoading(false);
-        return;
+      // Create new tickets
+      const response = await postEventTicket(formattedNewTickets);
+      const createdTickets = response || [];
+
+      // Update the ticketTemplates state with the new IDs from response
+      if (Array.isArray(createdTickets) && createdTickets.length > 0) {
+        const updatedTicketTemplates = [...ticketTemplates];
+
+        // Replace temporary IDs with the new ones and submit serial numbers immediately
+        for (let i = 0; i < createdTickets.length; i++) {
+          const createdTicket = createdTickets[i];
+          const index = updatedTicketTemplates.findIndex(
+            (t) =>
+              t.ticketName === createdTicket.ticketName &&
+              (t.isNew ||
+                t.ticketTemplateId === "3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+          );
+
+          if (index !== -1) {
+            // Update state with new ID
+            updatedTicketTemplates[index] = {
+              ...updatedTicketTemplates[index],
+              ticketTemplateId: createdTicket.ticketTemplateId,
+              isNew: false,
+            };
+
+            // Submit serial number immediately if one exists
+            if (updatedTicketTemplates[index].serialNumber) {
+              try {
+                await submitSerialNumbers({
+                  ...updatedTicketTemplates[index],
+                  ticketTemplateId: createdTicket.ticketTemplateId,
+                });
+              } catch (error) {
+                console.error("Error submitting serial number:", error);
+                toast.error(
+                  `Lỗi khi tạo mã số vé cho "${createdTicket.ticketName}"`,
+                );
+              }
+            }
+          }
+        }
+
+        setTicketTemplates(updatedTicketTemplates);
+        toast.success("Đã tạo vé mới thành công");
       }
-
-      // Save each ticket template first
-      const savePromises = ticketTemplates.map((ticket) =>
-        createTicketTemplate({
-          ...ticket,
-          eventId: eventId,
-        }),
-      );
-
-      const savedTickets = await Promise.all(savePromises);
-
-      // Then submit serial numbers for each ticket
-      const serialPromises = ticketTemplates.map((ticket) =>
-        submitSerialNumbers(ticket),
-      );
-
-      await Promise.all(serialPromises);
-
-      toast.success("Đã lưu thông tin vé thành công");
-      navigate("/my-events");
     } catch (error) {
-      console.error("Error saving tickets:", error);
-      toast.error(error.message || "Có lỗi xảy ra khi lưu thông tin vé");
+      console.error("Error creating new tickets:", error);
+      toast.error(error.message || "Có lỗi xảy ra khi tạo vé mới");
     } finally {
       setLoading(false);
     }
   };
+
+  const handleUpdateExistingTickets = async () => {
+    try {
+      setLoading(true);
+
+      // Get only existing tickets
+      const existingTickets = ticketTemplates.filter(
+        (ticket) =>
+          !ticket.isNew &&
+          ticket.ticketTemplateId !== "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      );
+
+      if (existingTickets.length === 0) {
+        toast.info("Không có vé hiện tại để cập nhật");
+        setLoading(false);
+        return;
+      }
+
+      // Validate existing tickets
+      const invalidTickets = existingTickets.filter(
+        (ticket) =>
+          !ticket.ticketName ||
+          !ticket.ticketPrice ||
+          !ticket.rank ||
+          !ticket.totalQuantity ||
+          ticket.totalQuantity < ticket.availableQuantity,
+      );
+
+      if (invalidTickets.length > 0) {
+        toast.error("Vui lòng điền đầy đủ thông tin vé và kiểm tra số lượng");
+        setLoading(false);
+        return;
+      }
+
+      // Update existing tickets and collect serial number promises
+      const updatePromises = [];
+      const serialPromises = [];
+
+      for (const ticket of existingTickets) {
+        // Add update promise
+        updatePromises.push(
+          updateTicketTemplate({
+            ticketTemplateId: ticket.ticketTemplateId,
+            ticketName: ticket.ticketName,
+            eventId: eventId,
+            imageTicket: ticket.imageTicket || "",
+            ticketPrice: ticket.ticketPrice,
+            totalQuantity: ticket.totalQuantity,
+            availableQuantity: ticket.availableQuantity,
+            rank: ticket.rank,
+            isValid: true,
+          }),
+        );
+
+        // If ticket has serial number, add to serial promises
+        if (ticket.serialNumber) {
+          serialPromises.push(submitSerialNumbers(ticket));
+        }
+      }
+
+      // Wait for updates to complete
+      await Promise.all(updatePromises);
+
+      // Then submit serial numbers for updated tickets
+      if (serialPromises.length > 0) {
+        await Promise.all(serialPromises);
+      }
+
+      toast.success("Đã cập nhật vé thành công");
+    } catch (error) {
+      console.error("Error updating existing tickets:", error);
+      toast.error(error.message || "Có lỗi xảy ra khi cập nhật vé");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAll = async () => {
+    try {
+      setLoading(true);
+
+      // First save new tickets
+      const newTickets = ticketTemplates.filter(
+        (ticket) =>
+          ticket.isNew ||
+          ticket.ticketTemplateId === "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      );
+
+      if (newTickets.length > 0) {
+        // Validate new tickets
+        const invalidNewTickets = newTickets.filter(
+          (ticket) =>
+            !ticket.ticketName ||
+            !ticket.ticketPrice ||
+            !ticket.rank ||
+            !ticket.totalQuantity ||
+            ticket.totalQuantity < ticket.availableQuantity,
+        );
+
+        if (invalidNewTickets.length > 0) {
+          toast.error(
+            "Vui lòng điền đầy đủ thông tin vé mới và kiểm tra số lượng",
+          );
+          setLoading(false);
+          return;
+        }
+
+        const formattedNewTickets = newTickets.map((ticket) => ({
+          ticketTemplateId: ticket.ticketTemplateId,
+          ticketName: ticket.ticketName,
+          eventId: eventId,
+          imageTicket: ticket.imageTicket || "",
+          ticketPrice: ticket.ticketPrice,
+          totalQuantity: ticket.totalQuantity,
+          availableQuantity: ticket.availableQuantity,
+          rank: ticket.rank,
+          isValid: true,
+        }));
+
+        // Create new tickets
+        const response = await postEventTicket(formattedNewTickets);
+        const createdTickets = response || [];
+
+        // Update ticket states with new IDs and submit serial numbers
+        if (Array.isArray(createdTickets) && createdTickets.length > 0) {
+          const updatedTicketTemplates = [...ticketTemplates];
+
+          // Replace temporary IDs and submit serial numbers
+          for (let i = 0; i < createdTickets.length; i++) {
+            const createdTicket = createdTickets[i];
+            const index = updatedTicketTemplates.findIndex(
+              (t) =>
+                t.ticketName === createdTicket.ticketName &&
+                (t.isNew ||
+                  t.ticketTemplateId ===
+                    "3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+            );
+
+            if (index !== -1) {
+              // Update state with new ID
+              updatedTicketTemplates[index] = {
+                ...updatedTicketTemplates[index],
+                ticketTemplateId: createdTicket.ticketTemplateId,
+                isNew: false,
+              };
+
+              // Submit serial number immediately
+              if (updatedTicketTemplates[index].serialNumber) {
+                try {
+                  await submitSerialNumbers({
+                    ...updatedTicketTemplates[index],
+                    ticketTemplateId: createdTicket.ticketTemplateId,
+                  });
+                } catch (error) {
+                  console.error("Error submitting serial number:", error);
+                  toast.error(
+                    `Lỗi khi tạo mã số vé cho "${createdTicket.ticketName}"`,
+                  );
+                }
+              }
+            }
+          }
+
+          // Update state with new tickets
+          setTicketTemplates(updatedTicketTemplates);
+        }
+      }
+
+      // Then update existing tickets
+      const existingTickets = ticketTemplates.filter(
+        (ticket) =>
+          !ticket.isNew &&
+          ticket.ticketTemplateId !== "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      );
+
+      if (existingTickets.length > 0) {
+        // Validate existing tickets
+        const invalidExistingTickets = existingTickets.filter(
+          (ticket) =>
+            !ticket.ticketName ||
+            !ticket.ticketPrice ||
+            !ticket.rank ||
+            !ticket.totalQuantity ||
+            ticket.totalQuantity < ticket.availableQuantity,
+        );
+
+        if (invalidExistingTickets.length > 0) {
+          toast.error(
+            "Vui lòng điền đầy đủ thông tin vé hiện có và kiểm tra số lượng",
+          );
+          setLoading(false);
+          return;
+        }
+
+        // Update existing tickets
+        const updatePromises = [];
+        const serialPromises = [];
+
+        for (const ticket of existingTickets) {
+          updatePromises.push(
+            updateTicketTemplate({
+              ticketTemplateId: ticket.ticketTemplateId,
+              ticketName: ticket.ticketName,
+              eventId: eventId,
+              imageTicket: ticket.imageTicket || "",
+              ticketPrice: ticket.ticketPrice,
+              totalQuantity: ticket.totalQuantity,
+              availableQuantity: ticket.availableQuantity,
+              rank: ticket.rank,
+              isValid: true,
+            }),
+          );
+
+          if (ticket.serialNumber) {
+            serialPromises.push(submitSerialNumbers(ticket));
+          }
+        }
+
+        await Promise.all(updatePromises);
+
+        if (serialPromises.length > 0) {
+          await Promise.all(serialPromises);
+        }
+      }
+
+      toast.success("Đã lưu tất cả vé thành công");
+      navigate("/my-events");
+    } catch (error) {
+      console.error("Error saving all tickets:", error);
+      toast.error(error.message || "Có lỗi xảy ra khi lưu vé");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Main save function now just redirects to the right handler
+  const handleSave = async () => {
+    // Check if we have any tickets
+    if (ticketTemplates.length === 0) {
+      toast.error("Vui lòng thêm ít nhất một loại vé");
+      return;
+    }
+
+    // Check if we have new tickets
+    const hasNewTickets = ticketTemplates.some(
+      (ticket) =>
+        ticket.isNew ||
+        ticket.ticketTemplateId === "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    );
+
+    // Check if we have existing tickets
+    const hasExistingTickets = ticketTemplates.some(
+      (ticket) =>
+        !ticket.isNew &&
+        ticket.ticketTemplateId !== "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    );
+
+    // If we have both types, suggest using the specific buttons
+    if (hasNewTickets && hasExistingTickets) {
+      toast.info(
+        "Vui lòng sử dụng nút riêng để tạo vé mới hoặc cập nhật vé hiện có",
+      );
+    }
+    // If we only have new tickets
+    else if (hasNewTickets) {
+      await handleSaveNewTickets();
+    }
+    // If we only have existing tickets
+    else if (hasExistingTickets) {
+      await handleUpdateExistingTickets();
+    }
+  };
+
+  if (fetchLoading) {
+    return (
+      <div
+        className={`min-h-screen ${bgBase} flex items-center justify-center`}
+      >
+        <div className="flex flex-col items-center">
+          <div className="w-12 h-12 border-t-2 border-r-2 border-orange-500 rounded-full animate-spin mb-4"></div>
+          <p className={textSecondary}>Đang tải dữ liệu...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        className={`min-h-screen ${bgBase} flex items-center justify-center p-4`}
+      >
+        <div className="text-center max-w-md">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className={`${textPrimary} text-xl font-bold mb-2`}>
+            Có lỗi xảy ra
+          </h2>
+          <p className={textSecondary}>{error}</p>
+          <button
+            onClick={() => navigate("/my-events")}
+            className="mt-6 px-4 py-2 bg-orange-500 text-white rounded-lg flex items-center gap-2 mx-auto"
+          >
+            <ArrowLeft size={18} />
+            <span>Quay lại danh sách sự kiện</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!event) return null;
 
@@ -448,9 +868,17 @@ const EditEvent = () => {
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className={`text-2xl font-bold ${textPrimary}`}>
-            Chỉnh sửa sự kiện
-          </h1>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate("/my-events")}
+              className={`p-2 rounded-lg ${borderColor} border hover:bg-gray-100 dark:hover:bg-gray-700`}
+            >
+              <ArrowLeft size={18} className={textSecondary} />
+            </button>
+            <h1 className={`text-2xl font-bold ${textPrimary}`}>
+              Chỉnh sửa sự kiện
+            </h1>
+          </div>
           <button
             onClick={handleSave}
             disabled={loading}
@@ -481,12 +909,15 @@ const EditEvent = () => {
               src={event.eventImage}
               alt={event.eventName}
               className="w-24 h-24 rounded-xl object-cover"
+              onError={(e) => {
+                e.target.src = "https://via.placeholder.com/100?text=No+Image";
+              }}
             />
             <div>
               <h2 className={`text-xl font-medium ${textPrimary}`}>
                 {event.eventName}
               </h2>
-              <div className="flex items-center gap-4 mt-2 text-sm">
+              <div className="flex flex-wrap items-center gap-4 mt-2 text-sm">
                 <div className="flex items-center gap-1.5">
                   <Calendar className="w-4 h-4 text-orange-500" />
                   <span className={textSecondary}>
@@ -501,7 +932,9 @@ const EditEvent = () => {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <MapPin className="w-4 h-4 text-orange-500" />
-                  <span className={textSecondary}>{event.location}</span>
+                  <span className={`${textSecondary} line-clamp-1`}>
+                    {event.location}
+                  </span>
                 </div>
               </div>
             </div>
@@ -548,7 +981,7 @@ const EditEvent = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className={`text-xl font-medium ${textPrimary}`}>
-                  Danh sách loại vé
+                  Quản lý loại vé
                 </h2>
                 <p className={`mt-1 text-sm ${textSecondary}`}>
                   Quản lý thông tin các loại vé của sự kiện
@@ -559,44 +992,189 @@ const EditEvent = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600"
               >
                 <Plus size={18} />
-                <span>Thêm loại vé</span>
+                <span>Tạo loại vé mới</span>
               </button>
             </div>
 
-            <div className="space-y-4">
-              {ticketTemplates.map((ticket) => (
-                <TicketTemplateForm
-                  key={ticket.ticketTemplateId}
-                  ticket={ticket}
-                  onUpdate={handleUpdateTicket}
-                  onDelete={handleDeleteTicket}
-                  isDarkMode={isDarkMode}
-                />
-              ))}
-            </div>
+            {/* Empty State - No tickets */}
+            {ticketTemplates.length === 0 && (
+              <div className="py-12 flex flex-col items-center justify-center">
+                <div className="p-4 rounded-full bg-orange-100 dark:bg-orange-900 dark:bg-opacity-30 mb-4">
+                  <Ticket className="w-8 h-8 text-orange-500" />
+                </div>
+                <h3 className={`text-lg font-medium ${textPrimary} mb-2`}>
+                  Chưa có loại vé nào
+                </h3>
+                <p className={`text-sm ${textSecondary} mb-6 text-center`}>
+                  Hãy tạo loại vé đầu tiên cho sự kiện của bạn
+                </p>
+                <button
+                  onClick={handleAddTicket}
+                  className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600"
+                >
+                  <Plus size={18} />
+                  <span>Tạo loại vé mới</span>
+                </button>
+              </div>
+            )}
 
-            {/* Save button */}
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <button
-                onClick={handleSave}
-                disabled={loading}
-                className={`w-full flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 ${
-                  loading ? "opacity-70 cursor-not-allowed" : ""
-                }`}
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Đang lưu thông tin vé...</span>
-                  </>
-                ) : (
-                  <>
-                    <Save size={18} />
-                    <span>Lưu tất cả thay đổi</span>
-                  </>
-                )}
-              </button>
-            </div>
+            {/* New Tickets Section */}
+            {ticketTemplates.some(
+              (ticket) =>
+                ticket.isNew ||
+                ticket.ticketTemplateId ===
+                  "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            ) && (
+              <div className="mb-8">
+                <div className="flex items-center mb-4 pb-2 border-b ${borderColor}">
+                  <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900 dark:bg-opacity-30 mr-3">
+                    <Plus className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <h3 className={`font-medium ${textPrimary}`}>
+                    Loại vé mới tạo
+                  </h3>
+                </div>
+                <div className="space-y-4">
+                  {ticketTemplates
+                    .filter(
+                      (ticket) =>
+                        ticket.isNew ||
+                        ticket.ticketTemplateId ===
+                          "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    )
+                    .map((ticket) => (
+                      <TicketTemplateForm
+                        key={ticket.ticketTemplateId}
+                        ticket={ticket}
+                        onUpdate={handleUpdateTicket}
+                        onDelete={handleDeleteTicket}
+                        isDarkMode={isDarkMode}
+                      />
+                    ))}
+                </div>
+
+                {/* Save New Tickets Button */}
+                <div className="mt-4">
+                  <button
+                    onClick={handleSaveNewTickets}
+                    disabled={loading}
+                    className={`w-full flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 ${
+                      loading ? "opacity-70 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    {loading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Đang tạo vé mới...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={18} className="mr-1" />
+                        <Save size={18} />
+                        <span>Lưu các vé mới</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Existing Tickets Section */}
+            {ticketTemplates.some(
+              (ticket) =>
+                !ticket.isNew &&
+                ticket.ticketTemplateId !==
+                  "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            ) && (
+              <div>
+                <div className="flex items-center mb-4 pb-2 border-b ${borderColor}">
+                  <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900 dark:bg-opacity-30 mr-3">
+                    <Ticket className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h3 className={`font-medium ${textPrimary}`}>
+                    Loại vé hiện có
+                  </h3>
+                </div>
+                <div className="space-y-4">
+                  {ticketTemplates
+                    .filter(
+                      (ticket) =>
+                        !ticket.isNew &&
+                        ticket.ticketTemplateId !==
+                          "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    )
+                    .map((ticket) => (
+                      <TicketTemplateForm
+                        key={ticket.ticketTemplateId}
+                        ticket={ticket}
+                        onUpdate={handleUpdateTicket}
+                        onDelete={handleDeleteTicket}
+                        isDarkMode={isDarkMode}
+                      />
+                    ))}
+                </div>
+
+                {/* Save Existing Tickets Button */}
+                <div className="mt-4">
+                  <button
+                    onClick={handleUpdateExistingTickets}
+                    disabled={loading}
+                    className={`w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 ${
+                      loading ? "opacity-70 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    {loading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Đang cập nhật vé...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Ticket size={18} className="mr-1" />
+                        <Save size={18} />
+                        <span>Cập nhật vé hiện có</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Save All button - only show if both types exist */}
+            {ticketTemplates.some(
+              (ticket) =>
+                ticket.isNew ||
+                ticket.ticketTemplateId ===
+                  "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            ) &&
+              ticketTemplates.some(
+                (ticket) =>
+                  !ticket.isNew &&
+                  ticket.ticketTemplateId !==
+                    "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              ) && (
+                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={handleSaveAll}
+                    disabled={loading}
+                    className={`w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-blue-500 text-white rounded-xl hover:opacity-90 ${
+                      loading ? "opacity-70 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    {loading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Đang xử lý...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save size={18} />
+                        <span>Lưu tất cả thay đổi</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
           </div>
         )}
       </div>
