@@ -1,17 +1,29 @@
 import axiosInstance from "../config/axiosConfig";
 
-export const getAllTicketsApi = async () => {
+export const getAllTicketsApi = async (pageNumber = 1, pageSize = 10) => {
   try {
-    const rs = await axiosInstance.get("api/Tickets?pageNumber=1&pageSize=20");
-    if (rs.status === 200) {
-      console.log(rs);
-      return rs.data.result;
-    } else {
-      throw new Error(`Error: Received status code ${rs.status}`);
+    const response = await axiosInstance.get("api/tickets/templates", {
+      params: {
+        pageNumber,
+        pageSize,
+      },
+    });
+
+    if (response.status === 200) {
+      return {
+        data: response.data.result.data || [],
+        pagination: {
+          pageNumber: response.data.result.pageNumber,
+          pageSize: response.data.result.pageSize,
+          totalItems: response.data.result.totalItems,
+          totalPages: response.data.result.totalPages,
+        },
+      };
     }
-  } catch (error) {
-    console.error("Failed to fetch tickets:", error.message || error);
     throw new Error("Failed to fetch tickets");
+  } catch (error) {
+    console.error("Failed to fetch tickets:", error);
+    throw error;
   }
 };
 
@@ -72,6 +84,7 @@ export const rejectTicketApi = async (ticketId) => {
     throw new Error(`Failed to reject Ticket`);
   }
 };
+
 export const postTicketApi = async (ticket) => {
   try {
     const ticketData = {
@@ -125,5 +138,37 @@ export const uploadTicketApi = async (image, onProgress) => {
     return response;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to upload ticket");
+  }
+};
+
+export const postEventTicket = async (ticketTemplates) => {
+  try {
+    const response = await axiosInstance.post(
+      "/api/tickets/create-ticket-template",
+      {
+        ticketTemplates,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    if (response.status === 201 || response.status === 200) {
+      return response.data.result;
+    }
+
+    throw new Error(
+      response.data.message || "Failed to create ticket template",
+    );
+  } catch (error) {
+    if (error.response) {
+      throw new Error(
+        error.response.data.message ||
+          `Failed to create ticket template: ${error.response.status}`,
+      );
+    }
+    throw new Error("Failed to create ticket template: Network error");
   }
 };

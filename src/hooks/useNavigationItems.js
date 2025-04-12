@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axiosInstance from "../config/axiosConfig";
+import { subscribeToCartUpdates } from "../utils/cartEvents";
 
 /**
  * Custom hook to manage navigation items and state
@@ -8,6 +10,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 export const useNavigationItems = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("");
+  const [cartCount, setCartCount] = useState(0);
 
   // Define navigation items with priority flags
   const navItems = [
@@ -20,17 +24,11 @@ export const useNavigationItems = () => {
       priority: 80,
       secondary: true,
     }, // Can be hidden on narrow screens
-    {
-      id: "trending",
-      label: "Xu Hướng",
-      path: "/trending",
-      badge: "Hot",
-      priority: 95,
-    }, // High priority due to badge
+
     {
       id: "create",
       label: "Tạo Sự Kiện",
-      path: "/create-ticket",
+      path: "/create-event",
       badge: "Mới",
       priority: 85,
       secondary: true,
@@ -49,12 +47,41 @@ export const useNavigationItems = () => {
     return "events"; // Default
   };
 
-  const [activeTab, setActiveTab] = useState(getInitialActiveTab());
-
   // Update active tab when URL changes
   useEffect(() => {
     setActiveTab(getInitialActiveTab());
   }, [location.pathname]);
+
+  // Fetch cart items count
+  const fetchCartCount = async () => {
+    try {
+      const response = await axiosInstance.get("api/Cart");
+
+      if (response.data.isSuccess && Array.isArray(response.data.result)) {
+        setCartCount(response.data.result.length);
+      }
+    } catch (error) {
+      console.error("Failed to fetch cart count:", error);
+    }
+  };
+
+  // Fetch cart count
+  useEffect(() => {
+    fetchCartCount();
+
+    // Set up polling to refresh cart count every minute
+    const intervalId = setInterval(fetchCartCount, 60000);
+
+    // Subscribe to cart update events
+    const unsubscribe = subscribeToCartUpdates(() => {
+      fetchCartCount();
+    });
+
+    return () => {
+      clearInterval(intervalId);
+      unsubscribe();
+    };
+  }, []);
 
   // Handle navigation using React Router
   const handleNavigation = (path) => {
@@ -66,5 +93,6 @@ export const useNavigationItems = () => {
     activeTab,
     setActiveTab,
     handleNavigation,
+    cartCount,
   };
 };

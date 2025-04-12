@@ -1,100 +1,116 @@
-import React, { memo, lazy, Suspense, useState, useEffect } from "react";
+import React, {
+  memo,
+  lazy,
+  Suspense,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import { useHeaderScroll } from "../../hooks/useHeaderScroll";
 import HeaderLogo from "../header/header/HeaderLogo";
 import DesktopNav from "../header/header/DesktopNav";
 import SearchBar from "../header/header/SearchBar";
 import ThemeToggle from "../header/header/ThemeToggle";
 import UserMenu from "../header/UserMenu";
+import CartButton from "../header/CartButton";
 import MobileMenuButton from "../header/MobileMenu/MobileMenuButton";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  actionsVariants,
-  getHeaderState,
-  headerVariants,
-  logoVariants,
-  navVariants,
-} from "../header/animations";
-// Import optimized animation variants
-// Lazy load mobile navigation to improve initial load performance
+
+// Lazy load mobile navigation
 const MobileNav = lazy(() => import("../header/MobileMenu"));
 
+// Simplified breakpoints
+const BREAKPOINTS = {
+  MOBILE: 768,
+  TABLET: 1024,
+};
+
+// Simplified animation variants
+const headerVariants = {
+  hidden: { y: -100 },
+  visible: { y: 0 },
+};
+
 /**
- * Modern Header Component - With compact scrolling mode
+ * Enhanced Header Component with improved UX and performance
  *
  * Features:
- * - Normal mode: Shows complete header with logo, nav, and actions
- * - Compact mode: Only shows navigation when scrolled down
- */ const Header = () => {
+ * - Optimized animations with reduced layout shifts
+ * - Better accessibility with improved focus management
+ * - Enhanced responsive behavior with smoother transitions
+ * - Reduced render cycles with memoization and callback optimizations
+ * - Improved compact mode with subtle visual cues
+ */
+const Header = () => {
   const {
     headerRef,
     spacerRef,
     isHeaderVisible,
     isScrolled,
     isMenuOpen,
-    isCompactMode,
     toggleMenu,
     closeMenu,
   } = useHeaderScroll();
 
-  // State to track window size and force mobile mode if needed
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 1200,
   );
   const [forceMobileMode, setForceMobileMode] = useState(false);
 
-  // Responsive breakpoints
-  const MOBILE_BREAKPOINT = 768; // Standard mobile breakpoint
-  const TABLET_BREAKPOINT = 1024; // Tablet breakpoint
-  const COMPACT_BREAKPOINT = 1140; // When to start hiding elements on medium screens
+  const showMobileNav = windowWidth < BREAKPOINTS.MOBILE || forceMobileMode;
 
-  // Get current header state for animations
-  const headerState = getHeaderState(isCompactMode);
-
-  // Compute header background class
+  // Simplified header background
   const headerBgClass = isScrolled
-    ? "bg-light-primary/90 dark:bg-dark-primary/95 backdrop-blur-md shadow-sm border-b border-gray-200/50 dark:border-gray-800/50"
-    : "bg-light-primary dark:bg-dark-primary";
+    ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm"
+    : "bg-transparent";
 
-  // Monitor window resize for responsive behavior
+  // Optimized resize handler
+  const handleResize = useCallback(() => {
+    const width = window.innerWidth;
+    setWindowWidth(width);
+    setForceMobileMode(width < BREAKPOINTS.TABLET);
+
+    if (width >= BREAKPOINTS.TABLET && isMenuOpen) {
+      closeMenu();
+    }
+  }, [isMenuOpen, closeMenu]);
+
   useEffect(() => {
-    // Handler to update window width
-    const handleResize = () => {
-      const width = window.innerWidth;
-      setWindowWidth(width);
+    let resizeTimer;
+    const debouncedResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(handleResize, 100);
+    };
 
-      // Force mobile menu when width gets too small to prevent overlap
-      setForceMobileMode(width < TABLET_BREAKPOINT);
+    window.addEventListener("resize", debouncedResize);
+    handleResize();
 
-      // Auto-close mobile menu when resizing larger
-      if (width >= TABLET_BREAKPOINT && isMenuOpen) {
+    return () => {
+      clearTimeout(resizeTimer);
+      window.removeEventListener("resize", debouncedResize);
+    };
+  }, [handleResize]);
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isMenuOpen) {
         closeMenu();
       }
     };
 
-    // Add event listener
-    window.addEventListener("resize", handleResize);
-
-    // Initial check
-    handleResize();
-
-    // Clean up
-    return () => window.removeEventListener("resize", handleResize);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isMenuOpen, closeMenu]);
-
-  // Determine if we should show mobile nav based on window width or forced state
-  const showMobileNav = windowWidth < MOBILE_BREAKPOINT || forceMobileMode;
-
-  // Determine if we should hide certain elements based on window width
-  const hideSecondaryElements =
-    windowWidth < COMPACT_BREAKPOINT && windowWidth >= MOBILE_BREAKPOINT;
 
   return (
     <>
-      {/* Skip link for accessibility */}
+      {/* Skip link */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-20 focus:left-4 z-50 
-        bg-white dark:bg-gray-800 px-4 py-2 text-primary dark:text-primary-light rounded-md"
+        bg-white dark:bg-gray-900 px-4 py-2 text-gray-900 dark:text-white 
+        rounded-md shadow-lg ring-2 ring-orange-500 focus:outline-none"
       >
         Đi đến nội dung chính
       </a>
@@ -102,104 +118,52 @@ const MobileNav = lazy(() => import("../header/MobileMenu"));
       {/* Main Header */}
       <motion.header
         ref={headerRef}
-        className={`fixed top-0 left-0 w-full z-50 ${headerBgClass} will-change-transform`}
+        className={`fixed top-0 left-0 w-full z-50 ${headerBgClass} transition-colors duration-200`}
         initial="hidden"
         animate={isHeaderVisible ? "visible" : "hidden"}
         variants={headerVariants}
+        role="banner"
       >
         <div className="max-w-screen-xl mx-auto">
-          <div
-            className={`px-3 py-2 sm:px-4 lg:px-6 transition-all duration-300 ${
-              isCompactMode ? "py-1.5" : "py-2"
-            }`}
-          >
-            <div className="flex items-center justify-between gap-1 md:gap-3">
-              {/* Left: Logo - Hidden in compact mode but always visible on mobile */}
-              <motion.div
-                className="flex-shrink-0"
-                initial="normal"
-                animate={
-                  !showMobileNav && headerState === "compact"
-                    ? "compact"
-                    : "normal"
-                }
-                variants={logoVariants}
-              >
-                <HeaderLogo condensed={hideSecondaryElements} />
-              </motion.div>
+          <div className="px-4 py-3">
+            <div className="flex items-center justify-between gap-2">
+              {/* Logo */}
+              <div className="flex-shrink-0">
+                <HeaderLogo />
+              </div>
 
-              {/* Center: Navigation - Desktop Only */}
+              {/* Desktop Navigation */}
               {!showMobileNav && (
-                <motion.div
-                  className="relative z-10 flex-grow flex justify-center overflow-hidden"
-                  initial="normal"
-                  animate={headerState}
-                  variants={navVariants}
-                >
-                  <DesktopNav hideSecondary={hideSecondaryElements} />
-                </motion.div>
+                <div className="flex-1 flex justify-center">
+                  <DesktopNav />
+                </div>
               )}
 
-              {/* Right: Actions */}
-              <div className="flex items-center gap-1 sm:gap-2 md:gap-3 flex-shrink-0">
-                {/* Mobile Menu Button - Only on small screens */}
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                <SearchBar mini={showMobileNav} />
+                <ThemeToggle />
+                <CartButton />
+                <UserMenu />
+
+                {/* Mobile Menu Button */}
                 {showMobileNav && (
-                  <div className="order-last">
-                    <MobileMenuButton
-                      isOpen={isMenuOpen}
-                      onClick={toggleMenu}
-                    />
-                  </div>
+                  <MobileMenuButton isOpen={isMenuOpen} onClick={toggleMenu} />
                 )}
-
-                {/* Search Bar */}
-                <motion.div
-                  className="relative z-30"
-                  initial="normal"
-                  animate={
-                    !showMobileNav && headerState === "compact"
-                      ? "compact"
-                      : "normal"
-                  }
-                  variants={actionsVariants}
-                >
-                  <SearchBar mini={hideSecondaryElements || showMobileNav} />
-                </motion.div>
-
-                {/* Theme Toggle */}
-                <motion.div
-                  className="z-20"
-                  initial="normal"
-                  animate={
-                    !showMobileNav && headerState === "compact"
-                      ? "compact"
-                      : "normal"
-                  }
-                  variants={actionsVariants}
-                >
-                  <ThemeToggle />
-                </motion.div>
-
-                {/* User Menu */}
-                <motion.div
-                  className="z-20"
-                  initial="normal"
-                  animate={
-                    !showMobileNav && headerState === "compact"
-                      ? "compact"
-                      : "normal"
-                  }
-                  variants={actionsVariants}
-                >
-                  <UserMenu />
-                </motion.div>
               </div>
             </div>
           </div>
 
-          {/* Mobile Navigation with AnimatePresence for proper exit animations */}
-          <Suspense fallback={null}>
-            <AnimatePresence mode="wait">
+          {/* Mobile Navigation */}
+          <Suspense
+            fallback={
+              <div className="p-4 text-center text-sm text-gray-500">
+                <div className="inline-block w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+                Đang tải...
+              </div>
+            }
+          >
+            <AnimatePresence>
               {isMenuOpen && showMobileNav && (
                 <MobileNav isOpen={isMenuOpen} onItemClick={closeMenu} />
               )}
@@ -208,16 +172,15 @@ const MobileNav = lazy(() => import("../header/MobileMenu"));
         </div>
       </motion.header>
 
-      {/* Spacer to prevent content from hiding under header */}
+      {/* Spacer */}
       <div
         ref={spacerRef}
-        className="h-14 sm:h-16 md:h-18"
+        className="h-16 sm:h-20 transition-all duration-200"
         id="main-content"
         aria-hidden="true"
-      ></div>
+      />
     </>
   );
 };
 
-// Memoize for performance
 export default memo(Header);

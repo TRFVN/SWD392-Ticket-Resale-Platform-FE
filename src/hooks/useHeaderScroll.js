@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 /**
  * Custom hook to handle header scroll behavior with Framer Motion support
  * Optimized for performance with requestAnimationFrame and throttling
+ * Updated to support transparent nav-only mode
  */
 export const useHeaderScroll = () => {
   // Refs
@@ -83,6 +84,7 @@ export const useHeaderScroll = () => {
 
       // Update spacer height for proper content positioning
       if (spacerRef.current && headerRef.current) {
+        // When in compact transparent mode, we might want to adjust the spacer
         spacerRef.current.style.height = `${headerRef.current.offsetHeight}px`;
       }
     };

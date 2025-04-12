@@ -42,13 +42,15 @@ const scaleUp = {
 // Category Badge Component
 const CategoryBadge = memo(({ category }) => {
   const colorMap = {
-    sports: "bg-blue-500",
-    music: "bg-purple-500",
-    arts: "bg-pink-500",
-    other: "bg-orange-500",
+    "Âm Nhạc": "bg-purple-500",
+    "Hội Chợ": "bg-pink-500",
+    "Văn Hóa": "bg-blue-500",
+    "Ẩm Thực": "bg-green-500",
+    "Lễ Hội": "bg-orange-500",
+    "Thể Thao": "bg-yellow-500",
   };
 
-  const bgColor = colorMap[category.toLowerCase()] || colorMap.other;
+  const bgColor = colorMap[category] || "bg-orange-500";
 
   return (
     <span
@@ -58,6 +60,7 @@ const CategoryBadge = memo(({ category }) => {
     </span>
   );
 });
+CategoryBadge.displayName = "CategoryBadge";
 
 // Event Card Actions Component
 const CardActions = memo(({ isSaved, onSave, onShare }) => {
@@ -68,11 +71,11 @@ const CardActions = memo(({ isSaved, onSave, onShare }) => {
         whileTap={{ scale: 0.9 }}
         onClick={onSave}
         className="p-2 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 transition-colors"
-        aria-label={isSaved ? "Remove from saved" : "Save event"}
+        aria-label={isSaved ? "Bỏ lưu" : "Lưu sự kiện"}
       >
         <Heart
           className={`w-4 h-4 ${
-            isSaved ? "fill-red-500 text-red-500" : "text-white"
+            isSaved ? "fill-orange-500 text-orange-500" : "text-white"
           }`}
         />
       </motion.button>
@@ -82,13 +85,14 @@ const CardActions = memo(({ isSaved, onSave, onShare }) => {
         whileTap={{ scale: 0.9 }}
         onClick={onShare}
         className="p-2 rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 transition-colors"
-        aria-label="Share event"
+        aria-label="Chia sẻ sự kiện"
       >
         <Share2 className="w-4 h-4 text-white" />
       </motion.button>
     </div>
   );
 });
+CardActions.displayName = "CardActions";
 
 // Modern Event Card Component
 const EventCard = memo(
@@ -181,11 +185,11 @@ const EventCard = memo(
                   </div>
                   <div className="mt-1 flex justify-between text-xs">
                     <span className="text-gray-500 dark:text-gray-400">
-                      {attendance}% Booked
+                      {attendance}% Đã Đặt
                     </span>
                     {attendance > 75 && (
                       <span className="text-orange-500 font-medium">
-                        Selling Fast
+                        Sắp Hết Vé
                       </span>
                     )}
                   </div>
@@ -201,15 +205,15 @@ const EventCard = memo(
                   {price ? (
                     <div className="flex flex-col">
                       <span className="text-xs text-gray-500 dark:text-gray-400">
-                        Starting from
+                        Từ
                       </span>
                       <span className="text-lg font-bold text-gray-900 dark:text-white">
-                        ${price}
+                        {price}đ
                       </span>
                     </div>
                   ) : (
                     <span className="text-sm font-medium text-orange-500">
-                      Coming Soon
+                      Sắp Ra Mắt
                     </span>
                   )}
                 </div>
@@ -219,7 +223,7 @@ const EventCard = memo(
                   whileTap={{ scale: 0.95 }}
                   className="flex items-center justify-center gap-1 px-4 py-2 bg-gray-900 dark:bg-orange-500 text-white rounded-lg text-sm font-medium transition-colors"
                 >
-                  Details
+                  Chi Tiết
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </motion.button>
               </div>
@@ -230,6 +234,7 @@ const EventCard = memo(
     );
   },
 );
+EventCard.displayName = "EventCard";
 
 // Featured Section Header
 const SectionHeader = memo(() => {
@@ -246,147 +251,128 @@ const SectionHeader = memo(() => {
             <ArrowUpRight className="w-4 h-4 text-white" />
           </div>
           <span className="text-orange-500 dark:text-orange-400 font-medium uppercase tracking-wider text-sm">
-            Featured Events
+            Sự Kiện Nổi Bật
           </span>
         </motion.div>
 
         <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"
         >
-          Trending this Month
+          Khám Phá Các Sự Kiện <br className="hidden sm:block" />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">
+            Đặc Sắc Nhất
+          </span>
         </motion.h2>
       </div>
 
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
-        className="flex items-center gap-3"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <button className="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm font-medium">
-          Popular
-        </button>
-        <button className="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm font-medium">
-          Nearby
-        </button>
-        <button className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white transition-colors text-sm font-medium">
-          Upcoming
+        <button
+          className="flex items-center gap-2 text-gray-700 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors group"
+          aria-label="Xem tất cả sự kiện"
+        >
+          <span className="font-medium">Xem Tất Cả</span>
+          <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
         </button>
       </motion.div>
     </div>
   );
 });
+SectionHeader.displayName = "SectionHeader";
 
-// Main FeaturedEvents Component
+// Main Featured Events Component
 const FeaturedEvents = () => {
-  const events = [
+  // Sample featured event data
+  const featuredEvents = [
     {
       id: 1,
-      title: "World Cup Finals 2024",
-      date: "Dec 15, 2024",
-      location: "Qatar",
-      category: "Sports",
+      title: "Lễ Hội Áo Dài TP.HCM 2024",
+      date: "28 Th4 - 05 Th5, 2024",
+      location: "Phố đi bộ Nguyễn Huệ, TP.HCM",
+      price: "150.000",
       image:
-        "https://cdnuploads.aa.com.tr/uploads/Contents/2022/12/15/thumbs_b_c_0b4284b0e7eec848abbd00da0cf6689a.jpg?v=201200",
+        "https://images.unsplash.com/photo-1561121692-bc2450c5a86a?q=80&w=800&auto=format&fit=crop",
+      category: "Văn Hóa",
       attendance: 85,
+      isLarge: true,
     },
     {
       id: 2,
-      title: "EDM Festival 2024",
-      date: "Dec 20",
-      location: "Miami",
-      price: 79,
-      category: "Music",
-      image: "https://3kshop.vn/wp-content/uploads/2020/08/nhac-edm.jpg",
-      attendance: 60,
+      title: "Đêm Nhạc Trịnh Công Sơn",
+      date: "15 Th5, 2024",
+      location: "Nhà Hát Hòa Bình, TP.HCM",
+      price: "350.000",
+      image:
+        "https://images.unsplash.com/photo-1577398977702-77f1af5a9a36?q=80&w=800&auto=format&fit=crop",
+      category: "Âm Nhạc",
+      attendance: 65,
     },
     {
       id: 3,
-      title: "NBA All-Star Game",
-      date: "Jan 15",
-      location: "Los Angeles",
-      price: 129,
-      category: "Sports",
+      title: "Liên Hoan Ẩm Thực Việt Nam",
+      date: "01-03 Th6, 2024",
+      location: "Công viên 23/9, TP.HCM",
+      price: "100.000",
       image:
-        "https://www.usatoday.com/gcdn/-mm-/6edafaf7998a6f8ce9d21ad9f051d92c7369c7dd/c=115-0-1885-1000/local/-/media/2015/12/03/USATODAY/USATODAY/635847352594650898-adidas-NBA-All-Star-Full-H.jpg?width=660&height=373&fit=crop&format=pjpg&auto=webp",
-      attendance: 45,
+        "https://images.unsplash.com/photo-1496116218417-1a781b1c416c?q=80&w=800&auto=format&fit=crop",
+      category: "Ẩm Thực",
+      attendance: 50,
     },
     {
       id: 4,
-      title: "Broadway Shows Week",
-      date: "Dec 25",
-      location: "New York",
-      price: 89,
-      category: "Arts",
+      title: "Hội Chợ Làng Nghề Truyền Thống",
+      date: "20-25 Th6, 2024",
+      location: "Bảo tàng Dân tộc học, Hà Nội",
+      price: "80.000",
       image:
-        "https://www.hollywoodreporter.com/wp-content/uploads/2023/07/newyorknewyork.jpg?w=1296&h=730&crop=1",
-      attendance: 30,
+        "https://images.unsplash.com/photo-1559828135-b26e7d8121c9?q=80&w=800&auto=format&fit=crop",
+      category: "Hội Chợ",
+      attendance: 40,
     },
     {
       id: 5,
-      title: "Tech Innovation Summit",
-      date: "Jan 10, 2025",
-      location: "San Francisco",
-      price: 199,
-      category: "Other",
+      title: "Lễ Hội Trung Thu",
+      date: "15 Th9, 2024",
+      location: "Phố Cổ Hà Nội",
+      price: null,
       image:
-        "https://imageio.forbes.com/specials-images/imageserve/647fa6ca4ade3d3e030e5a2d/0x0.jpg?format=jpg&height=900&width=1600&fit=bounds",
-      attendance: 70,
+        "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?q=80&w=800&auto=format&fit=crop",
+      category: "Lễ Hội",
+      attendance: 0,
     },
   ];
 
   return (
-    <section className="py-16 lg:py-24 relative overflow-hidden">
-      {/* Modern background elements */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-b from-orange-200/20 to-pink-200/20 dark:from-orange-900/10 dark:to-pink-900/10 rounded-full blur-3xl -z-10 transform translate-x-1/3 -translate-y-1/3" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-t from-blue-200/20 to-purple-200/20 dark:from-blue-900/10 dark:to-purple-900/10 rounded-full blur-3xl -z-10 transform -translate-x-1/3 translate-y-1/3" />
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section header */}
+    <section className="py-20 bg-gray-50 dark:bg-gray-900/50">
+      <div className="container mx-auto px-6">
         <SectionHeader />
 
-        {/* Events grid - modern layout */}
         <motion.div
           variants={staggerContainer}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr"
+          viewport={{ once: true, margin: "-100px" }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-auto"
         >
-          {/* First event is large (spans 2 rows) */}
-          <EventCard {...events[0]} isLarge={true} />
-
-          {/* Other events */}
-          {events.slice(1).map((event) => (
-            <EventCard key={event.id} {...event} />
+          {featuredEvents.map((event) => (
+            <EventCard
+              key={event.id}
+              {...event}
+              className={
+                event.isLarge ? "md:col-span-2 lg:col-span-1 row-span-2" : ""
+              }
+            />
           ))}
-        </motion.div>
-
-        {/* View all button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-          className="mt-12 text-center"
-        >
-          <motion.button
-            whileHover={{
-              scale: 1.05,
-              boxShadow: "0 10px 25px -5px rgba(249, 115, 22, 0.2)",
-            }}
-            whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl font-medium shadow-md"
-          >
-            Explore All Events
-            <ArrowRight className="w-4 h-4" />
-          </motion.button>
         </motion.div>
       </div>
     </section>
   );
 };
 
-export default memo(FeaturedEvents);
+export default FeaturedEvents;

@@ -49,6 +49,19 @@ const EventCard = ({ event, onClick }) => {
       <div className="flex flex-col h-full">
         {/* Date Badge - Top Left */}
         <div className="relative">
+          {/* Add event image if available */}
+          {event.eventImage &&
+            !event.eventImage.includes("Tp.") &&
+            !event.eventImage.includes("Việt Nam") && (
+              <div className="w-full h-48 bg-gray-200 overflow-hidden">
+                <img
+                  src={event.eventImage}
+                  alt={event.eventName}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
           <div
             className={`absolute top-4 left-4 w-16 h-16 rounded-xl flex flex-col items-center justify-center 
             ${isDarkMode ? "bg-gray-900" : "bg-orange-50"} shadow-sm border 
@@ -111,9 +124,26 @@ const EventCard = ({ event, onClick }) => {
             </div>
             <div className="flex items-start gap-3 text-gray-600 dark:text-gray-400">
               <MapPin className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
-              <span className="text-sm line-clamp-1">{`${event.address}, ${event.district}, ${event.city}`}</span>
+              <span className="text-sm line-clamp-1">{event.location}</span>
             </div>
           </div>
+
+          {/* Ticket Info (Optional) */}
+          {event.ticketTemplates && event.ticketTemplates.length > 0 && (
+            <div className="mt-3">
+              <p
+                className={`text-sm ${
+                  isDarkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                {event.ticketTemplates.length} loại vé từ{" "}
+                {new Intl.NumberFormat("vi-VN").format(
+                  Math.min(...event.ticketTemplates.map((t) => t.ticketPrice)),
+                )}
+                đ
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Card Footer */}
@@ -297,7 +327,8 @@ const EventsPage = () => {
           event.eventDescription
             .toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
-          event.city.toLowerCase().includes(searchTerm.toLowerCase()),
+          (event.location &&
+            event.location.toLowerCase().includes(searchTerm.toLowerCase())),
       );
 
       setFilteredEvents(filtered);
@@ -309,12 +340,7 @@ const EventsPage = () => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("/api/Event", {
-        params: {
-          pageNumber: 1,
-          pageSize: 100, // Get all for client-side pagination
-        },
-      });
+      const response = await axiosInstance.get("/api/Event");
 
       if (response.data.isSuccess) {
         setEvents(response.data.result);
@@ -323,7 +349,7 @@ const EventsPage = () => {
           Math.max(1, Math.ceil(response.data.result.length / pageSize)),
         );
       } else {
-        throw new Error(response.data.message);
+        throw new Error(response.data.message || "Failed to fetch events");
       }
     } catch (err) {
       setError(err.message || "Failed to fetch events");
@@ -349,6 +375,23 @@ const EventsPage = () => {
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     return filteredEvents.slice(startIndex, endIndex);
+  };
+
+  // Count unique cities from event locations
+  const getUniqueLocationsCount = () => {
+    if (!events.length) return 0;
+
+    // Extract city names from location strings
+    const cityRegex = /([^,]+)$/;
+    const cities = events
+      .map((event) => {
+        if (!event.location) return null;
+        const match = event.location.match(cityRegex);
+        return match ? match[1].trim() : event.location;
+      })
+      .filter(Boolean);
+
+    return new Set(cities).size;
   };
 
   if (loading) {
@@ -566,7 +609,7 @@ const EventsPage = () => {
                     isDarkMode ? "text-white" : "text-gray-900"
                   }`}
                 >
-                  {new Set(events.map((e) => e.city)).size}
+                  {getUniqueLocationsCount()}
                 </p>
               </div>
             </div>

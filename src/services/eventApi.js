@@ -29,31 +29,36 @@ export const getLocationApi = async () => {
   }
 };
 
-export const postEventApi = async (events) => {
+export const postEventApi = async (eventData) => {
   try {
-    const response = await axiosInstance.post("/api/Event", {
-      eventName: events.eventName,
-      eventDescription: events.eventDescription,
-      eventDate: events.eventDate,
-      city: events.city,
-      district: events.district,
-      address: events.address,
-    });
+    // Format the data to match API's expected structure
+    const formattedEventData = {
+      eventName: eventData.eventName,
+      eventDescription: eventData.eventDescription,
+      eventDate: eventData.eventDate,
+      categoryId: eventData.categoryId,
+      location: eventData.location,
+      eventImage: eventData.eventImage,
+    };
+
+    const response = await axiosInstance.post("/api/Event", formattedEventData);
+
     if (response.status === 201) {
       return response.data.result;
     } else {
       throw new Error(response.data.message || "Failed to create event");
     }
   } catch (error) {
+    console.error("Error in postEventApi:", error);
     throw new Error(error.message || "Failed to create event");
   }
 };
 
 export const deleteEventApi = async (eventId) => {
   try {
-    const response = await axiosInstance.delete(`/Event/${eventId}`);
-    if (response.status === 201) {
-      return response.data.result; //tai vi api tra nhu the :))))
+    const response = await axiosInstance.delete(`/api/Event/${eventId}`);
+    if (response.status === 200 || response.status === 201) {
+      return response.data.result;
     } else {
       throw new Error(response.data.message || "Failed to delete event");
     }
@@ -62,32 +67,51 @@ export const deleteEventApi = async (eventId) => {
   }
 };
 
-export const putEventApi = async ({
-  eventId,
-  eventName,
-  eventDescription,
-  eventDate,
-  city,
-  district,
-  address,
-}) => {
+export const putEventApi = async (eventData) => {
   try {
-    const response = await axiosInstance.put("Event", {
-      eventId: eventId,
-      eventName: eventName,
-      eventDescription: eventDescription,
-      eventDate: eventDate,
-      city: city,
-      district: district,
-      address: address,
+    const response = await axiosInstance.put("/api/Event", {
+      eventId: eventData.eventId,
+      eventName: eventData.eventName,
+      eventDescription: eventData.eventDescription,
+      eventDate: eventData.eventDate,
+      categoryId: eventData.categoryId,
+      location: eventData.location,
+      eventImage: eventData.eventImage,
     });
-    console.log(response.data);
-    if (response.status === 201) {
+
+    if (response.status === 200 || response.status === 201) {
       return response.data.result;
     } else {
       throw new Error(response.data.message || "Failed to update event");
     }
   } catch (error) {
     throw new Error(error.message || "Failed to update event");
+  }
+};
+
+// Get event by ID
+export const getEventByIdApi = async (eventId) => {
+  try {
+    const response = await axiosInstance.get(`/api/Event/${eventId}`);
+    if (response.status === 200) {
+      return response.data.result;
+    } else {
+      throw new Error(response.data.message || "Failed to get event details");
+    }
+  } catch (error) {
+    throw new Error(error.message || "Failed to get event details");
+  }
+};
+// Get event by ID
+export const getEventByUserID = async () => {
+  try {
+    const response = await axiosInstance.get(`/api/Event/userId`);
+    if (response.status === 200) {
+      return response.data.result;
+    } else {
+      throw new Error(response.data.message || "Failed to get event details");
+    }
+  } catch (error) {
+    throw new Error(error.message || "Failed to get event details");
   }
 };

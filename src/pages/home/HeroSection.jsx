@@ -56,6 +56,7 @@ const Stat = memo(({ value, label, delay }) => {
     </motion.div>
   );
 });
+Stat.displayName = "Stat";
 
 // Enhanced Hero badge component
 const HeroBadge = memo(() => {
@@ -69,7 +70,7 @@ const HeroBadge = memo(() => {
         backdrop-blur-sm border border-orange-500/30
         text-orange-400 rounded-full text-sm font-medium"
       >
-        Smart Ticketing Platform
+        Nền Tảng Đặt Vé Thông Minh
       </span>
       <motion.div
         initial={{ x: "100%" }}
@@ -85,13 +86,14 @@ const HeroBadge = memo(() => {
     </motion.div>
   );
 });
+HeroBadge.displayName = "HeroBadge";
 
 // Optimized and enhanced HeroSection component
 const HeroSection = () => {
   const stats = [
-    { value: "1M+", label: "Active Users", delay: 0 },
-    { value: "10K+", label: "Events Hosted", delay: 1 },
-    { value: "100+", label: "Cities Worldwide", delay: 2 },
+    { value: "500K+", label: "Người Dùng", delay: 0 },
+    { value: "5K+", label: "Sự Kiện", delay: 1 },
+    { value: "63+", label: "Tỉnh Thành", delay: 2 },
   ];
 
   return (
@@ -122,10 +124,9 @@ const HeroSection = () => {
           className="w-full h-full"
         >
           <img
-            src="https://images.alphacoders.com/117/1178907.jpg"
-            alt=""
+            src="https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=1920&auto=format&fit=crop"
+            alt="Nhà hát Hồ Gươm, Hà Nội"
             className="w-full h-full object-cover"
-            role="presentation"
           />
         </motion.div>
       </div>
@@ -144,9 +145,9 @@ const HeroSection = () => {
             variants={itemVariants}
             className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight tracking-tight"
           >
-            Where Moments <br />
+            Khoảnh Khắc <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">
-              Become Memories
+              Thành Kỷ Niệm
             </span>
           </motion.h1>
 
@@ -154,9 +155,9 @@ const HeroSection = () => {
             variants={itemVariants}
             className="text-xl md:text-2xl text-gray-300 max-w-2xl font-light leading-relaxed"
           >
-            Find and book tickets for extraordinary events. Join experiences
-            that last a lifetime with our innovative platform designed for event
-            lovers.
+            Tìm và đặt vé cho các sự kiện văn hóa, nghệ thuật Việt Nam đặc sắc.
+            Tham gia những trải nghiệm còn mãi với thời gian qua nền tảng đặt vé
+            hiện đại của chúng tôi.
           </motion.p>
 
           <motion.div
@@ -172,9 +173,9 @@ const HeroSection = () => {
                 text-white rounded-xl shadow-lg shadow-orange-500/30
                 font-medium transition-all duration-300 flex items-center gap-2.5 group
                 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:ring-offset-2 focus:ring-offset-black/20"
-              aria-label="Browse available events"
+              aria-label="Khám phá các sự kiện đang diễn ra"
             >
-              <span className="text-base">Browse Events</span>
+              <span className="text-base">Khám Phá Sự Kiện</span>
               <ArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" />
             </motion.button>
 
@@ -188,9 +189,9 @@ const HeroSection = () => {
                 font-medium transition-all duration-300 flex items-center gap-2.5 group
                 backdrop-blur-sm
                 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-black/20"
-              aria-label="Create and host your own event"
+              aria-label="Tạo và tổ chức sự kiện của riêng bạn"
             >
-              <span className="text-base">Host Event</span>
+              <span className="text-base">Tổ Chức Sự Kiện</span>
               <Plus className="w-5 h-5 transform group-hover:rotate-90 transition-transform" />
             </motion.button>
           </motion.div>
@@ -225,7 +226,7 @@ const HeroSection = () => {
           className="flex flex-col items-center"
         >
           <span className="text-white/80 text-sm mb-2 font-medium tracking-wide">
-            Scroll Down
+            Cuộn Xuống
           </span>
           <div className="bg-white/10 backdrop-blur-sm p-2 rounded-full border border-white/10">
             <ChevronDown className="w-6 h-6 text-orange-500" />

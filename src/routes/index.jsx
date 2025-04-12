@@ -26,11 +26,14 @@ import Checkout from "../pages/checkout/Checkout";
 import OrderConfirmation from "../pages/order-confirmation/orderconfirmation";
 import ResetPassword from "../pages/auth/ResetPassword";
 import CreateEventPage from "../pages/CreateEvent/CreateEvent";
+import MyEvents from "../pages/tickets/Events/MyEvents";
+import EditEvent from "../pages/tickets/Events/EditEvent";
 const ROLES = {
   ADMIN: "ADMIN",
   STAFF: "STAFF",
   MEMBER: "MEMBER",
   ORGANIZATION: "ORGANIZATION",
+  MANAGER: "MANAGER",
 };
 
 const publicRoutes = [
@@ -41,7 +44,13 @@ const publicRoutes = [
   { path: "verify-email", element: <VerifyEmail /> },
   { path: "forgot-password", element: <ForgotPassword /> },
   { path: "reset-password", element: <ResetPassword /> },
-
+  {
+    path: "chat",
+    children: [
+      { index: true, element: <ChatsPage /> },
+      { path: ":userId", element: <ChatsPage /> },
+    ],
+  },
   { path: "tickets", element: <Ticket /> },
   { path: "events", element: <EventsPage /> },
   { path: "events/:eventId", element: <EventDetails /> },
@@ -52,13 +61,13 @@ const privateRoutes = [
   { path: "create-ticket", element: <CreateTicket /> },
   { path: "profile", element: <Profile /> },
   { path: "cart", element: <Cart /> },
-  {
-    path: "chat",
-    children: [
-      { index: true, element: <ChatsPage /> },
-      { path: ":userId", element: <ChatsPage /> },
-    ],
-  },
+  // {
+  //   path: "chat",
+  //   children: [
+  //     { index: true, element: <ChatsPage /> },
+  //     { path: ":userId", element: <ChatsPage /> },
+  //   ],
+  // },
   { path: "my-tickets", element: <MyTicketsPage /> },
   { path: "checkout", element: <Checkout /> },
   {
@@ -66,6 +75,13 @@ const privateRoutes = [
     element: <OrderConfirmation />,
   },
   { path: "create-event", element: <CreateEventPage /> },
+  { path: "my-events", element: <MyEvents /> },
+  { path: "events/edit/:eventId", element: <EditEvent /> },
+  { path: "edit-event/:id", element: <div>Edit Event Page (Coming soon)</div> },
+  {
+    path: "event-tickets/:id",
+    element: <div>Event Tickets Page (Coming soon)</div>,
+  },
 ];
 
 export const router = createBrowserRouter([
