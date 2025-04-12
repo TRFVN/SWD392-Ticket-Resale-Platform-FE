@@ -6,6 +6,7 @@ import Footer from "../components/layout/Footer";
 import Loader from "../components/common/Loader";
 import Header from "../components/layout/Header";
 import BreadCrumb from "../components/common/BreadCrumb";
+import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 
 // Animation variants
 const pageTransition = {
@@ -148,17 +149,19 @@ const RootLayout = () => {
   }, [pathname]);
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={isAuthPage ? "auth" : "main"}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        variants={pageTransition}
-      >
-        {isAuthPage ? <AuthLayout /> : <MainLayout />}
-      </motion.div>
-    </AnimatePresence>
+    <AnalyticsWrapper>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={isAuthPage ? "auth" : "main"}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          variants={pageTransition}
+        >
+          {isAuthPage ? <AuthLayout /> : <MainLayout />}
+        </motion.div>
+      </AnimatePresence>
+    </AnalyticsWrapper>
   );
 };
 

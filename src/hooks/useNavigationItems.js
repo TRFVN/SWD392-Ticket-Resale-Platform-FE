@@ -10,7 +10,7 @@ import { subscribeToCartUpdates } from "../utils/cartEvents";
 export const useNavigationItems = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("");
+  const [activeTab, setActiveTab] = useState("events");
   const [cartCount, setCartCount] = useState(0);
 
   // Define navigation items with priority flags

@@ -6,6 +6,11 @@ import authService from "../services/auth";
 import { toast } from "react-toastify";
 import axios from "axios";
 import axiosInstance from "../config/axiosConfig";
+import {
+  setAnalyticsUserId,
+  setAnalyticsUserProperties,
+  logUserEvent,
+} from "../config/firebase";
 
 export const AuthContext = createContext(null);
 
@@ -13,6 +18,31 @@ export function AuthProvider({ children }) {
   const dispatch = useDispatch();
   const { user, loading, error } = useSelector((state) => state.auth);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // Set analytics user ID and properties when user changes
+  useEffect(() => {
+    if (user) {
+      // Set user ID for analytics
+      setAnalyticsUserId(user.id);
+
+      // Set user properties
+      setAnalyticsUserProperties({
+        userRole: user.role,
+        userType: user.organizationName ? "organization" : "member",
+        hasAvatar: !!user.imageUrl,
+      });
+
+      // Log login event
+      logUserEvent("user_login", {
+        userId: user.id,
+        userRole: user.role,
+      });
+    } else {
+      // Clear user ID when logged out
+      setAnalyticsUserId(null);
+      logUserEvent("user_logout");
+    }
+  }, [user]);
 
   const refreshUserData = async () => {
     const accessToken = Cookies.get("accessToken");

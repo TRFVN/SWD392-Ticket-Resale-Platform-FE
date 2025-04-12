@@ -28,6 +28,10 @@ import ResetPassword from "../pages/auth/ResetPassword";
 import CreateEventPage from "../pages/CreateEvent/CreateEvent";
 import MyEvents from "../pages/tickets/Events/MyEvents";
 import EditEvent from "../pages/tickets/Events/EditEvent";
+import MenteeGathering from "../pages/mentee-gathering/MenteeGathering";
+import MissUniverseEvent from "../pages/miss-universe-event/MissUniverseEvent";
+import CriticalThinkingEvent from "../pages/critical-thinking-event/CriticalThinkingEvent";
+
 const ROLES = {
   ADMIN: "ADMIN",
   STAFF: "STAFF",
@@ -44,6 +48,12 @@ const publicRoutes = [
   { path: "verify-email", element: <VerifyEmail /> },
   { path: "forgot-password", element: <ForgotPassword /> },
   { path: "reset-password", element: <ResetPassword /> },
+  { path: "mentee-gathering", element: <MenteeGathering /> },
+  { path: "miss-universe-event", element: <MissUniverseEvent /> },
+  {
+    path: "/critical-thinking-event",
+    element: <CriticalThinkingEvent />,
+  },
   {
     path: "chat",
     children: [
