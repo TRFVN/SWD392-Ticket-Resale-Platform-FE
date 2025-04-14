@@ -127,7 +127,7 @@ export const getTicketTemplatesByEventId = async (
 export const updateTicketTemplate = async (ticketTemplateData) => {
   try {
     const response = await axiosInstance.put(
-      `/api/tickets/update-ticket-template/${ticketTemplateData.ticketTemplateId}`,
+      `/api/tickets/update-ticket-template`,
       ticketTemplateData,
     );
 

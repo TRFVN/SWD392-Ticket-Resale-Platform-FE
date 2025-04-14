@@ -102,16 +102,17 @@ export const getEventByIdApi = async (eventId) => {
     throw new Error(error.message || "Failed to get event details");
   }
 };
+
 // Get event by ID
 export const getEventByUserID = async () => {
   try {
     const response = await axiosInstance.get(`/api/Event/userId`);
-    if (response.status === 200) {
+    if (response.status === 200 && response.data.isSuccess) {
       return response.data.result;
     } else {
-      throw new Error(response.data.message || "Failed to get event details");
+      throw new Error(response.data.message || "Failed to get user events");
     }
   } catch (error) {
-    throw new Error(error.message || "Failed to get event details");
+    throw new Error(error.message || "Failed to get user events");
   }
 };

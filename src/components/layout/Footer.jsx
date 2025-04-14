@@ -55,6 +55,8 @@ const FooterLink = memo(({ href, children, icon: Icon, external }) => (
   </div>
 ));
 
+FooterLink.displayName = "FooterLink";
+
 // Social Icon Component with enhanced animations
 const SocialIcon = memo(({ icon: Icon, href, label, gradient }) => (
   <a
@@ -75,6 +77,8 @@ const SocialIcon = memo(({ icon: Icon, href, label, gradient }) => (
   </a>
 ));
 
+SocialIcon.displayName = "SocialIcon";
+
 // App Store Button with improved design
 const AppStoreButton = memo(({ type }) => {
   const storeData = {
@@ -91,7 +95,7 @@ const AppStoreButton = memo(({ type }) => {
           <path d="M17.9 5c0-.2-.2-.4-.4-.5l-9.9-5.7c-.3-.1-.5-.1-.8 0-.2.1-.3.2-.4.5L2.5 11.7c-.1.2-.1.4 0 .7 0 .2.2.4.4.5l9.9 5.7c.2.1.3.1.4.1.1 0 .2 0 .3-.1.2-.1.4-.3.4-.5V5zm-.3 11.9l-9.3-5.3L11.7 7l9.3 5.4-3.4 4.5z" />
         </svg>
       ),
-      textMain: "GET IT ON",
+      textMain: "TẢI VỀ TỪ",
       textSub: "Google Play",
     },
     ios: {
@@ -107,7 +111,7 @@ const AppStoreButton = memo(({ type }) => {
           <path d="M14.5 3.5c1.6-.7 3.4.2 4.8 1.4-1.8.9-3.1 2.7-2.8 4.8 1.8.2 3.3 1.8 3.9 3.5-1.1 1.6-2.4 3.4-4.5 3.4-1 0-1.7-.4-2.4-.4-.8 0-1.5.4-2.5.4-2.1 0-4.8-3.5-4.8-7.8 0-3.5 2.3-5.3 4.4-5.3 1.4 0 2.5.8 3.1.8.6 0 1.5-.6 2.8-.8z M14.9 0c.1 2.1-1.3 4-3 4.7-1.5-1.8-1.1-4.3.7-5.3.8-.4 1.6-.4 2.3.6z" />
         </svg>
       ),
-      textMain: "Download on the",
+      textMain: "TẢI VỀ TRÊN",
       textSub: "App Store",
     },
   };
@@ -120,9 +124,7 @@ const AppStoreButton = memo(({ type }) => {
       target="_blank"
       rel="noopener noreferrer"
       className={store.className}
-      aria-label={`Download from ${
-        type === "ios" ? "App Store" : "Google Play"
-      }`}
+      aria-label={`Tải về từ ${type === "ios" ? "App Store" : "Google Play"}`}
     >
       {store.icon}
       <div className="flex flex-col items-start">
@@ -133,38 +135,42 @@ const AppStoreButton = memo(({ type }) => {
   );
 });
 
+AppStoreButton.displayName = "AppStoreButton";
+
 // Newsletter subscription form
 const NewsletterForm = memo(() => (
   <div className="space-y-4">
     <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
       <Mail className="h-6 w-6 text-orange-500" />
-      Subscribe to Updates
+      Đăng Ký Nhận Thông Báo
     </h3>
     <p className="text-sm text-gray-600 dark:text-gray-400">
-      Get the latest news and updates delivered to your inbox
+      Nhận tin tức và cập nhật mới nhất vào hộp thư của bạn
     </p>
     <form className="flex flex-col sm:flex-row gap-2">
       <input
         type="email"
-        placeholder="Enter your email"
+        placeholder="Nhập email của bạn"
         className="flex-1 px-4 py-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 
           focus:outline-none focus:ring-2 focus:ring-orange-500/40 text-gray-900 dark:text-gray-100"
         required
-        aria-label="Email for newsletter"
+        aria-label="Email cho bản tin"
       />
       <button
         type="submit"
         className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors 
           font-medium shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-orange-500/40"
       >
-        Subscribe
+        Đăng Ký
       </button>
     </form>
     <p className="text-xs text-gray-500 dark:text-gray-500">
-      By subscribing you agree to our Privacy Policy
+      Bằng việc đăng ký, bạn đồng ý với Chính sách Quyền riêng tư của chúng tôi
     </p>
   </div>
 ));
+
+NewsletterForm.displayName = "NewsletterForm";
 
 // Section header
 const SectionHeader = memo(({ title, icon: Icon }) => (
@@ -174,6 +180,8 @@ const SectionHeader = memo(({ title, icon: Icon }) => (
   </h3>
 ));
 
+SectionHeader.displayName = "SectionHeader";
+
 // Contact Info Item
 const ContactItem = memo(({ icon: Icon, text }) => (
   <div className="flex items-start gap-3">
@@ -182,6 +190,8 @@ const ContactItem = memo(({ icon: Icon, text }) => (
   </div>
 ));
 
+ContactItem.displayName = "ContactItem";
+
 // Main Footer Component
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -189,24 +199,24 @@ const Footer = () => {
   // Footer links grouped by category
   const footerLinks = {
     company: [
-      { label: "About Us", href: "/about", icon: Info },
-      { label: "Contact Us", href: "/contact", icon: Mail },
-      { label: "Careers", href: "/careers", icon: User },
-      { label: "Blog", href: "/blog", icon: FileText },
-      { label: "Partnerships", href: "/partners", icon: Award },
+      { label: "Về Chúng Tôi", href: "/about", icon: Info },
+      { label: "Liên Hệ", href: "/contact", icon: Mail },
+      { label: "Tuyển Dụng", href: "/careers", icon: User },
+      { label: "Tin Tức", href: "/blog", icon: FileText },
+      { label: "Đối Tác", href: "/partners", icon: Award },
     ],
     support: [
-      { label: "Help Center", href: "/help", icon: HelpCircle },
-      { label: "FAQs", href: "/faq", icon: HelpCircle },
-      { label: "Ticket Guarantees", href: "/guarantees", icon: Shield },
-      { label: "Contact Support", href: "/support", icon: Phone },
-      { label: "Refund Policy", href: "/refunds", icon: CreditCard },
+      { label: "Trung Tâm Trợ Giúp", href: "/help", icon: HelpCircle },
+      { label: "Câu Hỏi Thường Gặp", href: "/faq", icon: HelpCircle },
+      { label: "Bảo Đảm Vé", href: "/guarantees", icon: Shield },
+      { label: "Liên Hệ Hỗ Trợ", href: "/support", icon: Phone },
+      { label: "Chính Sách Hoàn Tiền", href: "/refunds", icon: CreditCard },
     ],
     legal: [
-      { label: "Terms of Service", href: "/terms", icon: FileText },
-      { label: "Privacy Policy", href: "/privacy", icon: Lock },
-      { label: "Cookie Policy", href: "/cookies", icon: Lock },
-      { label: "Accessibility", href: "/accessibility", icon: User },
+      { label: "Điều Khoản Dịch Vụ", href: "/terms", icon: FileText },
+      { label: "Chính Sách Quyền Riêng Tư", href: "/privacy", icon: Lock },
+      { label: "Chính Sách Cookie", href: "/cookies", icon: Lock },
+      { label: "Trợ Năng", href: "/accessibility", icon: User },
     ],
   };
 
@@ -255,33 +265,33 @@ const Footer = () => {
                   TicketHub
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  Connecting fans to events
+                  Kết nối người hâm mộ với sự kiện
                 </div>
               </div>
             </div>
 
             {/* Company Description */}
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Your trusted platform for finding and booking tickets to the best
-              events worldwide.
+              Nền tảng đáng tin cậy của bạn để tìm và đặt vé cho các sự kiện tốt
+              nhất trên toàn quốc.
             </p>
 
             {/* Contact Information */}
             <div className="space-y-3 pt-4">
               <ContactItem
                 icon={MapPin}
-                text="123 Event Avenue, Suite 300, New York, NY 10001"
+                text="123 Đường Sự Kiện, Tầng 3, Quận 1, TP. Hồ Chí Minh"
               />
-              <ContactItem icon={Phone} text="+1 (555) 123-4567" />
-              <ContactItem icon={Mail} text="support@tickethub.com" />
-              <ContactItem icon={Clock} text="Monday-Friday: 9AM-6PM EST" />
-              <ContactItem icon={Globe} text="Available in 30+ countries" />
+              <ContactItem icon={Phone} text="(+84) 123-456-789" />
+              <ContactItem icon={Mail} text="hotro@tickethub.com" />
+              <ContactItem icon={Clock} text="Thứ Hai-Thứ Sáu: 8:30-17:30" />
+              <ContactItem icon={Globe} text="Có mặt tại hơn 30 tỉnh thành" />
             </div>
           </div>
 
           {/* Quick Links - Company */}
           <div className="lg:col-span-2 space-y-6">
-            <SectionHeader title="Company" />
+            <SectionHeader title="Công Ty" />
             <div className="space-y-1">
               {footerLinks.company.map((link) => (
                 <FooterLink key={link.label} href={link.href} icon={link.icon}>
@@ -293,7 +303,7 @@ const Footer = () => {
 
           {/* Quick Links - Support */}
           <div className="lg:col-span-2 space-y-6">
-            <SectionHeader title="Support" />
+            <SectionHeader title="Hỗ Trợ" />
             <div className="space-y-1">
               {footerLinks.support.map((link) => (
                 <FooterLink key={link.label} href={link.href} icon={link.icon}>
@@ -305,7 +315,7 @@ const Footer = () => {
 
           {/* Legal Links */}
           <div className="lg:col-span-2 space-y-6">
-            <SectionHeader title="Legal" />
+            <SectionHeader title="Pháp Lý" />
             <div className="space-y-1">
               {footerLinks.legal.map((link) => (
                 <FooterLink key={link.label} href={link.href} icon={link.icon}>
@@ -326,7 +336,7 @@ const Footer = () => {
           {/* Social Media Links */}
           <div className="border-t border-gray-200 dark:border-gray-800 pt-8 pb-8">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-              Connect With Us
+              Kết Nối Với Chúng Tôi
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {socialLinks.map((social) => (
@@ -346,10 +356,10 @@ const Footer = () => {
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Download Our Mobile App
+                  Tải Ứng Dụng Di Động
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 md:mb-0">
-                  Get exclusive deals and manage your tickets on the go
+                  Nhận ưu đãi độc quyền và quản lý vé của bạn mọi lúc mọi nơi
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -363,20 +373,25 @@ const Footer = () => {
           <div className="border-t border-gray-200 dark:border-gray-800 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-6">
               <div className="text-sm text-gray-600 dark:text-gray-400 flex flex-wrap items-center gap-2">
-                <div>© {currentYear} TicketHub. All rights reserved.</div>
+                <div>© {currentYear} TicketHub. Tất cả quyền được bảo lưu.</div>
                 <div className="hidden md:block">•</div>
-                <div>Secure payments powered by Stripe</div>
+                <div>Thanh toán an toàn được cung cấp bởi Stripe</div>
               </div>
 
               <div className="flex items-center gap-6">
-                {["Terms", "Privacy", "Cookies", "Sitemap"].map((item) => (
+                {[
+                  { name: "Điều Khoản", path: "terms" },
+                  { name: "Quyền Riêng Tư", path: "privacy" },
+                  { name: "Cookie", path: "cookies" },
+                  { name: "Sơ Đồ", path: "sitemap" },
+                ].map((item) => (
                   <a
-                    key={item}
-                    href={`/${item.toLowerCase()}`}
+                    key={item.name}
+                    href={`/${item.path}`}
                     className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-orange-500 
                       dark:hover:text-orange-400 transition-all duration-300 focus:outline-none focus:text-orange-500"
                   >
-                    {item}
+                    {item.name}
                   </a>
                 ))}
 
@@ -388,7 +403,7 @@ const Footer = () => {
                     focus:outline-none focus:text-orange-500"
                   >
                     <Globe className="h-4 w-4" />
-                    <span>English</span>
+                    <span>Tiếng Việt</span>
                     <ChevronRight className="h-3 w-3 transform rotate-90 group-hover:rotate-[270deg] transition-transform duration-300" />
                   </button>
                 </div>
