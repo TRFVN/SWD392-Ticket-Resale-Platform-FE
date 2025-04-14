@@ -2,11 +2,44 @@ import React, { useState } from "react";
 import ManagerSidebar from "../components/layout/ManagerSidebar";
 import ManagerHeader from "../components/layout/ManagerHeader";
 import { Outlet } from "react-router-dom";
-
+const Tabs = [
+  {
+    id: 1,
+    label: "Dashboard",
+  },
+  {
+    id: 2,
+    label: "Category",
+  },
+  {
+    id: 3,
+    label: "Event",
+  },
+  {
+    id: 4,
+    label: "Ticket",
+  },
+  {
+    id: 5,
+    label: "Account",
+  },
+  {
+    id: 6,
+    label: "Message",
+  },
+  {
+    id: 7,
+    label: "Reports",
+  },
+  {
+    id: 8,
+    label: "Setting",
+  },
+];
 const ManagerLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false); // Collapse cho desktop
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Toggle cho mobile
-
+  const [currentTab, setCurrentTab] = useState("Dashboard");
   return (
     <main className="flex min-h-screen bg-manager-primary relative">
       {/* SIDEBAR DESKTOP */}
@@ -15,7 +48,11 @@ const ManagerLayout = () => {
           isCollapsed ? "w-20" : "w-64"
         }`}
       >
-        <ManagerSidebar isCollapsed={isCollapsed} />
+        <ManagerSidebar
+          isCollapsed={isCollapsed}
+          currentTab={currentTab}
+          setCurrentTab={setCurrentTab}
+        />
       </div>
 
       {/* SIDEBAR MOBILE */}

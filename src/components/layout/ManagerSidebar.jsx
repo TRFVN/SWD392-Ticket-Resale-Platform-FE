@@ -53,7 +53,7 @@ const Other_Items = [
   },
   {
     id: 3,
-    name: "Reports",
+    name: "Report",
     icon: <FileWarning />,
   },
   {
@@ -62,7 +62,9 @@ const Other_Items = [
     icon: <Settings />,
   },
 ];
-const ManagerSidebar = ({ isCollapsed }) => {
+const ManagerSidebar = ({ isCollapsed, currentTab, setCurrentTab }) => {
+  console.log(currentTab);
+
   const { logout } = useAuth();
   const navigate = useNavigate();
   const handleLogout = () => {
@@ -94,7 +96,10 @@ const ManagerSidebar = ({ isCollapsed }) => {
         {Main_Items.map((item) => (
           <div
             key={item.id}
-            className="flex items-center gap-3 text-manager-third hover:bg-gray-400 px-3 py-2 rounded-lg cursor-pointer transition-all"
+            className={`flex items-center gap-3 text-manager-third hover:bg-gray-400 px-3 py-2 rounded-lg cursor-pointer transition-all ${
+              currentTab === item.name ? "bg-gray-400/20" : ""
+            } `}
+            onClick={() => navigate(`/manager/${item.name.toLowerCase()}`)}
           >
             {item.icon}
             {!isCollapsed && <p className="text-lg">{item.name}</p>}
@@ -113,7 +118,10 @@ const ManagerSidebar = ({ isCollapsed }) => {
         {Other_Items.map((item) => (
           <div
             key={item.id}
-            className="flex items-center gap-3 text-manager-third hover:bg-gray-400 px-3 py-2 rounded-lg cursor-pointer transition-all"
+            className={`flex items-center gap-3 text-manager-third hover:bg-gray-400 px-3 py-2 rounded-lg cursor-pointer transition-all ${
+              currentTab === item.name ? "bg-gray-400/20" : ""
+            } `}
+            onClick={() => navigate(`/manager/${item.name.toLowerCase()}`)}
           >
             {item.icon}
             {!isCollapsed && <p className="text-lg">{item.name}</p>}

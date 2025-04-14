@@ -32,7 +32,14 @@ import MenteeGathering from "../pages/mentee-gathering/MenteeGathering";
 import MissUniverseEvent from "../pages/miss-universe-event/MissUniverseEvent";
 import CriticalThinkingEvent from "../pages/critical-thinking-event/CriticalThinkingEvent";
 import ManagerLayout from "../layout/ManagerLayout";
-import Manager from "../pages/Manager";
+import ManagerDashboard from "../pages/Manager/Dashboard";
+import ManagerCategory from "../pages/Manager/Category";
+import ManagerEvent from "../pages/Manager/Event";
+import ManagerTicket from "../pages/Manager/Ticket";
+import ManagerAccount from "../pages/Manager/Account";
+import ManagerMessage from "../pages/Manager/Message";
+import ManagerReport from "../pages/Manager/Report";
+import ManagerSetting from "../pages/Manager/Setting";
 const ROLES = {
   ADMIN: "ADMIN",
   STAFF: "STAFF",
@@ -115,7 +122,17 @@ export const router = createBrowserRouter([
     children: [
       {
         element: <ManagerLayout />,
-        children: [{ path: "", element: <Manager /> }],
+        children: [
+          { path: "", element: <ManagerDashboard /> },
+          { path: "dashboard", element: <ManagerDashboard /> },
+          { path: "category", element: <ManagerCategory /> },
+          { path: "event", element: <ManagerEvent /> },
+          { path: "account", element: <ManagerAccount /> },
+          { path: "report", element: <ManagerReport /> },
+          { path: "ticket", element: <ManagerTicket /> },
+          { path: "message", element: <ManagerMessage /> },
+          { path: "setting", element: <ManagerSetting /> },
+        ],
       },
     ],
   },

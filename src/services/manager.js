@@ -7,7 +7,7 @@ export const getRevenue = async () => {
     const today = new Date();
     const endDate = today.toLocaleDateString("en-US");
 
-    const response = await axiosInstance.get(`/api/revenue/revenue`, {
+    const response = await axiosInstance.get(`/api/revenue/profit`, {
       params: {
         startDate,
         endDate,
