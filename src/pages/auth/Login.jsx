@@ -216,16 +216,25 @@ const Login = () => {
   const isGoogleLoginSuccess = useSelector(
     (state) => state.auth.googleLoginSuccess,
   );
+  const userRole = useSelector((state) => state.auth.role);
   const message = location.state?.message || "";
   const from = location.state?.from?.pathname || "/";
+
+  const navigateBasedOnRole = useCallback(() => {
+    if (userRole === "MANAGER") {
+      navigate("/manager");
+    } else {
+      navigate(from);
+    }
+  }, [userRole, navigate, from]);
 
   // Check for successful Google login and redirect
   useEffect(() => {
     if (isGoogleLoginSuccess) {
       toast.success("Đăng nhập thành công!");
-      navigate(from);
+      navigateBasedOnRole();
     }
-  }, [isGoogleLoginSuccess, navigate, from]);
+  }, [isGoogleLoginSuccess, navigateBasedOnRole]);
 
   // Display message from redirect (e.g., after registration)
   useEffect(() => {
@@ -241,9 +250,27 @@ const Login = () => {
       setIsSubmitting(true);
 
       try {
-        await login(values.email, values.password);
+        const response = await login(values.email, values.password);
         toast.success("Đăng nhập thành công!");
-        navigate(from);
+
+        // Get the role from local storage after login
+        const decodedTokenStr = localStorage.getItem("decodedToken");
+        if (decodedTokenStr) {
+          const decodedToken = JSON.parse(decodedTokenStr);
+          const roleKey = Object.keys(decodedToken).find((key) =>
+            key.toLowerCase().includes("role"),
+          );
+          const userRole = roleKey ? decodedToken[roleKey] : null;
+
+          // Navigate based on role
+          if (userRole === "MANAGER") {
+            navigate("/manager");
+          } else {
+            navigate(from);
+          }
+        } else {
+          navigate(from);
+        }
       } catch (error) {
         setError(error.message || "Đăng nhập thất bại. Vui lòng thử lại.");
       } finally {
