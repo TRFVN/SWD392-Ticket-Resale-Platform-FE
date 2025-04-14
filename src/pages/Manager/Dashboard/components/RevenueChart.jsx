@@ -58,7 +58,7 @@ const RevenueChart = ({ transactions }) => {
               }
               setStartDate(date);
             }}
-            className="border border-gray-800 px-2 py-1 rounded bg-gray-700 cursor-pointer outline-none "
+            className="border border-gray-800 px-3 py-2 rounded-md bg-gray-700 cursor-pointer outline-none "
           />
         </div>
         <div>
@@ -73,7 +73,7 @@ const RevenueChart = ({ transactions }) => {
               }
               setEndDate(date);
             }}
-            className="border border-gray-800 px-2 py-1 rounded bg-gray-700 cursor-pointer outline-none "
+            className="border border-gray-800 px-3 py-2 rounded-md bg-gray-700 cursor-pointer outline-none "
           />
         </div>
       </div>
@@ -93,7 +93,7 @@ const RevenueChart = ({ transactions }) => {
           />
           <YAxis
             stroke="#e5e7eb"
-            tickFormatter={(value) => `${value / 1000} `}
+            tickFormatter={(value) => `${value / 1000} K `}
           />
           <Tooltip
             contentStyle={{ backgroundColor: "#1f2937", border: "none" }}

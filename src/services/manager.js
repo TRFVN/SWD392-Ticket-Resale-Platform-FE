@@ -42,3 +42,34 @@ export const getTicket = async () => {
     throw new Error(error.message || "Lỗi khi lấy ticket");
   }
 };
+
+export const getOrganizer = async () => {
+  try {
+    const response = await axiosInstance.get(`/api/revenue/organizer`);
+    console.log(response.data.result);
+
+    return response.data.result;
+  } catch (error) {
+    console.log(error.message || "Lỗi khi lấy organizer");
+    throw new Error(error.message || "Lỗi khi lấy organizer");
+  }
+};
+export const getCustomer = async () => {
+  try {
+    const response = await axiosInstance.get(`/api/revenue/customer`);
+    return response.data.result.customers;
+  } catch (error) {
+    console.log(error.message || "Lỗi khi lấy customer");
+    throw new Error(error.message || "Lỗi khi lấy customer");
+  }
+};
+
+export const getCategory = async () => {
+  try {
+    const response = await axiosInstance.get(`/api/revenue/customer`);
+    return response.data.result;
+  } catch (error) {
+    console.log(error.message || "Lỗi khi lấy category");
+    throw new Error(error.message || "Lỗi khi lấy category");
+  }
+};

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Logo from "../../assets/TicketHub_Logo.png";
 import {
   Menu,
@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Main_Items = [
   {
@@ -62,16 +62,22 @@ const Other_Items = [
     icon: <Settings />,
   },
 ];
-const ManagerSidebar = ({ isCollapsed, currentTab, setCurrentTab }) => {
-  console.log(currentTab);
-
+const ManagerSidebar = ({ isCollapsed }) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const [currentTab, setCurrentTab] = useState("dashboard");
   const handleLogout = () => {
     logout();
     toast.success("Logout successfully");
     navigate("/login");
   };
+
+  useEffect(() => {
+    const currentTab = location.pathname.split("/").pop();
+    setCurrentTab(currentTab);
+  }, [location.pathname]);
   return (
     <main
       className={`px-3 py-4 h-screen bg-manager-secondary shadow-md transition-all duration-300 flex flex-col ${
@@ -97,7 +103,7 @@ const ManagerSidebar = ({ isCollapsed, currentTab, setCurrentTab }) => {
           <div
             key={item.id}
             className={`flex items-center gap-3 text-manager-third hover:bg-gray-400 px-3 py-2 rounded-lg cursor-pointer transition-all ${
-              currentTab === item.name ? "bg-gray-400/20" : ""
+              currentTab === item.name.toLowerCase() ? "bg-gray-400/20" : ""
             } `}
             onClick={() => navigate(`/manager/${item.name.toLowerCase()}`)}
           >
@@ -119,7 +125,7 @@ const ManagerSidebar = ({ isCollapsed, currentTab, setCurrentTab }) => {
           <div
             key={item.id}
             className={`flex items-center gap-3 text-manager-third hover:bg-gray-400 px-3 py-2 rounded-lg cursor-pointer transition-all ${
-              currentTab === item.name ? "bg-gray-400/20" : ""
+              currentTab === item.name.toLowerCase() ? "bg-gray-400/20" : ""
             } `}
             onClick={() => navigate(`/manager/${item.name.toLowerCase()}`)}
           >
