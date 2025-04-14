@@ -1,4 +1,10 @@
-import React, { useState, useEffect, memo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  memo,
+  useCallback,
+  useContext,
+} from "react";
 import {
   Plus,
   Calendar,
@@ -16,6 +22,9 @@ import {
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { getEventByUserID } from "../../../services/eventApi";
+import { AuthContext } from "../../../context/AuthContext";
 
 // Memoized components for better performance
 const EventCard = memo(({ event, onEdit, onDelete, isDarkMode }) => {
@@ -196,27 +205,58 @@ const MyEvents = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const isDarkMode = useSelector((state) => state.theme?.isDarkMode);
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+
+  const fetchMyEvents = async () => {
+    try {
+      setLoading(true);
+      const response = await getEventByUserID(user.id);
+      console.log("API response:", response);
+
+      if (response) {
+        if (Array.isArray(response)) {
+          setEvents(response);
+        } else if (response.events && Array.isArray(response.events)) {
+          setEvents(response.events);
+        } else if (response.data && Array.isArray(response.data)) {
+          setEvents(response.data);
+        } else {
+          console.error("Unexpected API response format:", response);
+          setEvents([]);
+        }
+      } else {
+        setEvents([]);
+      }
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      toast.error("Failed to load your events");
+      setEvents([]); // Ensure events is an empty array on error
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Fetch events
   useEffect(() => {
     // Simulate loading with the provided event data
-    setTimeout(() => {
-      setEvents([
-        {
-          eventId: "1582cc5d-b586-42a6-b78b-4a3856796f14",
-          eventName: "ronaldo ra mắt clb hà nội",
-          eventDate: "2026-02-20T05:20:00Z",
-          eventDescription: "anh 8 hết thời\n",
-          eventImage:
-            "https://storage.googleapis.com/tickethub-af919.appspot.com/EventImages/faaf5002-7b98-401f-b7bc-f4b9ef0bfe00_images.jpg",
-          location: "HCM, Quận Ba Đình, Thành phố Hà Nội",
-          status: 1,
-          categoryId: "841d3c6e-ee0e-49fc-97cf-9620c9d66768",
-          ticketTemplates: [],
-        },
-      ]);
-      setLoading(false);
-    }, 500);
+    // setTimeout(() => {
+    //   setEvents([
+    //     {
+    //       eventId: "1582cc5d-b586-42a6-b78b-4a3856796f14",
+    //       eventName: "ronaldo ra mắt clb hà nội",
+    //       eventDate: "2026-02-20T05:20:00Z",
+    //       eventDescription: "anh 8 hết thời\n",
+    //       eventImage:
+    //         "https://storage.googleapis.com/tickethub-af919.appspot.com/EventImages/faaf5002-7b98-401f-b7bc-f4b9ef0bfe00_images.jpg",
+    //       location: "HCM, Quận Ba Đình, Thành phố Hà Nội",
+    //       status: 1,
+    //       categoryId: "841d3c6e-ee0e-49fc-97cf-9620c9d66768",
+    //       ticketTemplates: [],
+    //     },
+    //   ]);
+    //   setLoading(false);
+    // }, 500);
+    fetchMyEvents();
   }, []);
 
   const handleEdit = useCallback(

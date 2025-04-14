@@ -22,6 +22,11 @@ export default {
           DEFAULT: "#EA580C", // Base color - orange-600
           dark: "#C2410C", // Dark shade - orange-700
         },
+        manager: {
+          primary: "#111727",
+          secondary: "#1E2938",
+          third: "#606773",
+        },
       },
       backgroundImage: {
         header:

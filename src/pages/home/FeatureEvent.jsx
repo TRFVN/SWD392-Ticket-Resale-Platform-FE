@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef, memo } from "react";
-import { motion, AnimatePresence, useScroll, useTransform, useSpring, useInView } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+  useSpring,
+  useInView,
+} from "framer-motion";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
@@ -25,7 +32,10 @@ const formatDate = (dateString) => {
     month: date.toLocaleString("vi-VN", { month: "short" }),
     weekday: date.toLocaleString("vi-VN", { weekday: "long" }),
     year: date.getFullYear(),
-    time: date.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
+    time: date.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
     full: new Intl.DateTimeFormat("vi-VN", {
       weekday: "long",
       month: "long",
@@ -119,40 +129,40 @@ const DEFAULT_CATEGORY = {
 // ====== ANIMATIONS ======
 const fadeIn = {
   hidden: { opacity: 0 },
-  visible: { 
-    opacity: 1, 
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
 const slideUp = {
   hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { 
-      type: "spring", 
-      stiffness: 300, 
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 300,
       damping: 30,
-      duration: 0.8
-    }
+      duration: 0.8,
+    },
   },
 };
 
 const sliderVariants = {
   hidden: { opacity: 0, x: 20 },
-  visible: i => ({
-    opacity: 1, 
+  visible: (i) => ({
+    opacity: 1,
     x: 0,
     transition: {
       delay: i * 0.1,
-      duration: 0.5
-    }
+      duration: 0.5,
+    },
   }),
   hover: {
     scale: 1.02,
-    transition: { duration: 0.3 }
-  }
+    transition: { duration: 0.3 },
+  },
 };
 
 const staggerChildren = {
@@ -161,9 +171,9 @@ const staggerChildren = {
     opacity: 1,
     transition: {
       staggerChildren: 0.07,
-      delayChildren: 0.2
-    }
-  }
+      delayChildren: 0.2,
+    },
+  },
 };
 
 const pulseAnimation = {
@@ -171,11 +181,11 @@ const pulseAnimation = {
     scale: [1, 1.03, 1],
     opacity: [0.7, 1, 0.7],
     transition: {
-      duration: 3, 
+      duration: 3,
       repeat: Infinity,
-      ease: "easeInOut"
-    }
-  }
+      ease: "easeInOut",
+    },
+  },
 };
 
 // ====== COMPONENTS ======
@@ -185,7 +195,7 @@ const FuturisticCategoryBadge = memo(({ category }) => {
   const style = CATEGORY_STYLES[category] || DEFAULT_CATEGORY;
 
   return (
-    <div 
+    <div
       className={`flex items-center gap-1.5 bg-gradient-to-r ${style.gradient} text-white text-xs font-medium px-2 py-1 rounded-lg shadow-sm backdrop-blur-sm`}
     >
       <span className="text-xs">{style.icon}</span>
@@ -198,13 +208,15 @@ FuturisticCategoryBadge.displayName = "FuturisticCategoryBadge";
 // FuturisticDateBadge Component
 const FuturisticDateBadge = memo(({ date }) => {
   const eventDate = formatDate(date);
-  
+
   return (
     <div className="flex items-center gap-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-lg px-2.5 py-1 text-xs font-medium border border-white/30 dark:border-white/10 shadow-sm">
       <span className="text-orange-500">
         <Calendar className="w-3.5 h-3.5" />
       </span>
-      <span className="text-gray-800 dark:text-white">{eventDate.shortFormat}</span>
+      <span className="text-gray-800 dark:text-white">
+        {eventDate.shortFormat}
+      </span>
     </div>
   );
 });
@@ -212,19 +224,20 @@ FuturisticDateBadge.displayName = "FuturisticDateBadge";
 
 // FuturisticEventCard Component
 const FuturisticEventCard = memo(({ event, index = 0 }) => {
-  const [isSaved, setIsSaved] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef(null);
-  const isDarkMode = useSelector(state => state.theme?.isDarkMode);
+  const isDarkMode = useSelector((state) => state.theme?.isDarkMode);
   const isInView = useInView(cardRef, { once: true, amount: 0.3 });
-  
+
   const eventDate = formatDate(event.date);
   const categoryStyle = CATEGORY_STYLES[event.category] || DEFAULT_CATEGORY;
-  
+
   // Calculate availability
-  const availability = event.totalTickets > 0
-    ? Math.round((event.availableTickets / event.totalTickets) * 100)
-    : 100;
+  const availability =
+    event.totalTickets > 0
+      ? Math.round((event.availableTickets / event.totalTickets) * 100)
+      : 100;
 
   const getAvailabilityColor = () => {
     if (availability <= 20) return "text-red-500";
@@ -232,80 +245,86 @@ const FuturisticEventCard = memo(({ event, index = 0 }) => {
     return "text-emerald-500";
   };
 
-  const handleSave = (e) => {
+    const handleSave = (e) => {
     e.preventDefault();
-    e.stopPropagation();
-    setIsSaved(!isSaved);
-  };
+      e.stopPropagation();
+      setIsSaved(!isSaved);
+    };
 
-  const handleShare = (e) => {
+    const handleShare = (e) => {
     e.preventDefault();
-    e.stopPropagation();
+      e.stopPropagation();
     if (navigator.share) {
-      navigator.share({
-        title: event.title,
-        text: event.subtitle,
-        url: window.location.origin + event.link,
-      }).catch(err => console.log('Error sharing', err));
+      navigator
+        .share({
+          title: event.title,
+          text: event.subtitle,
+          url: window.location.origin + event.link,
+        })
+        .catch((err) => console.log("Error sharing", err));
     }
-  };
+    };
 
-  return (
-    <motion.div
+    return (
+      <motion.div
       ref={cardRef}
       custom={index}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
       variants={sliderVariants}
       whileHover="hover"
-      className={`group relative aspect-[3/4] overflow-hidden rounded-2xl bg-gradient-to-br ${isDarkMode ? 'from-gray-800 to-gray-900' : 'from-white to-gray-50'} shadow-xl ${event.isHighlighted ? 'ring-2 ring-orange-500' : ''}`}
+      className={`group relative aspect-[3/4] overflow-hidden rounded-2xl bg-gradient-to-br ${
+        isDarkMode ? "from-gray-800 to-gray-900" : "from-white to-gray-50"
+      } shadow-xl ${event.isHighlighted ? "ring-2 ring-orange-500" : ""}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Holographic effect overlay */}
       <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-      
+
       <Link to={event.link} className="block h-full">
         <div className="relative h-full flex flex-col">
           {/* Image container */}
           <div className="relative h-[55%] overflow-hidden">
             {/* Image with hover effect */}
-            <motion.div 
+            <motion.div
               animate={{
                 scale: isHovered ? 1.05 : 1,
-                filter: isHovered ? "brightness(1.1)" : "brightness(1)"
+                filter: isHovered ? "brightness(1.1)" : "brightness(1)",
               }}
               transition={{ duration: 0.5 }}
               className="w-full h-full"
             >
-              <img 
-                src={event.image} 
-                alt={event.title} 
+              <img
+                src={event.image}
+                alt={event.title}
                 className="w-full h-full object-cover"
-                loading="lazy"
+              loading="lazy"
               />
             </motion.div>
 
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-            
+
             {/* Top badges */}
             <div className="absolute top-3 left-3 right-3 flex justify-between items-center z-10">
               <FuturisticCategoryBadge category={event.category} />
-              
+
               {/* Actions */}
               <div className="flex gap-1.5">
-                <button 
+                <button
                   onClick={handleSave}
                   className="p-1.5 rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25 transition-colors"
                   aria-label={isSaved ? "Unsave event" : "Save event"}
                 >
-                  <Heart 
-                    className={`w-3.5 h-3.5 ${isSaved ? 'fill-orange-500 text-orange-500' : 'text-white'}`} 
+                  <Heart
+                    className={`w-3.5 h-3.5 ${
+                      isSaved ? "fill-orange-500 text-orange-500" : "text-white"
+                    }`}
                   />
                 </button>
-                
-                <button 
+
+                <button
                   onClick={handleShare}
                   className="p-1.5 rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25 transition-colors"
                   aria-label="Share event"
@@ -333,13 +352,13 @@ const FuturisticEventCard = memo(({ event, index = 0 }) => {
           <div className="flex-1 flex flex-col p-4">
             <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1 line-clamp-2">
               {event.title}
-            </h3>
-            
+              </h3>
+
             <AnimatePresence>
               {(isHovered || event.isLarge) && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
+                  animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden"
                 >
@@ -353,8 +372,8 @@ const FuturisticEventCard = memo(({ event, index = 0 }) => {
             <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1.5">
               <MapPin className="w-3 h-3 flex-shrink-0" />
               <span className="truncate">{event.location}</span>
-            </div>
-            
+                  </div>
+
             {/* Ticket availability section */}
             {event.totalTickets > 0 && (
               <div className="mt-auto pt-3">
@@ -364,19 +383,24 @@ const FuturisticEventCard = memo(({ event, index = 0 }) => {
                     <span className="text-gray-500 dark:text-gray-400">
                       <span className={`font-medium ${getAvailabilityColor()}`}>
                         {event.availableTickets}
-                      </span> / {event.totalTickets} vé
+                      </span>{" "}
+                      / {event.totalTickets} vé
                     </span>
                     <span className={`font-medium ${getAvailabilityColor()}`}>
                       {availability}%
-                    </span>
+                      </span>
                   </div>
-                  
+
                   {/* Custom progress bar */}
                   <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${availability}%` }}
-                      transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                      transition={{
+                        duration: 0.8,
+                        delay: 0.2,
+                        ease: "easeOut",
+                      }}
                       className={`h-full ${
                         availability <= 20
                           ? "bg-gradient-to-r from-red-500 to-red-600"
@@ -387,7 +411,7 @@ const FuturisticEventCard = memo(({ event, index = 0 }) => {
                     />
                   </div>
                 </div>
-                
+
                 {/* Low ticket warning */}
                 {availability <= 20 && (
                   <div className="flex gap-1.5 items-center text-red-500 dark:text-red-400 text-xs font-medium mb-2">
@@ -395,15 +419,15 @@ const FuturisticEventCard = memo(({ event, index = 0 }) => {
                     <span>Sắp hết vé, nhanh tay đặt ngay!</span>
                   </div>
                 )}
-              </div>
-            )}
+                </div>
+              )}
 
             {/* View details button */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
-              animate={{ 
+              animate={{
                 opacity: isHovered ? 1 : 0,
-                y: isHovered ? 0 : 10 
+                y: isHovered ? 0 : 10,
               }}
               transition={{ duration: 0.2 }}
               className="mt-3"
@@ -432,19 +456,19 @@ const HeroEventCard = memo(({ event }) => {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true });
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  
+
   // Handle mouse move effect
   const handleMouseMove = (e) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     setMousePosition({
       x: ((e.clientX - rect.left) / rect.width - 0.5) * 2,
-      y: ((e.clientY - rect.top) / rect.height - 0.5) * 2
+      y: ((e.clientY - rect.top) / rect.height - 0.5) * 2,
     });
   };
 
   return (
-    <motion.div 
+    <motion.div
       ref={containerRef}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
@@ -453,25 +477,34 @@ const HeroEventCard = memo(({ event }) => {
       onMouseMove={handleMouseMove}
     >
       {/* Spotlight effect follower */}
-      <div 
+      <div
         className="pointer-events-none absolute -inset-px bg-gradient-to-r from-orange-600/20 to-rose-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-2xl rounded-2xl"
-        style={{ 
-          backgroundPosition: `${50 + mousePosition.x * 20}% ${50 + mousePosition.y * 20}%`,
-          transform: `translate(${mousePosition.x * 10}px, ${mousePosition.y * 10}px)` 
+        style={{
+          backgroundPosition: `${50 + mousePosition.x * 20}% ${
+            50 + mousePosition.y * 20
+          }%`,
+          transform: `translate(${mousePosition.x * 10}px, ${
+            mousePosition.y * 10
+          }px)`,
         }}
       ></div>
 
       {/* Image with parallax effect */}
       <div className="absolute inset-0">
-        <motion.img 
-          src={event.image} 
+        <motion.img
+          src={event.image}
           alt={event.title}
-          style={{ 
+          style={{
             scale: 1.1,
             x: mousePosition.x * -10,
-            y: mousePosition.y * -10
+            y: mousePosition.y * -10,
           }}
-          transition={{ type: "spring", stiffness: 100, damping: 30, mass: 0.5 }}
+          transition={{
+            type: "spring",
+            stiffness: 100,
+            damping: 30,
+            mass: 0.5,
+          }}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/60"></div>
@@ -489,24 +522,21 @@ const HeroEventCard = memo(({ event }) => {
             <FuturisticCategoryBadge category={event.category} />
           </motion.div>
 
-          <motion.h2 
+          <motion.h2
             variants={slideUp}
             className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 leading-tight"
           >
             {event.title}
           </motion.h2>
 
-          <motion.p 
+          <motion.p
             variants={slideUp}
             className="text-white/90 mb-6 text-base md:text-lg line-clamp-2"
           >
             {event.subtitle}
           </motion.p>
 
-          <motion.div 
-            variants={slideUp}
-            className="flex flex-wrap gap-3 mb-6"
-          >
+          <motion.div variants={slideUp} className="flex flex-wrap gap-3 mb-6">
             {/* Date/time */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-lg px-3 py-2 border border-white/10">
               <Calendar className="w-4 h-4 text-orange-400" />
@@ -518,7 +548,7 @@ const HeroEventCard = memo(({ event }) => {
               <MapPin className="w-4 h-4 text-orange-400" />
               <span className="text-white text-sm truncate max-w-[200px]">
                 {event.location}
-              </span>
+                      </span>
             </div>
 
             {/* Tickets */}
@@ -527,13 +557,13 @@ const HeroEventCard = memo(({ event }) => {
                 <Ticket className="w-4 h-4 text-orange-400" />
                 <span className="text-white text-sm">
                   {event.availableTickets} vé còn trống
-                </span>
-              </div>
+                      </span>
+                    </div>
             )}
           </motion.div>
 
           <motion.div variants={slideUp}>
-            <Link 
+            <Link
               to={event.link}
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white rounded-lg font-medium transition-colors shadow-md group/btn"
             >
@@ -542,8 +572,8 @@ const HeroEventCard = memo(({ event }) => {
             </Link>
           </motion.div>
         </motion.div>
-      </div>
-      
+                </div>
+
       {/* Hover effect border */}
       <div className="absolute inset-0 border border-white/10 rounded-2xl pointer-events-none"></div>
     </motion.div>
@@ -584,10 +614,12 @@ const FeaturedEventStrip = memo(({ event, index }) => {
         <div className="relative h-full flex flex-col justify-end p-4">
           <div className="flex items-center justify-between mb-2">
             <FuturisticCategoryBadge category={event.category} />
-            
+
             <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-sm rounded-lg px-2 py-1">
               <Calendar className="w-3 h-3 text-orange-400" />
-              <span className="text-white/90 text-xs">{eventDate.shortFormat}</span>
+              <span className="text-white/90 text-xs">
+                {eventDate.shortFormat}
+              </span>
             </div>
           </div>
 
@@ -599,7 +631,7 @@ const FeaturedEventStrip = memo(({ event, index }) => {
             <div className="flex items-center gap-1.5 text-white/80 text-xs">
               <Users className="w-3 h-3 flex-shrink-0" />
               <span>{event.availableTickets} chỗ</span>
-            </div>
+              </div>
 
             <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1.5 text-orange-300 text-xs font-medium transition-opacity duration-300">
               Xem Chi Tiết
@@ -608,8 +640,8 @@ const FeaturedEventStrip = memo(({ event, index }) => {
           </div>
         </div>
       </Link>
-    </motion.div>
-  );
+      </motion.div>
+    );
 });
 FeaturedEventStrip.displayName = "FeaturedEventStrip";
 
@@ -617,7 +649,7 @@ FeaturedEventStrip.displayName = "FeaturedEventStrip";
 const SectionHeading = memo(() => {
   const headingRef = useRef(null);
   const isInView = useInView(headingRef, { once: true, amount: 0.5 });
-  
+
   return (
     <motion.div
       ref={headingRef}
@@ -628,34 +660,32 @@ const SectionHeading = memo(() => {
     >
       <div>
         {/* Badge */}
-        <motion.div 
-          variants={slideUp}
-          className="flex items-center gap-2 mb-3"
-        >
+        <motion.div variants={slideUp} className="flex items-center gap-2 mb-3">
           <div className="relative flex">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center shadow-lg">
               <Star className="w-5 h-5 text-white" />
             </div>
-            <motion.div 
-              variants={pulseAnimation} 
+        <motion.div
+              variants={pulseAnimation}
               animate="animate"
               className="absolute -inset-1.5 rounded-full bg-orange-500/20 -z-10"
             ></motion.div>
           </div>
-          
+
           <span className="inline-block bg-gradient-to-r from-orange-500 to-pink-500 text-transparent bg-clip-text font-semibold tracking-wide uppercase text-sm">
             Trending Events
           </span>
         </motion.div>
-        
+
         {/* Main heading */}
         <motion.h2
           variants={slideUp}
           className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent"
         >
-          Khám Phá Sự Kiện 
+          Khám Phá Sự Kiện
           <span className="bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
-            {" "}Nổi Bật
+            {" "}
+            Nổi Bật
           </span>
         </motion.h2>
       </div>
@@ -807,11 +837,13 @@ const FuturisticEvents = () => {
     {
       id: "workshop-ux-design",
       title: "Workshop UX Design for Beginners",
-      subtitle: "Học cách thiết kế trải nghiệm người dùng từ các chuyên gia hàng đầu",
+      subtitle:
+        "Học cách thiết kế trải nghiệm người dùng từ các chuyên gia hàng đầu",
       date: "2025-07-20T09:00:00.000Z",
       location: "Dreamplex Coworking Space, TP.HCM",
       price: "450.000",
-      image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=800&auto=format&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=800&auto=format&fit=crop",
       link: "/events/workshop-ux-design",
       category: "Workshop",
       availableTickets: 50,
@@ -823,36 +855,34 @@ const FuturisticEvents = () => {
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end start"] 
+    offset: ["start start", "end start"],
   });
-  
+
   const y = useTransform(scrollYProgress, [0, 1], [0, 100]);
   const y2 = useTransform(scrollYProgress, [0, 1], [0, -100]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0.3]);
-  
+
   return (
-    <section 
+    <section
       ref={containerRef}
       className="relative py-16 lg:py-24 overflow-hidden"
     >
       {/* Futuristic background elements */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         {/* Top gradient */}
-        <div 
-          className="absolute top-0 left-0 right-0 h-[30vh] bg-gradient-to-b from-orange-500/5 to-transparent"
-        ></div>
-        
+        <div className="absolute top-0 left-0 right-0 h-[30vh] bg-gradient-to-b from-orange-500/5 to-transparent"></div>
+
         {/* Animated circles */}
-        <motion.div 
+        <motion.div
           style={{ y, opacity }}
           className="absolute -top-[100px] -right-[100px] w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-orange-500/10 to-pink-500/10 blur-3xl"
         ></motion.div>
-        
-        <motion.div 
+
+        <motion.div
           style={{ y: y2, opacity }}
           className="absolute -bottom-[100px] -left-[100px] w-[300px] h-[300px] rounded-full bg-gradient-to-br from-blue-500/10 to-purple-500/10 blur-3xl"
         ></motion.div>
-        
+
         {/* Grid pattern */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGZpbGw9IiMzMzMiIGZpbGwtb3BhY2l0eT0iLjAyIiBkPSJNMCAwaDYwdjYwSDB6Ii8+PHBhdGggZD0iTTYwIDBoLTFWNjBIMFY1OWg1OVYxSDYweiIgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIuMDUiLz48L2c+PC9zdmc+')] opacity-30"></div>
       </div>
@@ -872,11 +902,7 @@ const FuturisticEvents = () => {
           {/* Side featured events */}
           <div className="md:col-span-4 space-y-6">
             {primaryEvents.slice(1).map((event, index) => (
-              <FeaturedEventStrip 
-                key={event.id} 
-                event={event}
-                index={index}
-              />
+              <FeaturedEventStrip key={event.id} event={event} index={index} />
             ))}
           </div>
         </div>
@@ -903,10 +929,12 @@ const FuturisticEvents = () => {
             >
               <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500 to-pink-500 rounded-lg blur opacity-30 group-hover:opacity-80 transition duration-300"></div>
               <div className="relative px-8 py-4 bg-white dark:bg-gray-800 rounded-lg leading-none flex items-center gap-2 group-hover:bg-opacity-90 transition duration-300">
-                <span className="text-gray-800 dark:text-white font-medium">Khám phá tất cả sự kiện</span>
+                <span className="text-gray-800 dark:text-white font-medium">
+                  Khám phá tất cả sự kiện
+                </span>
                 <ArrowRight className="w-5 h-5 text-orange-500 dark:text-orange-400 transition-transform group-hover:translate-x-1" />
               </div>
-            </motion.div>
+        </motion.div>
           </Link>
         </div>
       </div>

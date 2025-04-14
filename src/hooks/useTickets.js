@@ -85,3 +85,36 @@ export const getUserTickets = async () => {
     throw error;
   }
 };
+
+// Function to generate QR code for a ticket
+export const getTicketQRCode = async (ticketId, serialNumberId) => {
+  try {
+    if (!ticketId || !serialNumberId) {
+      throw new Error("Both ticketId and serialNumberId are required");
+    }
+
+    const response = await axiosInstance.get(
+      `/tickets/generate-qr-code?ticketId=${ticketId}&serialNumberId=${serialNumberId}`,
+      {
+        headers: {
+          accept: "text/plain",
+        },
+      },
+    );
+
+    if (response.status === 200 && response.data.isSuccess) {
+      // The API returns base64 encoded string in result field
+      const base64Data = response.data.result;
+      // Create a data URL that can be used as an image source
+      return `data:image/png;base64,${base64Data}`;
+    } else {
+      throw new Error(
+        response.data?.message ||
+          `Error: Received status code ${response.status}`,
+      );
+    }
+  } catch (error) {
+    console.error("Failed to generate QR code:", error.message || error);
+    throw error;
+  }
+};

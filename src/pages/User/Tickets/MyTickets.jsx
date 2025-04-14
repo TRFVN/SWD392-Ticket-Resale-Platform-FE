@@ -35,7 +35,8 @@ import {
   Home,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useTickets } from "../../../hooks/useTickets";
+import { useTickets, getTicketQRCode } from "../../../hooks/useTickets";
+import { getCategoryBadgeColor } from "../../../utils/categoryUtils";
 
 // Toast Notification Component
 const Toast = ({ message, type, onClose }) => {
@@ -91,27 +92,57 @@ const Toast = ({ message, type, onClose }) => {
 const FlippableTicketCard = ({ ticket, onAction, isDarkMode }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isStarred, setIsStarred] = useState(false);
+  const [qrCode, setQrCode] = useState(null);
+  const [loadingQR, setLoadingQR] = useState(false);
+  const [qrError, setQrError] = useState(null);
   const cardRef = useRef(null);
+  const isApiCallingRef = useRef(false);
 
-  // Get category badge color based on category name
-  const getCategoryBadgeColor = (categoryName) => {
-    if (!categoryName) return "";
+  // Load QR code when card is flipped
+  useEffect(() => {
+    let isMounted = true;
 
-    switch (categoryName) {
-      case "VIP":
-        return isDarkMode
-          ? "bg-purple-800/30 text-purple-400"
-          : "bg-purple-100 text-purple-600";
-      case "Standard":
-        return isDarkMode
-          ? "bg-blue-800/30 text-blue-400"
-          : "bg-blue-100 text-blue-600";
-      default:
-        return isDarkMode
-          ? "bg-green-800/30 text-green-400"
-          : "bg-green-100 text-green-600";
+    const fetchQRCode = async () => {
+      // Prevent multiple simultaneous calls
+      if (isApiCallingRef.current) return;
+
+      try {
+        isApiCallingRef.current = true;
+        setLoadingQR(true);
+        setQrError(null);
+
+        // Use the serialNumberId or ticketId as needed by your API
+        const serialNumberId = ticket.serialNumberId || ticket.ticketId;
+        const qrCodeUrl = await getTicketQRCode(
+          ticket.ticketId,
+          serialNumberId,
+        );
+
+        if (isMounted) {
+          setQrCode(qrCodeUrl);
+          setLoadingQR(false);
+        }
+      } catch (error) {
+        console.error("Failed to load QR code:", error);
+        if (isMounted) {
+          setQrError("Could not load QR code");
+          setLoadingQR(false);
+        }
+      } finally {
+        isApiCallingRef.current = false;
+      }
+    };
+
+    // Only fetch if card is flipped and we don't already have the QR code
+    if (isFlipped && !qrCode && !loadingQR && !isApiCallingRef.current) {
+      fetchQRCode();
     }
-  };
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  }, [isFlipped, ticket.ticketId, ticket.serialNumberId, qrCode]);
 
   // Format the event date
   const formatDate = (dateString) => {
@@ -152,8 +183,55 @@ const FlippableTicketCard = ({ ticket, onAction, isDarkMode }) => {
     }
   };
 
-  // Generate QR code placeholder
-  const getQrPlaceholder = () => {
+  // Generate QR code component
+  const renderQRCode = () => {
+    if (loadingQR) {
+      return (
+        <div className="relative w-32 h-32 bg-white rounded-lg overflow-hidden flex items-center justify-center mx-auto">
+          <div className="text-black text-xs">Loading QR...</div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-t-black border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+      );
+    }
+
+    if (qrError) {
+      return (
+        <div className="relative w-32 h-32 bg-white rounded-lg overflow-hidden flex items-center justify-center mx-auto">
+          <div className="text-red-500 text-xs text-center px-2">{qrError}</div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setQrCode(null);
+              setQrError(null);
+              isApiCallingRef.current = false; // Reset API calling status
+            }}
+            className="absolute bottom-2 text-xs text-blue-500"
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+
+    if (qrCode) {
+      return (
+        <div className="relative w-32 h-32 bg-white rounded-lg overflow-hidden flex items-center justify-center mx-auto p-2">
+          <img
+            src={qrCode}
+            alt="Ticket QR Code"
+            className="w-full h-full object-contain"
+            onError={() => {
+              setQrError("Failed to load image");
+              setQrCode(null);
+            }}
+          />
+        </div>
+      );
+    }
+
+    // Fallback placeholder
     return (
       <div className="relative w-32 h-32 bg-white rounded-lg overflow-hidden flex items-center justify-center mx-auto">
         <div className="text-black text-xs">QR Code</div>
@@ -207,6 +285,7 @@ const FlippableTicketCard = ({ ticket, onAction, isDarkMode }) => {
               <div
                 className={`px-3 py-1 rounded-full text-xs font-medium bg-opacity-20 ${getCategoryBadgeColor(
                   ticket.categoryName,
+                  isDarkMode,
                 )}`}
               >
                 {ticket.categoryName || "Category"}
@@ -428,7 +507,7 @@ const FlippableTicketCard = ({ ticket, onAction, isDarkMode }) => {
 
               <div className="mt-auto">
                 {/* QR Code area */}
-                {getQrPlaceholder()}
+                {renderQRCode()}
 
                 <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-lg p-3">
                   <div className="flex justify-between items-center text-white mb-2">
@@ -457,7 +536,21 @@ const FlippableTicketCard = ({ ticket, onAction, isDarkMode }) => {
 
             {/* Ticket actions */}
             <div className="grid grid-cols-4 divide-x divide-white/20 bg-black/20 backdrop-blur-sm">
-              <button className="py-3 text-white flex flex-col items-center justify-center">
+              <button
+                className="py-3 text-white flex flex-col items-center justify-center"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (qrCode) {
+                    // Create a temporary anchor element to download the image
+                    const link = document.createElement("a");
+                    link.href = qrCode;
+                    link.download = `ticket-qr-${ticket.ticketId}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }
+                }}
+              >
                 <Download className="w-4 h-4 mb-1" />
                 <span className="text-xs">Save</span>
               </button>
@@ -846,7 +939,7 @@ const CalendarView = ({ tickets, onAction, isDarkMode }) => {
             isDarkMode ? "text-white" : "text-gray-900"
           } mb-3`}
         >
-          Today's Events
+          Today&apos;s Events
         </h4>
 
         {(() => {
@@ -885,6 +978,7 @@ const CalendarView = ({ tickets, onAction, isDarkMode }) => {
                 <span
                   className={`text-xs ${getCategoryBadgeColor(
                     ticket.categoryName,
+                    isDarkMode,
                   )}`}
                 >
                   {ticket.categoryName}
@@ -1304,6 +1398,7 @@ const MapView = ({ tickets, onAction, isDarkMode }) => {
                   <span
                     className={`text-xs ${getCategoryBadgeColor(
                       ticket.categoryName,
+                      isDarkMode,
                     )}`}
                   >
                     {ticket.categoryName}

@@ -31,7 +31,8 @@ import EditEvent from "../pages/tickets/Events/EditEvent";
 import MenteeGathering from "../pages/mentee-gathering/MenteeGathering";
 import MissUniverseEvent from "../pages/miss-universe-event/MissUniverseEvent";
 import CriticalThinkingEvent from "../pages/critical-thinking-event/CriticalThinkingEvent";
-
+import ManagerLayout from "../layout/ManagerLayout";
+import Manager from "../pages/Manager";
 const ROLES = {
   ADMIN: "ADMIN",
   STAFF: "STAFF",
@@ -105,6 +106,16 @@ export const router = createBrowserRouter([
           <PrivateRoute allowedRoles={[ROLES.MEMBER, ROLES.ORGANIZATION]} />
         ),
         children: privateRoutes,
+      },
+    ],
+  },
+  {
+    path: "/manager",
+    element: <PrivateRoute allowedRoles={[ROLES.MANAGER]} />,
+    children: [
+      {
+        element: <ManagerLayout />,
+        children: [{ path: "", element: <Manager /> }],
       },
     ],
   },
