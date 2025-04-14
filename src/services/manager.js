@@ -33,9 +33,15 @@ export const getEvent = async () => {
   }
 };
 
-export const getTicket = async () => {
+export const getTicket = async (pageNumber) => {
   try {
-    const response = await axiosInstance.get(`/api/tickets/templates`);
+    const response = await axiosInstance.get(`/api/tickets/templates`, {
+      params: {
+        pageNumber: pageNumber,
+      },
+    });
+    console.log(response.data.result);
+
     return response.data.result;
   } catch (error) {
     console.log(error.message || "Lỗi khi lấy ticket");
