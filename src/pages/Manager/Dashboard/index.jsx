@@ -3,7 +3,8 @@ import { DollarSign, ReceiptText, CalendarCheck2, Ticket } from "lucide-react";
 import Card from "./components/Card";
 import { getEvent, getRevenue, getTicket } from "../../../services/manager";
 import RevenueChart from "./components/RevenueChart";
-
+import Organizer from "./Organizer";
+import Customer from "./Customer";
 const top_row = [
   {
     id: 1,
@@ -107,7 +108,7 @@ const Dashboard = () => {
     fetchTicket();
   }, []);
   return (
-    <main className="flex flex-col gap-6 p-4">
+    <main className="flex flex-col gap-12 p-4">
       <section className="text-white text-2xl font-bold">Dashboard</section>
       <section>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -119,6 +120,12 @@ const Dashboard = () => {
       </section>
       <section>
         <RevenueChart transactions={transactionData} />
+      </section>
+      <section>
+        <Organizer />
+      </section>
+      <section>
+        <Customer />
       </section>
     </main>
   );

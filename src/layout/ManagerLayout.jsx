@@ -41,7 +41,7 @@ const ManagerLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Toggle cho mobile
   const [currentTab, setCurrentTab] = useState("Dashboard");
   return (
-    <main className="flex min-h-screen bg-manager-primary relative">
+    <main className="flex h-screen max-h-screen bg-manager-primary relative overflow-hidden ">
       {/* SIDEBAR DESKTOP */}
       <div
         className={`hidden md:block transition-all duration-300 ${
@@ -81,7 +81,7 @@ const ManagerLayout = () => {
           onToggleCollapse={() => setIsCollapsed((prev) => !prev)}
           onToggleMobileSidebar={() => setIsSidebarOpen(true)}
         />
-        <div className="p-4">
+        <div className="p-4 flex-1 overflow-y-auto overflow-x-hidden">
           <Outlet />
         </div>
       </div>
