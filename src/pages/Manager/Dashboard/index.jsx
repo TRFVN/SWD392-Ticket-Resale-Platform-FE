@@ -5,6 +5,7 @@ import { getEvent, getRevenue, getTicket } from "../../../services/manager";
 import RevenueChart from "./components/RevenueChart";
 import Organizer from "./Organizer";
 import Customer from "./Customer";
+import Transaction from "./Transaction";
 const top_row = [
   {
     id: 1,
@@ -120,6 +121,9 @@ const Dashboard = () => {
       </section>
       <section>
         <RevenueChart transactions={transactionData} />
+      </section>
+      <section>
+        <Transaction data={transactionData} />
       </section>
       <section>
         <Organizer />

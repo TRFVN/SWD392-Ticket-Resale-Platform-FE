@@ -94,7 +94,7 @@ export const getTicketQRCode = async (ticketId, serialNumberId) => {
     }
 
     const response = await axiosInstance.get(
-      `/tickets/generate-qr-code?ticketId=${ticketId}&serialNumberId=${serialNumberId}`,
+      `api/tickets/generate-qr-code?ticketId=${ticketId}&serialNumberId=${serialNumberId}`,
       {
         headers: {
           accept: "text/plain",
