@@ -109,8 +109,8 @@ const Dashboard = () => {
     fetchTicket();
   }, []);
   return (
-    <main className="flex flex-col gap-12 p-4">
-      <section className="text-white text-2xl font-bold">Dashboard</section>
+    <main className="flex flex-col gap-12 p-6">
+      <section className="text-white text-3xl font-bold">Dashboard</section>
       <section>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card data={revenue} />
@@ -122,9 +122,9 @@ const Dashboard = () => {
       <section>
         <RevenueChart transactions={transactionData} />
       </section>
-      <section>
+      {/* <section>
         <Transaction />
-      </section>
+      </section> */}
       <section>
         <Organizer />
       </section>
