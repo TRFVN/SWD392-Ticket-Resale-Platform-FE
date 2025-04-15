@@ -44,6 +44,42 @@ export const getRevenuePagination = async (pageNumber, pageSize) => {
     throw new Error(error.message || "Lỗi khi lấy revenue");
   }
 };
+export const createCategory = async (categoryName) => {
+  try {
+    const response = await axiosInstance.post("/api/Category", {
+      categoryName: categoryName,
+      parentCategoryId: null,
+    });
+    console.log("fjioh");
+    return response.data;
+  } catch (error) {
+    console.log(error.message || "Lỗi khi tạo category");
+    throw new Error(error.message || "Lỗi khi tạo vé");
+  }
+};
+export const getCategory = async () => {
+  try {
+    const response = await axiosInstance.get(`/api/Category`);
+    return response.data.result;
+  } catch (error) {
+    console.log(error.message || "Lỗi khi lấy category");
+    throw new Error(error.message || "Lỗi khi lấy category");
+  }
+};
+export const modifyCategory = async (categoryId, categoryName) => {
+  try {
+    const response = await axiosInstance.put("/api/Category", {
+      params: {
+        categoryId: categoryId,
+        categoryName: categoryName,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.log(error.message || "Lỗi khi chỉnh sửa category");
+    throw new Error(error.message || "Lỗi khi chỉnh sửa category");
+  }
+};
 export const getEvent = async () => {
   try {
     const response = await axiosInstance.get(`/api/Event`);
@@ -81,6 +117,7 @@ export const getOrganizer = async () => {
     throw new Error(error.message || "Lỗi khi lấy organizer");
   }
 };
+
 export const getCustomer = async () => {
   try {
     const response = await axiosInstance.get(`/api/revenue/customer`);
@@ -88,15 +125,5 @@ export const getCustomer = async () => {
   } catch (error) {
     console.log(error.message || "Lỗi khi lấy customer");
     throw new Error(error.message || "Lỗi khi lấy customer");
-  }
-};
-
-export const getCategory = async () => {
-  try {
-    const response = await axiosInstance.get(`/api/revenue/customer`);
-    return response.data.result;
-  } catch (error) {
-    console.log(error.message || "Lỗi khi lấy category");
-    throw new Error(error.message || "Lỗi khi lấy category");
   }
 };
