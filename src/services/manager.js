@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import axiosInstance from "../config/axiosConfig";
 
 export const getRevenue = async () => {
@@ -50,9 +51,10 @@ export const createCategory = async (categoryName) => {
       categoryName: categoryName,
       parentCategoryId: null,
     });
-    console.log("fjioh");
-    return response.data;
+    if (response.data.result) toast.success("Create category successfully");
+    return response.data.result;
   } catch (error) {
+    toast.error("Create category failed");
     console.log(error.message || "Lỗi khi tạo category");
     throw new Error(error.message || "Lỗi khi tạo vé");
   }
@@ -78,6 +80,18 @@ export const modifyCategory = async (categoryId, categoryName) => {
   } catch (error) {
     console.log(error.message || "Lỗi khi chỉnh sửa category");
     throw new Error(error.message || "Lỗi khi chỉnh sửa category");
+  }
+};
+
+export const deleteCategory = async (categoryId) => {
+  try {
+    const response = await axiosInstance.delete(`/api/Category/${categoryId}`);
+    if (response.data.result) toast.success("Delete category successfully");
+    return response.data.result;
+  } catch (error) {
+    toast.error("Delete category failed");
+    console.log(error.message || "Lỗi khi xóa category");
+    throw new Error(error.message || "Lỗi khi xóa category");
   }
 };
 export const getEvent = async () => {
