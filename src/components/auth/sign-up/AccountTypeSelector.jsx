@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { User, Building2 } from "lucide-react";
+import { User } from "lucide-react";
 import { ACCOUNT_TYPES } from "./constants";
 
 export const AccountTypeSelector = ({
@@ -8,55 +8,38 @@ export const AccountTypeSelector = ({
   onChange,
   isDarkMode = true,
 }) => {
+  // Only individual type is available
   const types = [
     {
       id: ACCOUNT_TYPES.INDIVIDUAL,
       icon: User,
-      title: "Cá nhân",
+      title: "Người dùng",
       description: "Tài khoản dành cho người dùng cá nhân",
     },
-    {
-      id: ACCOUNT_TYPES.ORGANIZATION,
-      icon: Building2,
-      title: "Tổ chức",
-      description: "Tài khoản dành cho doanh nghiệp và tổ chức",
-    },
+    // Organization option removed
   ];
 
+  // Force to individual account type
+  React.useEffect(() => {
+    if (selectedType !== ACCOUNT_TYPES.INDIVIDUAL) {
+      onChange(ACCOUNT_TYPES.INDIVIDUAL);
+    }
+  }, [selectedType, onChange]);
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
       {types.map(({ id, icon: Icon, title, description }) => (
-        <motion.button
+        <motion.div
           key={id}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => onChange(id)}
           className={`relative p-4 rounded-xl border-2 transition-colors text-left
             ${
-              selectedType === id
-                ? `border-orange-500 ${
-                    isDarkMode ? "bg-orange-900/20" : "bg-orange-50"
-                  }`
-                : `${
-                    isDarkMode
-                      ? "border-gray-700 hover:border-orange-800"
-                      : "border-gray-200 hover:border-orange-200"
-                  }`
+              isDarkMode
+                ? "border-orange-500 bg-orange-900/20"
+                : "border-orange-500 bg-orange-50"
             }`}
         >
           <div className="flex items-start gap-4">
-            <div
-              className={`p-2 rounded-lg 
-              ${
-                selectedType === id
-                  ? "bg-orange-500 text-white"
-                  : `${
-                      isDarkMode
-                        ? "bg-gray-800 text-gray-400"
-                        : "bg-gray-100 text-gray-600"
-                    }`
-              }`}
-            >
+            <div className="p-2 rounded-lg bg-orange-500 text-white">
               <Icon className="w-5 h-5" />
             </div>
             <div>
@@ -76,14 +59,7 @@ export const AccountTypeSelector = ({
               </p>
             </div>
           </div>
-
-          {selectedType === id && (
-            <motion.div
-              layoutId="activeIndicator"
-              className="absolute -top-px -right-px -bottom-px w-1 bg-orange-500 rounded-r-xl"
-            />
-          )}
-        </motion.button>
+        </motion.div>
       ))}
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../../hooks/useAuth";
-import { User, LogOut, Settings, Ticket, Plus } from "lucide-react";
+import { User, LogOut, Settings, Ticket, Plus, Calendar } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 /**
@@ -13,6 +13,12 @@ const UserMenu = () => {
   const menuRef = useRef(null);
   const isAuthenticated = !!user;
   const navigate = useNavigate();
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    // Get user role from localStorage
+    setUserRole(localStorage.getItem("userRole"));
+  }, []);
 
   // Handle clicks outside to close menu
   useEffect(() => {
@@ -166,25 +172,40 @@ const UserMenu = () => {
                 </motion.div>
 
                 {/* Menu items */}
+
                 <div className="py-1">
-                  <MenuItem
-                    icon={User}
-                    label="Hồ sơ"
-                    path="/profile"
-                    variants={itemVariants}
-                  />
-                  <MenuItem
-                    icon={Ticket}
-                    label="Vé của tôi"
-                    path="/my-tickets"
-                    variants={itemVariants}
-                  />
-                  <MenuItem
-                    icon={Plus}
-                    label="Tạo sự kiện"
-                    path="/create-event"
-                    variants={itemVariants}
-                  />
+                  {userRole && userRole !== "ORGANIZATION" && (
+                    <>
+                      <MenuItem
+                        icon={User}
+                        label="Hồ sơ"
+                        path="/profile"
+                        variants={itemVariants}
+                      />
+                      <MenuItem
+                        icon={Ticket}
+                        label="Vé của tôi"
+                        path="/my-tickets"
+                        variants={itemVariants}
+                      />
+                    </>
+                  )}
+                  {userRole && userRole !== "MEMBER" && (
+                    <>
+                      <MenuItem
+                        icon={Plus}
+                        label="Tạo sự kiện"
+                        path="/create-event"
+                        variants={itemVariants}
+                      />
+                      <MenuItem
+                        icon={Calendar}
+                        label="Sự kiện của tôi"
+                        path="/my-events"
+                        variants={itemVariants}
+                      />
+                    </>
+                  )}
                   <MenuItem
                     icon={Settings}
                     label="Cài đặt"

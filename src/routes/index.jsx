@@ -92,6 +92,10 @@ const privateRoutes = [
     path: "order-confirmation/:orderId",
     element: <OrderConfirmation />,
   },
+];
+
+// Routes only for organization users (non-members)
+const organizationRoutes = [
   { path: "create-event", element: <CreateEventPage /> },
   { path: "my-events", element: <MyEvents /> },
   { path: "events/edit/:eventId", element: <EditEvent /> },
@@ -113,6 +117,14 @@ export const router = createBrowserRouter([
           <PrivateRoute allowedRoles={[ROLES.MEMBER, ROLES.ORGANIZATION]} />
         ),
         children: privateRoutes,
+      },
+      {
+        element: (
+          <PrivateRoute
+            allowedRoles={[ROLES.ORGANIZATION, ROLES.ADMIN, ROLES.MANAGER]}
+          />
+        ),
+        children: organizationRoutes,
       },
     ],
   },

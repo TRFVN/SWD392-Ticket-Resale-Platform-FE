@@ -1,24 +1,19 @@
 import {
   Calendar,
-  Heart,
-  MapPin,
-  MessageCircle,
-  ShoppingCart,
   Tag,
   Clock,
-  ArrowRight,
+  MapPin,
+  ShoppingCart,
+  ExternalLink,
 } from "lucide-react";
-import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { memo } from "react";
 
-const TicketCard = ({ ticket, onAddToCart }) => {
-  const [isLiked, setIsLiked] = useState(false);
+const TicketCard = memo(({ ticket, onAddToCart }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isDarkMode = useSelector((state) => state.theme?.isDarkMode || false);
-
-  // Check if we're on the MyTickets page
   const isMyTicketsPage = location.pathname.includes("/mytickets");
 
   const formatPrice = (price) => {
@@ -30,222 +25,139 @@ const TicketCard = ({ ticket, onAddToCart }) => {
     }).format(price);
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("vi-VN", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(date);
-  };
-
-  const handleLike = (e) => {
-    e.stopPropagation();
-    setIsLiked(!isLiked);
-  };
-
-  const handleDetailsClick = (e) => {
-    e.stopPropagation();
+  const handleDetailsClick = () => {
     navigate(`/tickets/${ticket.ticketId}`, {
-      state: {
-        ticket,
-        fromMyTickets: isMyTicketsPage,
-      },
+      state: { ticket, fromMyTickets: isMyTicketsPage },
     });
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    if (typeof onAddToCart === "function") {
+      onAddToCart(ticket);
+    }
   };
 
   return (
     <div
-      className={`group relative ${
-        isDarkMode ? "bg-gray-800/50" : "bg-white/50"
-      } backdrop-blur-sm rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-orange-500/10`}
+      onClick={handleDetailsClick}
+      className={`flex flex-col h-full rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden cursor-pointer ${
+        isDarkMode
+          ? "bg-gray-800 border border-gray-700"
+          : "bg-white border border-gray-100"
+      }`}
     >
-      {/* Image Section */}
-      <div className="relative aspect-[4/3] overflow-hidden">
-        <img
-          src={ticket.ticketImage || "/api/placeholder/400/300"}
-          alt={ticket.ticketName}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        {/* Gradient Overlay */}
-        <div
-          className={`absolute inset-0 bg-gradient-to-t ${
-            isDarkMode
-              ? "from-gray-900 via-gray-900/50"
-              : "from-gray-800 via-gray-800/40"
-          } to-transparent`}
-        />
-
-        {/* Top Badges - Only show if not on MyTickets */}
-        {!isMyTicketsPage && (
-          <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start">
-            <div className="flex gap-2">
-              <div className="px-3 py-1 bg-orange-500/90 backdrop-blur-sm rounded-full flex items-center gap-2">
-                <Tag size={14} className="text-white" />
-                <span className="text-white text-sm font-medium">
-                  {ticket.categoryName}
-                </span>
-              </div>
-              {ticket.eventName !== ticket.ticketName && (
-                <div
-                  className={`px-3 py-1 ${
-                    isDarkMode ? "bg-gray-800/80" : "bg-gray-700/70"
-                  } backdrop-blur-sm rounded-full`}
-                >
-                  <span className="text-white text-sm">{ticket.eventName}</span>
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={handleLike}
-              className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 
-                ${
-                  isLiked
-                    ? "bg-red-500"
-                    : isDarkMode
-                    ? "bg-gray-900/60 hover:bg-red-500"
-                    : "bg-gray-800/60 hover:bg-red-500"
-                }`}
+      {/* Ticket Header */}
+      <div
+        className={`p-4 ${
+          isDarkMode ? "bg-gray-750" : "bg-orange-50"
+        } border-b ${isDarkMode ? "border-gray-700" : "border-orange-100"}`}
+      >
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Tag
+              className={`w-4 h-4 ${
+                isDarkMode ? "text-orange-400" : "text-orange-500"
+              }`}
+            />
+            <span
+              className={`font-medium ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
             >
-              <Heart
-                className="w-5 h-5 text-white"
-                fill={isLiked ? "white" : "none"}
-              />
-            </button>
+              {ticket.rank || "Thường"}
+            </span>
           </div>
-        )}
-
-        {/* Bottom Info */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <div className="flex justify-between items-end">
-            <div className="space-y-2">
-              <h3 className="text-white text-lg font-bold line-clamp-1">
-                {ticket.ticketName}
-              </h3>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5 text-gray-300">
-                  <Calendar className="w-4 h-4" />
-                  <span className="text-sm">
-                    {formatDate(ticket.eventDate)}
-                  </span>
-                </div>
-              </div>
-            </div>
-            {/* Price - Only show if not on MyTickets */}
-            {!isMyTicketsPage && (
-              <div className="bg-orange-500 px-4 py-2 rounded-xl">
-                <span className="text-white text-lg font-bold">
-                  {formatPrice(ticket.ticketPrice)}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Content Section */}
-      <div className="p-4 space-y-4">
-        {/* Location */}
-        <div
-          className={`flex items-center gap-2 ${
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          }`}
-        >
-          <MapPin className="w-4 h-4 shrink-0" />
-          <span className="text-sm truncate">
-            {[ticket.city, ticket.district, ticket.address]
-              .filter(Boolean)
-              .join(", ")}
-          </span>
-        </div>
-
-        {/* Description - Only show if not on MyTickets */}
-        {!isMyTicketsPage && ticket.ticketDescription && (
-          <p
-            className={`text-sm line-clamp-2 ${
-              isDarkMode ? "text-gray-400" : "text-gray-600"
+          <span
+            className={`text-sm font-semibold ${
+              isDarkMode ? "text-orange-400" : "text-orange-500"
             }`}
           >
-            {ticket.ticketDescription}
-          </p>
-        )}
+            {formatPrice(ticket.ticketPrice || 0)}
+          </span>
+        </div>
+      </div>
 
-        {/* Action Bar */}
-        <div
-          className={`flex items-center justify-between pt-4 border-t ${
-            isDarkMode ? "border-gray-700" : "border-gray-200"
+      {/* Ticket Content */}
+      <div className="flex-1 p-4">
+        <h3
+          className={`text-lg font-semibold mb-3 ${
+            isDarkMode ? "text-white" : "text-gray-900"
           }`}
         >
-          <div className="hidden sm:flex flex-col">
-            <span
-              className={`text-xs ${
-                isDarkMode ? "text-gray-500" : "text-gray-600"
-              }`}
-            >
-              Serial No.
+          {ticket.ticketName || "Vé không tên"}
+        </h3>
+
+        <div className="space-y-2">
+          <div
+            className={`flex items-center gap-2 ${
+              isDarkMode ? "text-gray-300" : "text-gray-600"
+            } text-sm`}
+          >
+            <Calendar className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">
+              {ticket.eventName || "Sự kiện không tên"}
             </span>
-            <span
-              className={`font-mono text-sm ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              {ticket.serialNumber}
+          </div>
+
+          <div
+            className={`flex items-center gap-2 ${
+              isDarkMode ? "text-gray-300" : "text-gray-600"
+            } text-sm`}
+          >
+            <MapPin className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">
+              {ticket.city || "Không có địa điểm"}
+            </span>
+          </div>
+
+          <div
+            className={`flex items-center gap-2 ${
+              isDarkMode ? "text-gray-300" : "text-gray-600"
+            } text-sm`}
+          >
+            <Clock className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">
+              Còn {ticket.availableQuantity || 0}/{ticket.totalQuantity || 0} vé
             </span>
           </div>
         </div>
       </div>
 
-      {/* Quick Actions Overlay */}
+      {/* Ticket Actions */}
       <div
-        className={`absolute inset-0 ${
-          isDarkMode ? "bg-gray-900/80" : "bg-gray-800/80"
-        } backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4`}
+        className={`p-3 border-t ${
+          isDarkMode ? "border-gray-700" : "border-gray-100"
+        } flex justify-between items-center`}
       >
-        {isMyTicketsPage ? (
-          // MyTickets view - only show View Details
-          <button
-            onClick={handleDetailsClick}
-            className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl transition-colors"
-          >
-            View Details
-          </button>
-        ) : (
-          // Normal view - show all action buttons
-          <>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddToCart(ticket);
-              }}
-              className={`px-6 py-2 ${
-                isDarkMode
-                  ? "bg-gray-700 hover:bg-gray-600"
-                  : "bg-gray-600 hover:bg-gray-500"
-              } text-white rounded-xl transition-colors`}
-            >
-              Add to Cart
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/chat/${ticket.userId}`);
-              }}
-              className={`p-2 ${
-                isDarkMode
-                  ? "text-gray-400 hover:text-white hover:bg-gray-700"
-                  : "text-gray-300 hover:text-white hover:bg-gray-600"
-              } rounded-xl transition-colors`}
-              title="Contact seller"
-            >
-              <MessageCircle className="w-5 h-5 " />
-            </button>
-          </>
-        )}
+        <button
+          onClick={handleDetailsClick}
+          className={`text-sm flex items-center gap-1 ${
+            isDarkMode
+              ? "text-gray-300 hover:text-white"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          <span>Chi tiết</span>
+          <ExternalLink className="w-3 h-3" />
+        </button>
+
+        <button
+          onClick={handleAddToCart}
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+            isDarkMode
+              ? "bg-orange-500 hover:bg-orange-600 text-white"
+              : "bg-orange-500 hover:bg-orange-600 text-white"
+          } flex items-center gap-1.5`}
+        >
+          <ShoppingCart className="w-3.5 h-3.5" />
+          <span>Thêm vào giỏ</span>
+        </button>
       </div>
     </div>
   );
-};
+});
+
+TicketCard.displayName = "TicketCard";
 
 export default TicketCard;

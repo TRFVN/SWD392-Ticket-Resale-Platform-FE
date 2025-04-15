@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Ticket,
@@ -19,22 +19,12 @@ import { Link } from "react-router-dom";
 const MobileNav = ({ isOpen, onItemClick }) => {
   const { navItems, activeTab, setActiveTab, handleNavigation, cartCount } =
     useNavigationItems();
+  const [userRole, setUserRole] = useState(null);
 
-  // Icon mapping for navigation items
-  const iconMap = {
-    events: Ticket,
-    tickets: Calendar,
-    venues: MapPin,
-    trending: TrendingUp,
-    create: PlusCircle,
-  };
-
-  // Handle navigation item click
-  const handleClick = (id, path) => {
-    setActiveTab(id);
-    handleNavigation(path);
-    onItemClick();
-  };
+  useEffect(() => {
+    // Get user role from localStorage
+    setUserRole(localStorage.getItem("userRole"));
+  }, []);
 
   // Animation variants
   const containerVariants = {
@@ -142,35 +132,58 @@ const MobileNav = ({ isOpen, onItemClick }) => {
               variants={itemVariants}
             >
               <div className="grid grid-cols-2 gap-3">
-                <motion.a
-                  href="/create-ticket"
-                  className="flex flex-col items-center justify-center p-4 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavigation("/create-ticket");
-                    onItemClick();
-                  }}
-                >
-                  <PlusCircle size={24} />
-                  <span className="mt-2 text-sm font-medium">Tạo sự kiện</span>
-                </motion.a>
-
-                <motion.a
-                  href="/tickets"
-                  className="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavigation("/mytickets");
-                    onItemClick();
-                  }}
-                >
-                  <Ticket size={24} />
-                  <span className="mt-2 text-sm font-medium">Vé của tôi</span>
-                </motion.a>
+                {userRole && userRole !== "MEMBER" && (
+                  <motion.a
+                    href="/create-event"
+                    className="flex flex-col items-center justify-center p-4 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavigation("/create-event");
+                      onItemClick();
+                    }}
+                  >
+                    <PlusCircle size={24} />
+                    <span className="mt-2 text-sm font-medium">
+                      Tạo sự kiện
+                    </span>
+                  </motion.a>
+                )}
+                {userRole && userRole !== "ORGANIZATION" && (
+                  <motion.a
+                    href="/my-tickets"
+                    className="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavigation("/my-tickets");
+                      onItemClick();
+                    }}
+                  >
+                    <Ticket size={24} />
+                    <span className="mt-2 text-sm font-medium">Vé của tôi</span>
+                  </motion.a>
+                )}
+                {userRole && userRole !== "MEMBER" && (
+                  <motion.a
+                    href="/my-events"
+                    className="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavigation("/my-events");
+                      onItemClick();
+                    }}
+                  >
+                    <Calendar size={24} />
+                    <span className="mt-2 text-sm font-medium">
+                      Sự kiện của tôi
+                    </span>
+                  </motion.a>
+                )}
               </div>
             </motion.div>
           </div>

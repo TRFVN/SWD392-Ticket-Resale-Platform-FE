@@ -51,7 +51,12 @@ const Header = () => {
     toggleMenu,
     closeMenu,
   } = useHeaderScroll();
+  const [userRole, setUserRole] = useState(null);
 
+  useEffect(() => {
+    // Get user role from localStorage
+    setUserRole(localStorage.getItem("userRole"));
+  }, []);
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 1200,
   );
@@ -143,7 +148,7 @@ const Header = () => {
               <div className="flex items-center gap-2">
                 <SearchBar mini={showMobileNav} />
                 <ThemeToggle />
-                <CartButton />
+                {userRole && userRole !== "ORGANIZATION" && <CartButton />}
                 <UserMenu />
 
                 {/* Mobile Menu Button */}
