@@ -123,7 +123,7 @@ const Dashboard = () => {
         <RevenueChart transactions={transactionData} />
       </section>
       <section>
-        <Transaction data={transactionData} />
+        <Transaction />
       </section>
       <section>
         <Organizer />

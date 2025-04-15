@@ -22,7 +22,28 @@ export const getRevenue = async () => {
     throw new Error(error.message || "Lỗi khi lấy revenue");
   }
 };
+export const getRevenuePagination = async (pageNumber, pageSize) => {
+  try {
+    const startDate = "01/01/2000";
 
+    const today = new Date();
+    const endDate = today.toLocaleDateString("en-US");
+
+    const response = await axiosInstance.get(`/api/revenue/profit`, {
+      params: {
+        startDate,
+        endDate,
+        pageNumber,
+        pageSize,
+      },
+    });
+
+    return response.data.result;
+  } catch (error) {
+    console.log(error.message || "Lỗi khi lấy revenue");
+    throw new Error(error.message || "Lỗi khi lấy revenue");
+  }
+};
 export const getEvent = async () => {
   try {
     const response = await axiosInstance.get(`/api/Event`);
