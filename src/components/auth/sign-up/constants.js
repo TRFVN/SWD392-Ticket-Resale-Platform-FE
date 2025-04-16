@@ -2,42 +2,24 @@ import * as Yup from "yup";
 
 export const ACCOUNT_TYPES = {
   INDIVIDUAL: "individual",
-  ORGANIZATION: "organization",
 };
 
 export const signupSteps = {
   [ACCOUNT_TYPES.INDIVIDUAL]: [
     {
-      title: "Create Account",
-      subtitle: "Start by setting up your login credentials",
+      title: "Tạo tài khoản",
+      subtitle: "Bắt đầu bằng việc thiết lập thông tin đăng nhập của bạn",
       fields: ["email", "password", "confirmPassword"],
     },
     {
-      title: "Personal Information",
-      subtitle: "Tell us about yourself",
+      title: "Thông tin cá nhân",
+      subtitle: "Cho chúng tôi biết về bạn",
       fields: ["fullName", "phoneNumber", "birthDate"],
     },
     {
-      title: "Additional Details",
-      subtitle: "Complete your profile",
+      title: "Thông tin bổ sung",
+      subtitle: "Hoàn thành hồ sơ của bạn",
       fields: ["cccd", "country", "address"],
-    },
-  ],
-  [ACCOUNT_TYPES.ORGANIZATION]: [
-    {
-      title: "Create Account",
-      subtitle: "Start by setting up your organization account",
-      fields: ["email", "password", "confirmPassword"],
-    },
-    {
-      title: "Organization Details",
-      subtitle: "Tell us about your organization",
-      fields: ["organizationName", "phoneNumber", "taxId"],
-    },
-    {
-      title: "Location Information",
-      subtitle: "Where is your organization based?",
-      fields: ["country", "address"],
     },
   ],
 };
@@ -50,55 +32,42 @@ const passwordRules = {
 
 const baseValidationSchema = {
   email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
+    .email("Địa chỉ email không hợp lệ")
+    .required("Email là bắt buộc"),
   password: Yup.string()
     .min(
       passwordRules.min,
-      `Password must be at least ${passwordRules.min} characters`,
+      `Mật khẩu phải có ít nhất ${passwordRules.min} ký tự`,
     )
-    .max(
-      passwordRules.max,
-      `Password must be less than ${passwordRules.max} characters`,
-    )
+    .max(passwordRules.max, `Mật khẩu phải ít hơn ${passwordRules.max} ký tự`)
     .matches(
       passwordRules.matches,
-      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+      "Mật khẩu phải chứa ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt",
     )
-    .required("Password is required"),
+    .required("Mật khẩu là bắt buộc"),
   confirmPassword: Yup.string()
-    .oneOf([Yup.ref("password"), null], "Passwords must match")
-    .required("Please confirm your password"),
+    .oneOf([Yup.ref("password"), null], "Mật khẩu không khớp")
+    .required("Vui lòng xác nhận mật khẩu của bạn"),
   phoneNumber: Yup.string()
-    .matches(/^(\+?[0-9])\d{1,14}$/, "Invalid phone number")
-    .required("Phone number is required"),
-  country: Yup.string().required("Country is required"),
-  address: Yup.string().required("Address is required"),
+    .matches(/^(\+?[0-9])\d{1,14}$/, "Số điện thoại không hợp lệ")
+    .required("Số điện thoại là bắt buộc"),
+  country: Yup.string().required("Quốc gia là bắt buộc"),
+  address: Yup.string().required("Địa chỉ là bắt buộc"),
 };
 
 export const validationSchemas = {
   [ACCOUNT_TYPES.INDIVIDUAL]: Yup.object({
     ...baseValidationSchema,
     fullName: Yup.string()
-      .min(2, "Name is too short")
-      .max(50, "Name is too long")
-      .required("Full name is required"),
+      .min(2, "Tên quá ngắn")
+      .max(50, "Tên quá dài")
+      .required("Họ và tên là bắt buộc"),
     birthDate: Yup.date()
-      .max(new Date(), "Birth date cannot be in the future")
-      .required("Birth date is required"),
+      .max(new Date(), "Ngày sinh không thể nằm trong tương lai")
+      .required("Ngày sinh là bắt buộc"),
     cccd: Yup.string()
-      .matches(/^\d{9,12}$/, "Invalid ID number")
-      .required("ID number is required"),
-  }),
-  [ACCOUNT_TYPES.ORGANIZATION]: Yup.object({
-    ...baseValidationSchema,
-    organizationName: Yup.string()
-      .min(2, "Organization name is too short")
-      .max(100, "Organization name is too long")
-      .required("Organization name is required"),
-    taxId: Yup.string()
-      .matches(/^[0-9A-Z]{10,15}$/, "Invalid tax ID")
-      .required("Tax ID is required"),
+      .matches(/^\d{9,12}$/, "Số CCCD/CMND không hợp lệ")
+      .required("Số CCCD/CMND là bắt buộc"),
   }),
 };
 
@@ -111,16 +80,6 @@ export const initialValues = {
     phoneNumber: "",
     birthDate: "",
     cccd: "",
-    country: "",
-    address: "",
-  },
-  [ACCOUNT_TYPES.ORGANIZATION]: {
-    email: "",
-    password: "",
-    confirmPassword: "",
-    organizationName: "",
-    phoneNumber: "",
-    taxId: "",
     country: "",
     address: "",
   },

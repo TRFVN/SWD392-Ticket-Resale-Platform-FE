@@ -20,13 +20,13 @@ export const useNavigationItems = () => {
   const baseNavItems = [
     { id: "events", label: "Sự Kiện", path: "/events", priority: 100 }, // Highest priority
     { id: "tickets", label: "Vé", path: "/tickets", priority: 90 },
-    {
-      id: "venues",
-      label: "Địa Điểm",
-      path: "/venues",
-      priority: 80,
-      secondary: true,
-    }, // Can be hidden on narrow screens
+    // {
+    //   id: "venues",
+    //   label: "Địa Điểm",
+    //   path: "/venues",
+    //   priority: 80,
+    //   secondary: true,
+    // }, // Can be hidden on narrow screens
   ];
 
   // Add "Tạo Sự Kiện" option only if user role is not "MEMBER"

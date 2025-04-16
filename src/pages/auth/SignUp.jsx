@@ -1,25 +1,12 @@
-import React, { useState, useCallback, memo, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useTransform,
-} from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Formik, Form } from "formik";
 import { toast } from "react-toastify";
 import { useAuth } from "../../hooks/useAuth";
 import { FaGoogle } from "react-icons/fa";
-import {
-  HiOutlineShieldCheck,
-  HiArrowRight,
-  HiMoon,
-  HiSun,
-  HiOutlineTicket,
-  HiLightningBolt,
-} from "react-icons/hi";
-import { useSelector, useDispatch } from "react-redux";
-import { toggleTheme } from "../../store/slice/themeSlice";
+import { HiOutlineTicket, HiLightningBolt } from "react-icons/hi";
+import { useSelector } from "react-redux";
 import TicketLogo from "../../assets/TicketHub_Logo.png";
 import {
   ACCOUNT_TYPES,
@@ -31,264 +18,51 @@ import {
   StepIndicator,
   validationSchemas,
 } from "../../components/auth/sign-up";
+import ThemeToggle from "../../components/common/ThemeToggle";
 
-// Subtle background animation
-const BackgroundAnimation = () => {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <svg
-        className="absolute inset-0 w-full h-full opacity-50"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <defs>
-          <filter id="goo">
-            <feGaussianBlur
-              in="SourceGraphic"
-              stdDeviation="10"
-              result="blur"
-            />
-            <feColorMatrix
-              in="blur"
-              mode="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"
-              result="goo"
-            />
-          </filter>
-        </defs>
-      </svg>
-      {[1, 2, 3, 4].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full blur-3xl"
-          initial={{
-            background:
-              i % 2 === 0
-                ? "radial-gradient(circle, rgba(251,146,60,0.15) 0%, rgba(251,146,60,0) 70%)"
-                : "radial-gradient(circle, rgba(249,115,22,0.1) 0%, rgba(249,115,22,0) 70%)",
-            width: `${Math.random() * 50 + 20}vw`,
-            height: `${Math.random() * 50 + 20}vh`,
-            x: `${Math.random() * 100}%`,
-            y: `${Math.random() * 100}%`,
-            opacity: 0.3,
-          }}
-          animate={{
-            x: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
-            y: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{
-            duration: Math.random() * 30 + 20,
-            repeat: Infinity,
-            repeatType: "reverse",
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// Subtle hover effect card
-const HoverCard = ({ children, className }) => {
-  return (
-    <motion.div
-      className={`relative ${className}`}
-      whileHover={{
-        y: -4,
-        transition: { duration: 0.2 },
-      }}
-      transition={{
-        type: "spring",
-        stiffness: 300,
-        damping: 20,
-      }}
-    >
-      {children}
-    </motion.div>
-  );
-};
-
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: "easeOut" },
-  },
-};
-
-const stepAnimations = {
-  stepInitial: {
-    opacity: 0,
-    y: 10,
-  },
-  stepAnimate: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.3,
-      ease: "easeOut",
-    },
-  },
-  stepExit: {
-    opacity: 0,
-    y: -10,
-    transition: {
-      duration: 0.2,
-    },
-  },
-};
-
-// ThemeToggle component
-const ThemeToggle = memo(() => {
-  const dispatch = useDispatch();
+// Simplified component for feature cards
+const FeatureCard = ({ icon: Icon, title, description }) => {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
 
-  const handleToggleTheme = () => {
-    dispatch(toggleTheme());
-  };
-
   return (
-    <motion.button
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.3 }}
-      onClick={handleToggleTheme}
-      className={`fixed top-4 right-4 p-2.5 rounded-full z-50
-        ${
-          isDarkMode
-            ? "bg-white/10 text-orange-400 hover:bg-white/15"
-            : "bg-black/5 text-orange-500 hover:bg-black/10"
-        } 
-        backdrop-blur-sm transition-all duration-200`}
-      aria-label={
-        isDarkMode ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"
-      }
+    <div
+      className={`p-4 rounded-lg border ${
+        isDarkMode ? "border-white/10" : "border-gray-200"
+      }`}
     >
-      {isDarkMode ? (
-        <HiSun className="w-5 h-5" />
-      ) : (
-        <HiMoon className="w-5 h-5" />
-      )}
-    </motion.button>
-  );
-});
-
-ThemeToggle.displayName = "ThemeToggle";
-
-// Custom Google Button Component
-const GoogleButton = memo(({ onClick, isLoading, isDarkMode }) => (
-  <motion.button
-    whileHover={{ y: -2 }}
-    whileTap={{ y: 0 }}
-    onClick={onClick}
-    disabled={isLoading}
-    className={`w-full flex items-center justify-center gap-3 px-5 py-3.5
-      relative group
-      ${
-        isDarkMode
-          ? "bg-white/5 text-gray-200 hover:bg-white/10"
-          : "bg-black/5 text-gray-700 hover:bg-black/10"
-      }
-      rounded-xl backdrop-blur-sm
-      disabled:opacity-50 disabled:cursor-not-allowed
-      transition-all duration-200`}
-    aria-label="Đăng ký với Google"
-  >
-    {isLoading ? (
-      <>
-        <div
-          className={`w-4 h-4 border-2 ${
-            isDarkMode ? "border-gray-300" : "border-gray-500"
-          } border-t-transparent rounded-full animate-spin`}
-        ></div>
-        <span>Đang kết nối...</span>
-      </>
-    ) : (
-      <>
-        <FaGoogle className="w-4 h-4 text-[#4285F4]" />
-        <span>Tiếp tục với Google</span>
-        <motion.div className="absolute right-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <HiArrowRight className="w-4 h-4" />
-        </motion.div>
-      </>
-    )}
-  </motion.button>
-));
-
-GoogleButton.displayName = "GoogleButton";
-
-// Minimal Feature Card
-const FeatureCard = ({ icon: Icon, title, description }) => {
-  return (
-    <motion.div
-      variants={itemVariants}
-      className="bg-white/5 backdrop-blur-sm rounded-xl p-5 border border-white/10"
-      whileHover={{ y: -3, transition: { duration: 0.2 } }}
-    >
-      <div className="flex items-center mb-3">
-        <div className="bg-orange-500/10 p-2 rounded-md mr-3 text-orange-400">
+      <div className="flex items-start space-x-3">
+        <div className="text-orange-500">
           <Icon className="w-5 h-5" />
         </div>
-        <h3 className="font-medium text-white">{title}</h3>
+        <div>
+          <h3
+            className={`text-sm font-medium ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
+            {title}
+          </h3>
+          <p
+            className={`text-xs ${
+              isDarkMode ? "text-white/70" : "text-gray-600"
+            }`}
+          >
+            {description}
+          </p>
+        </div>
       </div>
-      <p className="text-white/70 text-sm">{description}</p>
-    </motion.div>
+    </div>
   );
 };
 
-// Quote component with subtle effects
-const QuoteSection = memo(({ isDarkMode }) => (
-  <motion.div
-    className="h-full w-full relative px-8 py-10 flex flex-col justify-center"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.8 }}
-  >
+// Quote section with reduced animations
+const QuoteSection = React.memo(({ isDarkMode }) => (
+  <div className="h-full w-full relative px-8 py-10 flex flex-col justify-center">
     <div className="absolute inset-0 bg-gradient-to-br from-orange-500/90 to-orange-600/90 rounded-2xl"></div>
 
-    {/* Subtle pattern overlay */}
-    <div className="absolute inset-0 opacity-5 mix-blend-overlay">
-      <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern
-            id="smallGrid"
-            width="10"
-            height="10"
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d="M 10 0 L 0 0 0 10"
-              fill="none"
-              stroke="white"
-              strokeWidth="0.5"
-            />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#smallGrid)" />
-      </svg>
-    </div>
-
-    <motion.div
-      className="relative z-10 flex flex-col h-full justify-between"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <div className="relative z-10 flex flex-col h-full justify-between">
       <div>
-        <motion.div variants={itemVariants} className="mb-8">
+        <div className="mb-8">
           <img
             src={TicketLogo}
             alt="TicketHub Logo"
@@ -304,9 +78,9 @@ const QuoteSection = memo(({ isDarkMode }) => (
             Nền tảng giao dịch vé sự kiện minh bạch và bảo mật cho cả người mua
             và người bán.
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div variants={containerVariants} className="space-y-3 mb-auto">
+        <div className="space-y-3 mb-auto">
           <FeatureCard
             icon={HiOutlineTicket}
             title="Giao dịch bảo mật"
@@ -317,13 +91,10 @@ const QuoteSection = memo(({ isDarkMode }) => (
             title="Thanh toán nhanh chóng"
             description="Nhiều phương thức thanh toán và xử lý tức thì"
           />
-        </motion.div>
+        </div>
       </div>
 
-      <motion.div
-        variants={itemVariants}
-        className="mt-8 bg-white/10 rounded-xl p-4 border border-white/10 backdrop-blur-sm"
-      >
+      <div className="mt-8 bg-white/10 rounded-xl p-4 border border-white/10 backdrop-blur-sm">
         <p className="text-white/90 italic mb-2">
           &ldquo;TicketHub đã thay đổi cách tôi mua vé sự kiện - an toàn, nhanh
           chóng và đáng tin cậy.&rdquo;
@@ -334,35 +105,64 @@ const QuoteSection = memo(({ isDarkMode }) => (
             Nguyễn Minh, Người dùng TicketHub
           </p>
         </div>
-      </motion.div>
-    </motion.div>
-  </motion.div>
+      </div>
+    </div>
+  </div>
 ));
 
 QuoteSection.displayName = "QuoteSection";
 
+// Google button component
+const GoogleButton = ({ onClick, isLoading, isDarkMode }) => (
+  <button
+    onClick={onClick}
+    disabled={isLoading}
+    className={`w-full flex items-center justify-center gap-3 px-5 py-3
+      ${
+        isDarkMode
+          ? "bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+          : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+      }
+      border rounded-lg transition-colors
+      disabled:opacity-70 disabled:cursor-not-allowed`}
+  >
+    {isLoading ? (
+      <>
+        <div
+          className={`w-5 h-5 border-2 rounded-full animate-spin ${
+            isDarkMode
+              ? "border-white border-t-transparent"
+              : "border-gray-500 border-t-transparent"
+          }`}
+        ></div>
+        <span>Đang kết nối...</span>
+      </>
+    ) : (
+      <>
+        <FaGoogle className="w-5 h-5 text-[#4285F4]" />
+        <span className="font-medium">Tiếp tục với Google</span>
+      </>
+    )}
+  </button>
+);
+
 const Signup = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  // Force account type to INDIVIDUAL only
   const [accountType, setAccountType] = useState(ACCOUNT_TYPES.INDIVIDUAL);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const navigate = useNavigate();
-  // Only use signupCustomer since organization signup is disabled
   const { signupCustomer, loading, googleLogin } = useAuth();
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
 
   const handleSubmit = useCallback(
     async (values, { setSubmitting, setFieldError }) => {
       try {
-        // Only handle individual account type signup
-        // Format customer data to match API expectations exactly
+        // Format customer data to match API expectations
         let birthDateFormatted;
 
-        // Handle different date formats
         if (values.birthDate) {
-          // Ensure it's a valid date string
           const dateObj = new Date(values.birthDate);
           if (!isNaN(dateObj.getTime())) {
             birthDateFormatted = dateObj.toISOString();
@@ -386,7 +186,6 @@ const Signup = () => {
           gender: values.gender || "",
         };
 
-        console.log("Customer signup data:", customerData);
         await signupCustomer(customerData);
 
         toast.success("Đăng ký thành công! Vui lòng xác nhận email của bạn.", {
@@ -442,50 +241,37 @@ const Signup = () => {
     setCurrentStep((prev) => Math.max(0, prev - 1));
   };
 
-  // Create progress percentage for the progress bar
   const progressPercentage = ((currentStep + 1) / currentSteps.length) * 100;
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center relative
+      className={`min-h-screen flex items-center justify-center
       ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}
       py-8 px-4 sm:px-6 lg:px-8`}
     >
-      <BackgroundAnimation />
       <ThemeToggle />
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-7xl relative z-10"
-      >
+      <div className="w-full max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column - Registration Form */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-            className="backdrop-blur-sm bg-white/5 dark:bg-gray-800/10 rounded-2xl border border-white/10 dark:border-gray-700/20 overflow-hidden"
+          <div
+            className={`rounded-2xl overflow-hidden ${
+              isDarkMode
+                ? "bg-gray-800/80 border border-gray-700/30"
+                : "bg-white/95 border border-gray-200 shadow-sm"
+            }`}
           >
             {/* Progress bar */}
-            <div className="h-1 bg-gray-200/5">
-              <motion.div
+            <div className="h-1 bg-gray-200/10">
+              <div
                 className="h-full bg-orange-500"
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercentage}%` }}
-                transition={{ duration: 0.3 }}
+                style={{ width: `${progressPercentage}%` }}
               />
             </div>
 
             <div className="p-6 sm:p-8">
               <div className="max-w-md mx-auto">
-                <motion.div
-                  className="mb-6"
-                  variants={itemVariants}
-                  initial="hidden"
-                  animate="visible"
-                >
+                <div className="mb-6">
                   <h1
                     className={`text-2xl font-medium
                     ${isDarkMode ? "text-white" : "text-gray-900"}`}
@@ -498,40 +284,30 @@ const Signup = () => {
                   >
                     {currentSteps[currentStep].subtitle}
                   </p>
-                </motion.div>
+                </div>
 
                 {/* Account Type Selector */}
-                <motion.div
-                  variants={itemVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="mb-6"
-                >
+                <div className="mb-6">
                   <AccountTypeSelector
                     selectedType={accountType}
                     isDarkMode={isDarkMode}
                   />
-                </motion.div>
+                </div>
 
                 {/* Progress Indicator */}
-                <motion.div
-                  className="mb-6"
-                  variants={itemVariants}
-                  initial="hidden"
-                  animate="visible"
-                >
+                <div className="mb-6">
                   <StepIndicator
                     currentStep={currentStep}
                     totalSteps={currentSteps.length}
                     steps={currentSteps}
                   />
-                </motion.div>
+                </div>
 
                 {/* Form */}
                 <div
                   className={`rounded-xl 
-                  ${isDarkMode ? "bg-gray-800/30" : "bg-white/30"} 
-                  backdrop-blur-sm p-5 border 
+                  ${isDarkMode ? "bg-gray-800/50" : "bg-white/50"} 
+                  p-5 border 
                   ${isDarkMode ? "border-gray-700/40" : "border-gray-200/40"}`}
                 >
                   <Formik
@@ -548,10 +324,10 @@ const Signup = () => {
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={`${accountType}-${currentStep}`}
-                            variants={stepAnimations}
-                            initial="stepInitial"
-                            animate="stepAnimate"
-                            exit="stepExit"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.2 }}
                           >
                             <StepContent
                               step={currentStep}
@@ -568,9 +344,7 @@ const Signup = () => {
 
                         {/* Error Message */}
                         {errors.submit && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
+                          <div
                             className={`rounded-lg p-3 text-sm
                               ${
                                 isDarkMode
@@ -579,7 +353,7 @@ const Signup = () => {
                               }`}
                           >
                             {errors.submit}
-                          </motion.div>
+                          </div>
                         )}
 
                         {/* Navigation Buttons */}
@@ -595,12 +369,7 @@ const Signup = () => {
 
                         {/* Social Login */}
                         {currentStep === 0 && (
-                          <motion.div
-                            className="mt-6"
-                            variants={itemVariants}
-                            initial="hidden"
-                            animate="visible"
-                          >
+                          <div className="mt-6">
                             <div className="relative">
                               <div className="absolute inset-0 flex items-center">
                                 <div
@@ -617,8 +386,8 @@ const Signup = () => {
                                   className={`px-2 
                                   ${
                                     isDarkMode
-                                      ? "bg-gray-800/30 text-gray-400"
-                                      : "bg-white/30 text-gray-500"
+                                      ? "bg-gray-800/50 text-gray-400"
+                                      : "bg-white text-gray-500"
                                   }`}
                                 >
                                   Hoặc tiếp tục với
@@ -632,7 +401,7 @@ const Signup = () => {
                                 isDarkMode={isDarkMode}
                               />
                             </div>
-                          </motion.div>
+                          </div>
                         )}
 
                         {/* Sign In Link */}
@@ -656,19 +425,14 @@ const Signup = () => {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Right Column - Quote & Info */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="hidden lg:block"
-          >
+          <div className="hidden lg:block">
             <QuoteSection isDarkMode={isDarkMode} />
-          </motion.div>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
