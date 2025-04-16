@@ -51,6 +51,7 @@ const ManagerAccount = lazy(() => import("../pages/Manager/Account"));
 const ManagerMessage = lazy(() => import("../pages/Manager/Message"));
 const ManagerReport = lazy(() => import("../pages/Manager/Report"));
 const ManagerSetting = lazy(() => import("../pages/Manager/Setting"));
+const ManagerTransaction = lazy(() => import("../pages/Manager/Transaction"));
 
 // Loading component
 const LoadingFallback = () => (
@@ -172,6 +173,7 @@ export const router = createBrowserRouter([
           { path: "ticket", element: withSuspense(ManagerTicket)() },
           { path: "message", element: withSuspense(ManagerMessage)() },
           { path: "setting", element: withSuspense(ManagerSetting)() },
+          { path: "transaction", element: withSuspense(ManagerTransaction)() },
         ],
       },
     ],

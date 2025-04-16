@@ -62,7 +62,12 @@ export const createCategory = async (categoryName) => {
 };
 export const getCategory = async () => {
   try {
-    const response = await axiosInstance.get(`/api/Category`);
+    const response = await axiosInstance.get(`/api/Category`, {
+      params: {
+        pageNumber: 1,
+        pageSize: 1000,
+      },
+    });
     return response.data.result;
   } catch (error) {
     toast.error("Cannot Fetch Category");
@@ -99,7 +104,12 @@ export const deleteCategory = async (categoryId) => {
 };
 export const getEvent = async () => {
   try {
-    const response = await axiosInstance.get(`/api/Event`);
+    const response = await axiosInstance.get(`/api/Event`, {
+      params: {
+        pageNumber: 1,
+        pageSize: 1000,
+      },
+    });
     return response.data.result;
   } catch (error) {
     toast.error("Cannot Fetch Event");
@@ -110,7 +120,12 @@ export const getEvent = async () => {
 
 export const getTicket = async () => {
   try {
-    const response = await axiosInstance.get(`/api/tickets/templates`);
+    const response = await axiosInstance.get(`/api/tickets/templates`, {
+      params: {
+        pageNumber: 1,
+        pageSize: 1000,
+      },
+    });
 
     return response.data.result;
   } catch (error) {

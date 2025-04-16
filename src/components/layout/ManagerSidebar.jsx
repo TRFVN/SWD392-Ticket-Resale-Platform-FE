@@ -12,6 +12,7 @@ import {
   FileWarning,
   Settings,
   LogOut,
+  HandCoins,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
@@ -37,6 +38,11 @@ const Main_Items = [
     id: 4,
     name: "Ticket",
     icon: <Ticket />,
+  },
+  {
+    id: 5,
+    name: "Transaction",
+    icon: <HandCoins />,
   },
 ];
 
