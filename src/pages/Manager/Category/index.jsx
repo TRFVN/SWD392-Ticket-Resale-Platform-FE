@@ -3,6 +3,7 @@ import {
   createCategory,
   deleteCategory,
   getCategory,
+  modifyCategory,
 } from "../../../services/manager";
 import CategoryLoading from "../components/CategoryLoading";
 import { Edit, Trash, Plus, Search, X } from "lucide-react";
@@ -17,6 +18,8 @@ const Category = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editCategoryData, setEditCategoryData] = useState(null);
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -27,7 +30,7 @@ const Category = () => {
       }
     };
     fetchCategory();
-  }, []);
+  }, [editCategoryData]);
 
   const filteredCategories = category.filter((cat) =>
     cat.categoryName.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -120,7 +123,10 @@ const Category = () => {
                       <td className="flex gap-3 px-6 py-4 text-sm">
                         <span
                           className="bg-yellow-500/10 p-1 rounded-md cursor-pointer hover:bg-yellow-500/50"
-                          onClick={() => alert("Có cái loz API mà edit")}
+                          onClick={() => {
+                            setEditCategoryData(cat);
+                            setIsEditModalOpen(true);
+                          }}
                         >
                           <Edit className="text-yellow-500" />
                         </span>
@@ -295,6 +301,82 @@ const Category = () => {
                 Confirm
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {isEditModalOpen && editCategoryData && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-manager-secondary text-white p-6 rounded-2xl shadow-lg border border-gray-700 w-full max-w-md relative">
+            <button
+              onClick={() => {
+                setIsEditModalOpen(false);
+                setEditCategoryData(null);
+              }}
+              className="absolute top-3 right-3 text-gray-400 hover:text-white"
+            >
+              <X size={20} />
+            </button>
+            <h2 className="text-xl font-semibold mb-4">Edit Category</h2>
+
+            <Formik
+              initialValues={{ categoryName: editCategoryData.categoryName }}
+              validationSchema={Yup.object({
+                categoryName: Yup.string()
+                  .min(3, "Must be at least 3 characters")
+                  .required("Required"),
+              })}
+              onSubmit={async (values, { resetForm }) => {
+                try {
+                  await modifyCategory(
+                    editCategoryData.categoryId,
+                    values.categoryName,
+                  );
+                  resetForm();
+                  setIsEditModalOpen(false);
+                  setEditCategoryData(null);
+                } catch (error) {
+                  console.error("Failed to update category", error);
+                }
+              }}
+            >
+              <Form className="flex flex-col gap-4">
+                <div>
+                  <label htmlFor="categoryName" className="block text-sm mb-3">
+                    Category Name
+                  </label>
+                  <Field
+                    name="categoryName"
+                    type="text"
+                    placeholder="Enter category name"
+                    className="w-full px-4 py-2 bg-gray-900 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                  <ErrorMessage
+                    name="categoryName"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditModalOpen(false);
+                      setEditCategoryData(null);
+                    }}
+                    className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-md"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md text-white"
+                  >
+                    Save
+                  </button>
+                </div>
+              </Form>
+            </Formik>
           </div>
         </div>
       )}

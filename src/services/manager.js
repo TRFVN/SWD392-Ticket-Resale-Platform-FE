@@ -73,12 +73,13 @@ export const getCategory = async () => {
 export const modifyCategory = async (categoryId, categoryName) => {
   try {
     const response = await axiosInstance.put("/api/Category", {
-      params: {
-        categoryId: categoryId,
-        categoryName: categoryName,
-      },
+      categoryId: categoryId,
+      categoryName: categoryName,
+      parentCategoryId: null,
     });
-    return response;
+    if (response.data.result) toast.success("Modify Category Successfully");
+
+    return response.data.result;
   } catch (error) {
     console.log(error.message || "Lỗi khi chỉnh sửa category");
     throw new Error(error.message || "Lỗi khi chỉnh sửa category");
@@ -88,7 +89,7 @@ export const modifyCategory = async (categoryId, categoryName) => {
 export const deleteCategory = async (categoryId) => {
   try {
     const response = await axiosInstance.delete(`/api/Category/${categoryId}`);
-    if (response.data.result) toast.success("Delete category successfully");
+    if (response.data.result) toast.success("Delete Category Successfully");
     return response.data.result;
   } catch (error) {
     toast.error("Delete category failed");
@@ -101,7 +102,7 @@ export const getEvent = async () => {
     const response = await axiosInstance.get(`/api/Event`);
     return response.data.result;
   } catch (error) {
-    toast.error("Cannot fetch event");
+    toast.error("Cannot Fetch Event");
     console.log(error.message || "Lỗi khi lấy event");
     throw new Error(error.message || "Lỗi khi lấy event");
   }
