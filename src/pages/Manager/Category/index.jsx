@@ -10,7 +10,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 const Category = () => {
   const [category, setCategory] = useState([]);
-  const [isLoadingCategory, setIsLoadingCategory] = useState(true);
+  const [isCategoryLoading, setIsCategoryLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const categoriesPerPage = 7;
@@ -23,7 +23,7 @@ const Category = () => {
       const response = await getCategory();
       if (response) {
         setCategory(response);
-        setIsLoadingCategory(false);
+        setIsCategoryLoading(false);
       }
     };
     fetchCategory();
@@ -43,7 +43,7 @@ const Category = () => {
     <main className="flex flex-col gap-12 p-6">
       <section className="text-white text-3xl font-bold">Category</section>
 
-      {isLoadingCategory ? (
+      {isCategoryLoading ? (
         <CategoryLoading />
       ) : (
         <>

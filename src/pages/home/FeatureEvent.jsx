@@ -224,7 +224,7 @@ FuturisticDateBadge.displayName = "FuturisticDateBadge";
 
 // FuturisticEventCard Component
 const FuturisticEventCard = memo(({ event, index = 0 }) => {
-    const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef(null);
   const isDarkMode = useSelector((state) => state.theme?.isDarkMode);
@@ -245,15 +245,15 @@ const FuturisticEventCard = memo(({ event, index = 0 }) => {
     return "text-emerald-500";
   };
 
-    const handleSave = (e) => {
+  const handleSave = (e) => {
     e.preventDefault();
-      e.stopPropagation();
-      setIsSaved(!isSaved);
-    };
+    e.stopPropagation();
+    setIsSaved(!isSaved);
+  };
 
-    const handleShare = (e) => {
+  const handleShare = (e) => {
     e.preventDefault();
-      e.stopPropagation();
+    e.stopPropagation();
     if (navigator.share) {
       navigator
         .share({
@@ -263,10 +263,10 @@ const FuturisticEventCard = memo(({ event, index = 0 }) => {
         })
         .catch((err) => console.log("Error sharing", err));
     }
-    };
+  };
 
-    return (
-      <motion.div
+  return (
+    <motion.div
       ref={cardRef}
       custom={index}
       initial="hidden"
@@ -299,7 +299,7 @@ const FuturisticEventCard = memo(({ event, index = 0 }) => {
                 src={event.image}
                 alt={event.title}
                 className="w-full h-full object-cover"
-              loading="lazy"
+                loading="lazy"
               />
             </motion.div>
 
@@ -352,7 +352,7 @@ const FuturisticEventCard = memo(({ event, index = 0 }) => {
           <div className="flex-1 flex flex-col p-4">
             <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1 line-clamp-2">
               {event.title}
-              </h3>
+            </h3>
 
             <AnimatePresence>
               {(isHovered || event.isLarge) && (
@@ -372,7 +372,7 @@ const FuturisticEventCard = memo(({ event, index = 0 }) => {
             <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1.5">
               <MapPin className="w-3 h-3 flex-shrink-0" />
               <span className="truncate">{event.location}</span>
-                  </div>
+            </div>
 
             {/* Ticket availability section */}
             {event.totalTickets > 0 && (
@@ -388,7 +388,7 @@ const FuturisticEventCard = memo(({ event, index = 0 }) => {
                     </span>
                     <span className={`font-medium ${getAvailabilityColor()}`}>
                       {availability}%
-                      </span>
+                    </span>
                   </div>
 
                   {/* Custom progress bar */}
@@ -419,8 +419,8 @@ const FuturisticEventCard = memo(({ event, index = 0 }) => {
                     <span>Sắp hết vé, nhanh tay đặt ngay!</span>
                   </div>
                 )}
-                </div>
-              )}
+              </div>
+            )}
 
             {/* View details button */}
             <motion.div
@@ -548,7 +548,7 @@ const HeroEventCard = memo(({ event }) => {
               <MapPin className="w-4 h-4 text-orange-400" />
               <span className="text-white text-sm truncate max-w-[200px]">
                 {event.location}
-                      </span>
+              </span>
             </div>
 
             {/* Tickets */}
@@ -557,8 +557,8 @@ const HeroEventCard = memo(({ event }) => {
                 <Ticket className="w-4 h-4 text-orange-400" />
                 <span className="text-white text-sm">
                   {event.availableTickets} vé còn trống
-                      </span>
-                    </div>
+                </span>
+              </div>
             )}
           </motion.div>
 
@@ -572,7 +572,7 @@ const HeroEventCard = memo(({ event }) => {
             </Link>
           </motion.div>
         </motion.div>
-                </div>
+      </div>
 
       {/* Hover effect border */}
       <div className="absolute inset-0 border border-white/10 rounded-2xl pointer-events-none"></div>
@@ -631,7 +631,7 @@ const FeaturedEventStrip = memo(({ event, index }) => {
             <div className="flex items-center gap-1.5 text-white/80 text-xs">
               <Users className="w-3 h-3 flex-shrink-0" />
               <span>{event.availableTickets} chỗ</span>
-              </div>
+            </div>
 
             <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1.5 text-orange-300 text-xs font-medium transition-opacity duration-300">
               Xem Chi Tiết
@@ -640,8 +640,8 @@ const FeaturedEventStrip = memo(({ event, index }) => {
           </div>
         </div>
       </Link>
-      </motion.div>
-    );
+    </motion.div>
+  );
 });
 FeaturedEventStrip.displayName = "FeaturedEventStrip";
 
@@ -665,7 +665,7 @@ const SectionHeading = memo(() => {
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center shadow-lg">
               <Star className="w-5 h-5 text-white" />
             </div>
-        <motion.div
+            <motion.div
               variants={pulseAnimation}
               animate="animate"
               className="absolute -inset-1.5 rounded-full bg-orange-500/20 -z-10"
@@ -767,7 +767,7 @@ const FuturisticEvents = () => {
       location: "Phố đi bộ Nguyễn Huệ, TP.HCM",
       price: "150.000",
       image:
-        "https://images.unsplash.com/photo-1561121692-bc2450c5a86a?q=80&w=800&auto=format&fit=crop",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQf0eMS34Os4zQnRzD2ai4jltVUZkIbTjRZKg&s",
       link: "/events/le-hoi-ao-dai",
       category: "Văn Hóa",
       availableTickets: 150,
@@ -783,7 +783,7 @@ const FuturisticEvents = () => {
       location: "Nhà Hát Hòa Bình, TP.HCM",
       price: "350.000",
       image:
-        "https://images.unsplash.com/photo-1577398977702-77f1af5a9a36?q=80&w=800&auto=format&fit=crop",
+        "https://lh4.googleusercontent.com/proxy/8dYviJDozcBqpll5OynttLmpR9JNoCHt4FsjV2j1J_VxhkQF2AvUL6RKE1avmfC-dpHh-sPXeOhKiph7tB1bfEC-SBLLY-jvqxk-LXfmrkXzIJ-xC1_TI-vm6ddjgw6xYXQCfb5sMFTWYHSYPb8qgh6M6lhtCowxNpegWcfDPlceub438jBDqozNtSh1xrQsCfzKf5vL",
       link: "/events/dem-nhac-trinh",
       category: "Âm Nhạc",
       availableTickets: 350,
@@ -812,7 +812,7 @@ const FuturisticEvents = () => {
       location: "Bảo tàng Dân tộc học, Hà Nội",
       price: "80.000",
       image:
-        "https://images.unsplash.com/photo-1559828135-b26e7d8121c9?q=80&w=800&auto=format&fit=crop",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMgQSvg8UtMLw9oOLR8UMUkS3TG2VWpqCM-A&s",
       link: "/events/hoi-cho-lang-nghe",
       category: "Hội Chợ",
       availableTickets: 400,
@@ -827,7 +827,7 @@ const FuturisticEvents = () => {
       location: "Phố Cổ Hà Nội",
       price: null,
       image:
-        "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?q=80&w=800&auto=format&fit=crop",
+        "https://booking.muongthanh.com/upload_images/images/H%60/tet-trung-thu-nhat-ban%20(1).jpg",
       link: "/events/le-hoi-trung-thu",
       category: "Lễ Hội",
       availableTickets: 0,
@@ -934,7 +934,7 @@ const FuturisticEvents = () => {
                 </span>
                 <ArrowRight className="w-5 h-5 text-orange-500 dark:text-orange-400 transition-transform group-hover:translate-x-1" />
               </div>
-        </motion.div>
+            </motion.div>
           </Link>
         </div>
       </div>

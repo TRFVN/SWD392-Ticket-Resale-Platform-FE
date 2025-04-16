@@ -64,6 +64,7 @@ export const getCategory = async () => {
     const response = await axiosInstance.get(`/api/Category`);
     return response.data.result;
   } catch (error) {
+    toast.error("Cannot Fetch Category");
     console.log(error.message || "Lỗi khi lấy category");
     throw new Error(error.message || "Lỗi khi lấy category");
   }
@@ -99,6 +100,7 @@ export const getEvent = async () => {
     const response = await axiosInstance.get(`/api/Event`);
     return response.data.result;
   } catch (error) {
+    toast.error("Cannot fetch event");
     console.log(error.message || "Lỗi khi lấy event");
     throw new Error(error.message || "Lỗi khi lấy event");
   }
@@ -119,7 +121,18 @@ export const getTicket = async (pageNumber) => {
     throw new Error(error.message || "Lỗi khi lấy ticket");
   }
 };
+export const getTicketByEventId = async (eventId) => {
+  try {
+    const response = await axiosInstance.get(`/api/tickets/event/${eventId}`);
+    console.log(response.data.result);
 
+    return response.data.result;
+  } catch (error) {
+    toast.error("Fetch Ticket Failed");
+    console.log(error.message || "Lỗi khi lấy ticket by eventId");
+    throw new Error(error.message || "Lỗi khi ticket by eventId");
+  }
+};
 export const getOrganizer = async () => {
   try {
     const response = await axiosInstance.get(`/api/revenue/organizer`);

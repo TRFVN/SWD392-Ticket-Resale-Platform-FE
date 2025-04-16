@@ -343,65 +343,51 @@ QuoteSection.displayName = "QuoteSection";
 
 const Signup = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  // Force account type to INDIVIDUAL only
   const [accountType, setAccountType] = useState(ACCOUNT_TYPES.INDIVIDUAL);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const navigate = useNavigate();
-  const { signupCustomer, signupOrganization, loading, googleLogin } =
-    useAuth();
+  // Only use signupCustomer since organization signup is disabled
+  const { signupCustomer, loading, googleLogin } = useAuth();
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
 
   const handleSubmit = useCallback(
     async (values, { setSubmitting, setFieldError }) => {
       try {
-        // Prepare data based on account type
-        if (accountType === ACCOUNT_TYPES.INDIVIDUAL) {
-          // Format customer data to match API expectations exactly
-          let birthDateFormatted;
+        // Only handle individual account type signup
+        // Format customer data to match API expectations exactly
+        let birthDateFormatted;
 
-          // Handle different date formats
-          if (values.birthDate) {
-            // Ensure it's a valid date string
-            const dateObj = new Date(values.birthDate);
-            if (!isNaN(dateObj.getTime())) {
-              birthDateFormatted = dateObj.toISOString();
-            } else {
-              birthDateFormatted = new Date().toISOString();
-            }
+        // Handle different date formats
+        if (values.birthDate) {
+          // Ensure it's a valid date string
+          const dateObj = new Date(values.birthDate);
+          if (!isNaN(dateObj.getTime())) {
+            birthDateFormatted = dateObj.toISOString();
           } else {
             birthDateFormatted = new Date().toISOString();
           }
-
-          const customerData = {
-            email: values.email,
-            password: values.password,
-            confirmPassword: values.confirmPassword,
-            cccd: values.idNumber || values.cccd || "",
-            birthDate: birthDateFormatted,
-            phoneNumber: values.phoneNumber || "",
-            fullName: values.fullName || "",
-            country: values.country || "",
-            address: values.address || "",
-            gender: values.gender || "",
-          };
-
-          console.log("Customer signup data:", customerData);
-          await signupCustomer(customerData);
         } else {
-          // Format organization data to match API expectations
-          const organizationData = {
-            email: values.email,
-            password: values.password,
-            confirmPassword: values.confirmPassword,
-            taxId: values.taxId || "",
-            phoneNumber: values.phoneNumber || "",
-            organizationName: values.organizationName || "",
-            country: values.country || "",
-            address: values.address || "",
-          };
-          await signupOrganization(organizationData);
+          birthDateFormatted = new Date().toISOString();
         }
+
+        const customerData = {
+          email: values.email,
+          password: values.password,
+          confirmPassword: values.confirmPassword,
+          cccd: values.idNumber || values.cccd || "",
+          birthDate: birthDateFormatted,
+          phoneNumber: values.phoneNumber || "",
+          fullName: values.fullName || "",
+          country: values.country || "",
+          address: values.address || "",
+          gender: values.gender || "",
+        };
+
+        console.log("Customer signup data:", customerData);
+        await signupCustomer(customerData);
 
         toast.success("Đăng ký thành công! Vui lòng xác nhận email của bạn.", {
           onClose: () => {
@@ -421,7 +407,7 @@ const Signup = () => {
         setSubmitting(false);
       }
     },
-    [accountType, navigate, signupCustomer, signupOrganization],
+    [navigate, signupCustomer],
   );
 
   const handleGoogleSignup = async () => {
@@ -454,11 +440,6 @@ const Signup = () => {
 
   const handlePreviousStep = () => {
     setCurrentStep((prev) => Math.max(0, prev - 1));
-  };
-
-  const handleAccountTypeChange = (type) => {
-    setAccountType(type);
-    setCurrentStep(0);
   };
 
   // Create progress percentage for the progress bar
@@ -528,7 +509,6 @@ const Signup = () => {
                 >
                   <AccountTypeSelector
                     selectedType={accountType}
-                    onChange={handleAccountTypeChange}
                     isDarkMode={isDarkMode}
                   />
                 </motion.div>

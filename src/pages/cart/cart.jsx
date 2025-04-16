@@ -4,8 +4,6 @@ import {
   Loader2,
   ShoppingBag,
   CheckCircle,
-  Minus,
-  Plus,
   ArrowLeft,
   ImageIcon,
   AlertTriangle,
@@ -44,7 +42,6 @@ const CartItem = ({
   onRemove,
   isSelected,
   onToggleSelect,
-  onUpdateQuantity,
 }) => {
   const isDarkMode = useSelector((state) => state.theme?.isDarkMode || false);
 
@@ -135,42 +132,18 @@ const CartItem = ({
         </div>
 
         <div className="flex items-center justify-between mt-3">
-          {/* Quantity Controls */}
-          <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-            <button
-              onClick={() =>
-                onUpdateQuantity(
-                  ticket.cartItemId,
-                  Math.max(1, ticket.quantity - 1),
-                )
-              }
-              className={`w-7 h-7 flex items-center justify-center ${
-                isDarkMode
-                  ? "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                  : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-              }`}
-            >
-              <Minus className="w-3 h-3" />
-            </button>
+          {/* Quantity Display - No longer controls, just display */}
+          <div className="flex items-center">
             <div
-              className={`w-8 text-center py-1 text-sm ${
-                isDarkMode ? "text-white" : "text-gray-900"
+              className={`px-3 py-1 rounded-lg border ${
+                isDarkMode 
+                  ? "border-gray-700 bg-gray-800 text-white" 
+                  : "border-gray-200 bg-gray-50 text-gray-900"
               }`}
             >
-              {ticket.quantity}
+              <span className="text-sm">Quantity: </span>
+              <span className="text-sm font-medium">{ticket.quantity}</span>
             </div>
-            <button
-              onClick={() =>
-                onUpdateQuantity(ticket.cartItemId, ticket.quantity + 1)
-              }
-              className={`w-7 h-7 flex items-center justify-center ${
-                isDarkMode
-                  ? "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                  : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-              }`}
-            >
-              <Plus className="w-3 h-3" />
-            </button>
           </div>
 
           {/* Subtotal */}
@@ -280,61 +253,64 @@ const Cart = () => {
   const handleRemoveFromCart = async (cartItemId) => {
     try {
       setLoadingAction(true);
-      const response = await axiosInstance.delete(
-        `api/Cart/RemoveFromCart?TicketId=${cartItemId}`,
-      );
-
-      if (response.data.isSuccess) {
-        setCartItems((prev) =>
-          prev.filter((item) => item.cartItemId !== cartItemId),
-        );
-        setSelectedItems((prev) => {
-          const newSelection = new Set(prev);
-          if (newSelection.has(cartItemId)) {
-            newSelection.delete(cartItemId);
-          }
-          return newSelection;
-        });
-
-        toast.success("Ticket removed from cart");
-
-        notifyCartUpdated();
-      } else {
-        throw new Error(response.data.message || "Failed to remove ticket");
+      
+      // Find the current item
+      const currentItem = cartItems.find(item => item.cartItemId === cartItemId);
+      
+      if (!currentItem) {
+        throw new Error("Item not found");
       }
+      
+      // If quantity is more than 1, decrease by 1
+      if (currentItem.quantity > 1) {
+        // Update locally first for immediate UI feedback
+        setCartItems(prev => 
+          prev.map(item => 
+            item.cartItemId === cartItemId 
+              ? {...item, quantity: item.quantity - 1} 
+              : item
+          )
+        );
+        
+        // Call API to remove one ticket (backend already handles this)
+        const response = await axiosInstance.delete(
+          `api/Cart/RemoveFromCart?TicketId=${cartItemId}`,
+        );
+
+        if (!response.data.isSuccess) {
+          throw new Error(response.data.message || "Failed to remove ticket");
+        }
+        
+        toast.success("Ticket quantity reduced");
+      } else {
+        // If quantity is 1, remove the item completely
+        const response = await axiosInstance.delete(
+          `api/Cart/RemoveFromCart?TicketId=${cartItemId}`,
+        );
+
+        if (response.data.isSuccess) {
+          setCartItems((prev) =>
+            prev.filter((item) => item.cartItemId !== cartItemId),
+          );
+          setSelectedItems((prev) => {
+            const newSelection = new Set(prev);
+            if (newSelection.has(cartItemId)) {
+              newSelection.delete(cartItemId);
+            }
+            return newSelection;
+          });
+
+          toast.success("Ticket removed from cart");
+        } else {
+          throw new Error(response.data.message || "Failed to remove ticket");
+        }
+      }
+
+      notifyCartUpdated();
     } catch (error) {
       toast.error(error.message || "Failed to remove ticket");
     } finally {
       setLoadingAction(false);
-    }
-  };
-
-  const handleUpdateQuantity = async (cartItemId, newQuantity) => {
-    try {
-      const ticket = cartItems.find((item) => item.cartItemId === cartItemId);
-
-      if (!ticket) {
-        throw new Error("Ticket not found");
-      }
-
-      if (newQuantity <= 0) {
-        return handleRemoveFromCart(cartItemId);
-      }
-
-      setCartItems((prev) =>
-        prev.map((item) =>
-          item.cartItemId === cartItemId
-            ? { ...item, quantity: newQuantity }
-            : item,
-        ),
-      );
-
-      toast.success("Quantity updated");
-
-      notifyCartUpdated();
-    } catch (error) {
-      toast.error(error.message || "Failed to update quantity");
-      fetchCart();
     }
   };
 
@@ -572,7 +548,6 @@ const Cart = () => {
                     key={item.cartItemId}
                     ticket={item}
                     onRemove={handleRemoveFromCart}
-                    onUpdateQuantity={handleUpdateQuantity}
                     isSelected={selectedItems.has(item.cartItemId)}
                     onToggleSelect={handleToggleSelect}
                   />

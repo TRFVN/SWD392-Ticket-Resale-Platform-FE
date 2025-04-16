@@ -13,8 +13,11 @@ export const useNavigationItems = () => {
   const [activeTab, setActiveTab] = useState("events");
   const [cartCount, setCartCount] = useState(0);
 
-  // Define navigation items with priority flags
-  const navItems = [
+  // Get user role from localStorage instead of Redux
+  const userRole = localStorage.getItem("userRole");
+
+  // Define base navigation items with priority flags
+  const baseNavItems = [
     { id: "events", label: "Sự Kiện", path: "/events", priority: 100 }, // Highest priority
     { id: "tickets", label: "Vé", path: "/tickets", priority: 90 },
     {
@@ -24,16 +27,29 @@ export const useNavigationItems = () => {
       priority: 80,
       secondary: true,
     }, // Can be hidden on narrow screens
+  ];
 
-    {
+  // Add "Tạo Sự Kiện" option only if user role is not "MEMBER"
+  const navItems = [...baseNavItems];
+
+  if (userRole && userRole !== "MEMBER") {
+    navItems.push({
       id: "create",
       label: "Tạo Sự Kiện",
       path: "/create-event",
       badge: "Mới",
       priority: 85,
       secondary: true,
-    }, // Can be hidden on narrow screens
-  ];
+    });
+
+    navItems.push({
+      id: "myevents",
+      label: "Sự Kiện Của Tôi",
+      path: "/my-events",
+      priority: 83,
+      secondary: true,
+    });
+  }
 
   // Determine active tab based on URL
   const getInitialActiveTab = () => {

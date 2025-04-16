@@ -70,7 +70,7 @@ const baseValidationSchema = {
     .oneOf([Yup.ref("password"), null], "Passwords must match")
     .required("Please confirm your password"),
   phoneNumber: Yup.string()
-    .matches(/^\+?[1-9]\d{1,14}$/, "Invalid phone number")
+    .matches(/^(\+?[0-9])\d{1,14}$/, "Invalid phone number")
     .required("Phone number is required"),
   country: Yup.string().required("Country is required"),
   address: Yup.string().required("Address is required"),

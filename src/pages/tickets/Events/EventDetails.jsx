@@ -1,4 +1,6 @@
-import React, { useState, useEffect, memo, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   ArrowLeft,
   Calendar,
@@ -7,156 +9,595 @@ import {
   Share,
   Heart,
   Ticket,
+  ShoppingCart,
+  ChevronDown,
+  Info,
   Users,
   Star,
-  Info,
-  ChevronRight,
-  ChevronDown,
-  ArrowUpRight,
-  AlertCircle,
-  CalendarDays,
-  Check,
-  ShoppingCart,
+  ExternalLink,
   Plus,
   Minus,
+  ChevronsRight,
 } from "lucide-react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import axiosInstance from "../../../config/axiosConfig";
 import { toast } from "react-toastify";
+import axiosInstance from "../../../config/axiosConfig";
 import { notifyCartUpdated } from "../../../utils/cartEvents";
+import { getTicketTemplatesByEventId } from "../../../services/ticketApi";
+import { getEventByIdApi } from "../../../services/eventApi";
 
-// Memoized components for better performance
-const EventHeader = memo(
-  ({
-    event,
-    eventDate,
-    isLiked,
-    setIsLiked,
-    showShare,
-    setShowShare,
-    navigate,
-    isDarkMode,
-  }) => {
-    const primaryColor = isDarkMode ? "text-orange-400" : "text-orange-500";
-    const textPrimary = isDarkMode ? "text-white" : "text-gray-900";
-    const textSecondary = isDarkMode ? "text-gray-300" : "text-gray-700";
-    const textTertiary = isDarkMode ? "text-gray-400" : "text-gray-500";
-    const bgElevated = isDarkMode ? "bg-gray-800" : "bg-white";
-    const borderColor = isDarkMode ? "border-gray-700" : "border-gray-200";
+// Header Actions Component - Smaller, more subtle actions
+const HeaderActions = ({ onBackClick, isLiked, setIsLiked }) => (
+  <>
+    {/* Back button */}
+    <button
+      onClick={onBackClick}
+      className="fixed top-5 left-5 z-50 w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white transition-colors"
+      aria-label="Back to events"
+    >
+      <ArrowLeft size={16} />
+    </button>
 
-    return (
-      <div
-        className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md ${bgElevated} border-b ${borderColor}`}
+    {/* Action buttons */}
+    <div className="fixed top-5 right-5 z-50 flex items-center gap-1.5">
+      <button
+        onClick={() => setIsLiked(!isLiked)}
+        className="w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white transition-colors"
+        aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
       >
-        <div className="max-w-6xl mx-auto">
-          <div className="px-4 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate("/events")}
-                className={`w-10 h-10 rounded-full flex items-center justify-center ${bgElevated} ${textPrimary}`}
-              >
-                <ArrowLeft size={18} />
-              </button>
+        <Heart
+          size={16}
+          className={isLiked ? "fill-red-500 text-red-500" : "text-white"}
+        />
+      </button>
 
-              <div className="flex flex-col">
-                <h1
-                  className={`font-medium leading-tight max-w-xs sm:max-w-sm truncate ${textPrimary}`}
-                >
-                  {event.eventName}
-                </h1>
-                <div className="flex items-center gap-1.5 text-xs">
-                  <span className={primaryColor}>{eventDate.weekday}</span>
-                  <span
-                    className={`w-1 h-1 rounded-full ${primaryColor} opacity-50`}
-                  ></span>
-                  <span className={textTertiary}>{eventDate.time}</span>
-                </div>
-              </div>
-            </div>
+      <button
+        onClick={() =>
+          (window.location.href = `mailto:?subject=${encodeURIComponent(
+            "Check out this event!",
+          )}&body=${encodeURIComponent(window.location.href)}`)
+        }
+        className="w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white transition-colors"
+        aria-label="Share event"
+      >
+        <Share size={16} />
+      </button>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsLiked(!isLiked)}
-                className={`w-10 h-10 rounded-full flex items-center justify-center ${bgElevated} ${
-                  isLiked ? "text-red-500" : textSecondary
-                }`}
-              >
-                <Heart size={18} className={isLiked ? "fill-current" : ""} />
-              </button>
+      <button
+        onClick={() => (window.location.href = "/cart")}
+        className="w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white transition-colors"
+        aria-label="View cart"
+      >
+        <ShoppingCart size={16} />
+      </button>
+    </div>
+  </>
+);
 
-              <div className="relative">
-                <button
-                  onClick={() => setShowShare(!showShare)}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center ${bgElevated} ${textSecondary}`}
-                >
-                  <Share size={18} />
-                </button>
+// Event Header Component - More streamlined with better typography
+const EventHeader = ({ event, eventDate }) => {
+  const hasValidImage =
+    event.eventImage &&
+    (event.eventImage.startsWith("http") ||
+      event.eventImage.includes(".appspot.com"));
 
-                {showShare && (
-                  <div
-                    className={`absolute right-0 mt-2 py-2 w-48 rounded-xl shadow-lg ${bgElevated} border ${borderColor}`}
-                  >
-                    {["Facebook", "Twitter", "Email", "Copy Link"].map(
-                      (option) => (
-                        <button
-                          key={option}
-                          className={`w-full text-left px-4 py-2 text-sm ${textSecondary} hover:bg-orange-500/10`}
-                          onClick={() => setShowShare(false)}
-                        >
-                          {option}
-                        </button>
-                      ),
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+  return (
+    <div className="relative h-[32vh] md:h-[38vh] overflow-hidden">
+      {/* Background image or placeholder */}
+      {hasValidImage ? (
+        <img
+          src={event.eventImage}
+          alt={event.eventName}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-gray-800">
+          <Calendar className="w-12 h-12 text-gray-700" />
+        </div>
+      )}
+
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/80"></div>
+
+      {/* Event basic info */}
+      <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
+        {/* Event status pill */}
+        <div
+          className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium mb-1.5 
+          bg-orange-500/20 text-orange-300 border border-orange-500/30"
+        >
+          <span className="mr-1 h-1 w-1 rounded-full bg-orange-400"></span>
+          {event.status === 1 ? "Đang diễn ra" : "Đã kết thúc"}
+        </div>
+
+        {/* Event title */}
+        <h1 className="text-xl md:text-2xl font-bold text-white mb-2">
+          {event.eventName}
+        </h1>
+
+        {/* Event meta info - more compact */}
+        <div className="flex flex-wrap gap-2 text-xs text-white/90">
+          <div className="flex items-center">
+            <Calendar className="w-3.5 h-3.5 mr-1 text-orange-400/90" />
+            <span>
+              {eventDate.weekday.charAt(0).toUpperCase() +
+                eventDate.weekday.slice(1)}
+              , {eventDate.day} {eventDate.month}
+            </span>
+          </div>
+
+          <div className="flex items-center">
+            <Clock className="w-3.5 h-3.5 mr-1 text-orange-400/90" />
+            <span>{eventDate.time}</span>
+          </div>
+
+          <div className="flex items-center">
+            <MapPin className="w-3.5 h-3.5 mr-1 text-orange-400/90" />
+            <span>{event.location}</span>
           </div>
         </div>
       </div>
-    );
-  },
+    </div>
+  );
+};
+
+// Section Title component for consistent headings
+const SectionTitle = ({ icon: Icon, title }) => (
+  <h2 className="text-base font-bold mb-2.5 flex items-center">
+    <Icon className="w-4 h-4 mr-1.5 text-orange-500" />
+    {title}
+  </h2>
 );
 
-EventHeader.displayName = "EventHeader";
+// Event Description Section - More compact
+const EventDescription = ({
+  description,
+  showAllDescription,
+  setShowAllDescription,
+}) => (
+  <section className="mb-4">
+    <SectionTitle icon={Info} title="Thông tin sự kiện" />
 
+    <div
+      className={`prose prose-sm max-w-none ${
+        !showAllDescription && description?.length > 150 ? "line-clamp-3" : ""
+      }`}
+    >
+      {description || "Không có thông tin chi tiết cho sự kiện này."}
+    </div>
+
+    {description && description.length > 150 && (
+      <button
+        onClick={() => setShowAllDescription(!showAllDescription)}
+        className="mt-1 text-orange-500 text-xs font-medium hover:underline flex items-center"
+      >
+        {showAllDescription ? "Thu gọn" : "Xem thêm"}
+        <ChevronDown
+          className={`ml-0.5 w-3 h-3 transform transition-transform ${
+            showAllDescription ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+    )}
+  </section>
+);
+
+// Highlight Card Component - More compact and elegant
+const HighlightCard = ({ icon: Icon, title, content, isDarkMode }) => (
+  <div
+    className={`p-2.5 rounded-lg border ${
+      isDarkMode
+        ? "border-gray-700/70 bg-gray-800/30"
+        : "border-gray-200/70 bg-white"
+    } flex items-start`}
+  >
+    <div className="w-6 h-6 rounded-full bg-orange-100/70 dark:bg-orange-900/20 flex items-center justify-center mr-2 flex-shrink-0">
+      <Icon className="w-3.5 h-3.5 text-orange-500" />
+    </div>
+    <div>
+      <h3 className="font-medium text-xs mb-0.5">{title}</h3>
+      <p className="text-xs text-gray-600 dark:text-gray-400 leading-snug">
+        {content}
+      </p>
+    </div>
+  </div>
+);
+
+// Event Highlights Section - Grid with smaller cards
+const EventHighlights = ({ event, tickets, isDarkMode }) => (
+  <section className="mb-4">
+    <SectionTitle icon={Star} title="Điểm nổi bật" />
+
+    <div className="grid grid-cols-2 gap-2">
+      <HighlightCard
+        icon={Users}
+        title="Đối tượng"
+        content="Phù hợp mọi lứa tuổi"
+        isDarkMode={isDarkMode}
+      />
+      <HighlightCard
+        icon={Clock}
+        title="Thời lượng"
+        content="Diễn ra trong 120 phút"
+        isDarkMode={isDarkMode}
+      />
+      <HighlightCard
+        icon={Star}
+        title="Đánh giá"
+        content="4.8/5 từ người tham dự"
+        isDarkMode={isDarkMode}
+      />
+      <HighlightCard
+        icon={Ticket}
+        title="Vé"
+        content={
+          tickets?.length
+            ? `${tickets.length} loại vé khác nhau`
+            : "Không có vé"
+        }
+        isDarkMode={isDarkMode}
+      />
+    </div>
+  </section>
+);
+
+// Location Section - Refined layout with better use of space
+const LocationSection = ({ event, eventDate, isDarkMode }) => (
+  <section className="mb-4">
+    <SectionTitle icon={MapPin} title="Địa điểm" />
+
+    <div
+      className={`p-3 rounded-lg border ${
+        isDarkMode
+          ? "border-gray-700/70 bg-gray-800/30"
+          : "border-gray-200/70 bg-white"
+      }`}
+    >
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+          <h3 className="font-medium text-sm mb-0.5">{event.location}</h3>
+          <p className="text-xs text-gray-600 dark:text-gray-400">
+            {event.address || "Không có địa chỉ chi tiết"}
+          </p>
+          <div className="flex items-center mt-1.5 text-xs text-gray-600 dark:text-gray-400">
+            <Clock className="w-3 h-3 mr-1" />
+            <span>Bắt đầu lúc {eventDate.time}</span>
+          </div>
+        </div>
+
+        <a
+          href={`https://maps.google.com/?q=${encodeURIComponent(
+            event.location,
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs rounded flex items-center gap-1 transition-colors self-start whitespace-nowrap"
+        >
+          <MapPin className="w-3 h-3" />
+          Xem trên bản đồ
+        </a>
+      </div>
+    </div>
+  </section>
+);
+
+// Organizer Section - More compact with better information hierarchy
+const OrganizerSection = ({ event, isDarkMode }) => (
+  <section className="mb-4">
+    <SectionTitle icon={Users} title="Ban tổ chức" />
+
+    <div
+      className={`p-3 rounded-lg border ${
+        isDarkMode
+          ? "border-gray-700/70 bg-gray-800/30"
+          : "border-gray-200/70 bg-white"
+      } flex flex-row gap-3`}
+    >
+      <div className="w-10 h-10 rounded-full bg-orange-100/70 dark:bg-orange-900/20 flex items-center justify-center flex-shrink-0">
+        <Users className="w-5 h-5 text-orange-500" />
+      </div>
+
+      <div className="flex-1">
+        <h3 className="font-medium text-sm mb-0.5">
+          {event.organizerName || "Ban tổ chức sự kiện"}
+        </h3>
+        <p className="text-xs text-gray-600 dark:text-gray-400 leading-snug">
+          {event.organizerDescription ||
+            "Thông tin chi tiết về ban tổ chức chưa được cung cấp."}
+        </p>
+
+        {event.organizerWebsite && (
+          <a
+            href={event.organizerWebsite}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex items-center text-orange-500 hover:underline text-xs"
+          >
+            <span>Truy cập website</span>
+            <ExternalLink className="w-3 h-3 ml-1" />
+          </a>
+        )}
+      </div>
+    </div>
+  </section>
+);
+
+// Ticket Card Component - More refined and compact
+const TicketCard = ({
+  ticket,
+  quantity,
+  onIncrement,
+  onDecrement,
+  onAddToCart,
+  isAddingToCart,
+  isDarkMode,
+}) => {
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("vi-VN").format(amount) + "đ";
+  };
+
+  return (
+    <div
+      className={`p-3 rounded-lg border ${
+        isDarkMode
+          ? "border-gray-700/70 hover:border-gray-600"
+          : "border-gray-200/70 hover:border-gray-300"
+      } transition-colors`}
+    >
+      <div className="flex justify-between items-start mb-1.5">
+        <div>
+          <h3 className="font-medium text-sm">{ticket.ticketName}</h3>
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            {ticket.rank || "Vé thường"}
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="text-orange-500 font-medium text-sm">
+            {formatCurrency(ticket.ticketPrice)}
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            {ticket.availableQuantity > 0
+              ? `Còn ${ticket.availableQuantity} vé`
+              : "Hết vé"}
+          </div>
+        </div>
+      </div>
+
+      {ticket.ticketDescription && (
+        <p className="text-xs mb-2 text-gray-600 dark:text-gray-400 leading-snug">
+          {ticket.ticketDescription}
+        </p>
+      )}
+
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <button
+            onClick={() => onDecrement(ticket.ticketTemplateId)}
+            className={`w-6 h-6 rounded-l border ${
+              isDarkMode
+                ? "bg-gray-800 border-gray-700 hover:bg-gray-700"
+                : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+            } flex items-center justify-center transition-colors`}
+            disabled={quantity <= 1}
+          >
+            <Minus size={12} className={quantity <= 1 ? "opacity-40" : ""} />
+          </button>
+          <div
+            className={`w-7 h-6 border-t border-b text-center ${
+              isDarkMode
+                ? "bg-gray-800 border-gray-700"
+                : "bg-gray-50 border-gray-200"
+            } flex items-center justify-center text-xs font-medium`}
+          >
+            {quantity || 1}
+          </div>
+          <button
+            onClick={() => onIncrement(ticket.ticketTemplateId)}
+            className={`w-6 h-6 rounded-r border ${
+              isDarkMode
+                ? "bg-gray-800 border-gray-700 hover:bg-gray-700"
+                : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+            } flex items-center justify-center transition-colors`}
+            disabled={ticket.availableQuantity <= quantity}
+          >
+            <Plus
+              size={12}
+              className={
+                ticket.availableQuantity <= quantity ? "opacity-40" : ""
+              }
+            />
+          </button>
+        </div>
+
+        <button
+          onClick={() => onAddToCart(ticket)}
+          disabled={isAddingToCart || ticket.availableQuantity <= 0}
+          className={`px-2.5 py-1 rounded text-xs font-medium ${
+            ticket.availableQuantity > 0
+              ? "bg-orange-500 hover:bg-orange-600 text-white"
+              : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+          } transition-colors flex items-center gap-1`}
+        >
+          <ShoppingCart size={12} />
+          {isAddingToCart
+            ? "Đang xử lý..."
+            : ticket.availableQuantity > 0
+            ? "Thêm vào giỏ"
+            : "Hết vé"}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Ticket Section - More elegant ticket container
+const TicketSection = ({
+  tickets,
+  ticketQuantities,
+  incrementQuantity,
+  decrementQuantity,
+  handleAddToCart,
+  isAddingToCart,
+  isDarkMode,
+}) => (
+  <div className="sticky top-14 p-3">
+    <SectionTitle icon={Ticket} title="Vé sự kiện" />
+
+    {tickets.length > 0 ? (
+      <div className="space-y-2">
+        {tickets.map((ticket) => (
+          <TicketCard
+            key={ticket.ticketId}
+            ticket={ticket}
+            quantity={ticketQuantities[ticket.ticketTemplateId] || 1}
+            onIncrement={incrementQuantity}
+            onDecrement={decrementQuantity}
+            onAddToCart={handleAddToCart}
+            isAddingToCart={isAddingToCart}
+            isDarkMode={isDarkMode}
+          />
+        ))}
+
+        <div className="mt-3 pt-2 border-t border-dashed border-gray-300 dark:border-gray-700">
+          <button
+            onClick={() => (window.location.href = "/cart")}
+            className={`w-full py-1.5 rounded ${
+              isDarkMode
+                ? "bg-gray-800 hover:bg-gray-700"
+                : "bg-gray-100 hover:bg-gray-200"
+            } font-medium transition-colors text-xs flex items-center justify-center gap-1`}
+          >
+            <ShoppingCart size={14} />
+            Xem giỏ hàng
+          </button>
+        </div>
+      </div>
+    ) : (
+      <div className="flex flex-col items-center justify-center py-6 text-center">
+        <Ticket className="w-10 h-10 mb-2 text-gray-400 opacity-30" />
+        <h3 className="text-sm font-medium mb-1">Không có vé nào</h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">
+          Hiện tại chưa có vé nào cho sự kiện này. Vui lòng quay lại sau.
+        </p>
+      </div>
+    )}
+  </div>
+);
+
+// Tags component to show event categories/tags
+const EventTags = ({
+  tags = ["Hòa nhạc", "Âm nhạc", "Giải trí"],
+  isDarkMode,
+}) => (
+  <div className="flex flex-wrap gap-1 mb-4">
+    {tags.map((tag) => (
+      <span
+        key={tag}
+        className={`text-xs px-2 py-0.5 rounded-full ${
+          isDarkMode
+            ? "bg-gray-800 text-gray-300 border border-gray-700"
+            : "bg-gray-100 text-gray-600 border border-gray-200"
+        }`}
+      >
+        {tag}
+      </span>
+    ))}
+  </div>
+);
+
+// Event Stats - small stats about the event
+const EventStats = ({ event, isDarkMode }) => (
+  <div
+    className={`grid grid-cols-3 gap-2 mb-4 p-2 rounded-lg ${
+      isDarkMode ? "bg-gray-800/30" : "bg-gray-50"
+    }`}
+  >
+    <div className="text-center">
+      <div className="text-xs text-gray-500 dark:text-gray-400">Lượt xem</div>
+      <div className="font-medium text-sm">2.5k</div>
+    </div>
+    <div className="text-center border-x border-gray-200 dark:border-gray-700">
+      <div className="text-xs text-gray-500 dark:text-gray-400">Vé đã bán</div>
+      <div className="font-medium text-sm">78%</div>
+    </div>
+    <div className="text-center">
+      <div className="text-xs text-gray-500 dark:text-gray-400">Đánh giá</div>
+      <div className="font-medium text-sm flex items-center justify-center">
+        4.8 <Star className="w-3 h-3 text-amber-400 ml-0.5" />
+      </div>
+    </div>
+  </div>
+);
+
+// Related events section - "You might also like"
+const RelatedEvents = ({ isDarkMode }) => (
+  <section className="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700">
+    <div className="flex items-center justify-between mb-3">
+      <h3 className="text-sm font-medium">Sự kiện liên quan</h3>
+      <a href="/events" className="text-xs text-orange-500 flex items-center">
+        Xem tất cả <ChevronsRight className="w-3 h-3 ml-0.5" />
+      </a>
+    </div>
+
+    <div className="grid grid-cols-2 gap-2">
+      {[1, 2].map((i) => (
+        <a
+          key={i}
+          href="/events/1"
+          className={`block rounded-lg overflow-hidden border ${
+            isDarkMode ? "border-gray-700" : "border-gray-200"
+          }`}
+        >
+          <div className="h-20 bg-gray-300 dark:bg-gray-700 relative">
+            <div className="absolute inset-0 flex items-end p-2">
+              <div className="text-white text-xs font-medium">Sự kiện {i}</div>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+);
+
+// Main Component - Now with optimized layout
 const EventDetails = () => {
+  const { eventId } = useParams();
+  const navigate = useNavigate();
+  const isDarkMode = useSelector((state) => state.theme?.isDarkMode);
+
+  // State
   const [event, setEvent] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
-  const [currentSection, setCurrentSection] = useState("overview");
-  const [showShare, setShowShare] = useState(false);
   const [ticketQuantities, setTicketQuantities] = useState({});
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const isDarkMode = useSelector((state) => state.theme?.isDarkMode);
-  const navigate = useNavigate();
+  const [tickets, setTickets] = useState([]);
+  const [loadingTickets, setLoadingTickets] = useState(false);
+  const [loadingEvent, setLoadingEvent] = useState(true);
+  const [showAllDescription, setShowAllDescription] = useState(false);
 
-  // Format date safely
+  // Format date
   const formatDate = useCallback((dateString) => {
     try {
-      // Check if date string is valid
       if (!dateString) {
         return {
           day: "--",
           month: "--",
-          weekday: "Not available",
+          weekday: "Không có",
           year: "--",
           time: "--:--",
-          full: "Date not available",
+          full: "Không có thời gian",
         };
       }
 
       const date = new Date(dateString);
 
-      // Check if date is valid
       if (isNaN(date.getTime())) {
         return {
           day: "--",
           month: "--",
-          weekday: "Invalid date",
+          weekday: "Không hợp lệ",
           year: "--",
           time: "--:--",
-          full: "Invalid date format",
+          full: "Định dạng thời gian không hợp lệ",
         };
       }
 
@@ -183,33 +624,29 @@ const EventDetails = () => {
       return {
         day: "--",
         month: "--",
-        weekday: "Error",
+        weekday: "Lỗi",
         year: "--",
         time: "--:--",
-        full: "Date formatting error",
+        full: "Lỗi định dạng thời gian",
       };
     }
   }, []);
 
-  const scrollToSection = useCallback((id) => {
-    const element = document.getElementById(id);
-    if (element) {
-      window.scrollTo({
-        top: element.offsetTop - 100,
-        behavior: "smooth",
-      });
-    }
-    setCurrentSection(id);
-  }, []);
-
-  const handleBuyTicket = useCallback(
+  // Handle adding ticket to cart
+  const handleAddToCart = useCallback(
     async (ticket) => {
       try {
         setIsAddingToCart(true);
         const quantity = ticketQuantities[ticket.ticketTemplateId] || 1;
+        const ticketTemplateId = ticket.ticketTemplateId || ticket.ticketId;
+
+        if (!ticketTemplateId) {
+          toast.error("Không thể xác định mã vé");
+          return;
+        }
 
         await axiosInstance.post("api/Cart/AddToCart", {
-          ticketTemplateId: ticket.ticketTemplateId,
+          ticketTemplateId: ticketTemplateId,
           quantity: quantity,
         });
 
@@ -217,6 +654,12 @@ const EventDetails = () => {
           `Đã thêm ${quantity} vé ${ticket.ticketName} vào giỏ hàng`,
         );
         notifyCartUpdated();
+
+        // Reset quantity after adding to cart
+        setTicketQuantities((prev) => ({
+          ...prev,
+          [ticket.ticketTemplateId]: 1,
+        }));
       } catch (error) {
         toast.error(
           error.response?.data?.message || "Không thể thêm vé vào giỏ hàng",
@@ -228,763 +671,251 @@ const EventDetails = () => {
     [ticketQuantities],
   );
 
-  // Handle quantity changes
-  const increaseQuantity = useCallback((ticketTemplateId, maxAvailable) => {
-    setTicketQuantities((prev) => {
-      const currentQty = prev[ticketTemplateId] || 1;
-      const newQty = Math.min(currentQty + 1, maxAvailable);
-      return {
-        ...prev,
-        [ticketTemplateId]: newQty,
-      };
-    });
+  // Increment ticket quantity
+  const incrementQuantity = useCallback((ticketId) => {
+    setTicketQuantities((prev) => ({
+      ...prev,
+      [ticketId]: (prev[ticketId] || 1) + 1,
+    }));
   }, []);
 
-  const decreaseQuantity = useCallback((ticketTemplateId) => {
-    setTicketQuantities((prev) => {
-      const currentQty = prev[ticketTemplateId] || 1;
-      const newQty = Math.max(currentQty - 1, 1);
-      return {
-        ...prev,
-        [ticketTemplateId]: newQty,
-      };
-    });
+  // Decrement ticket quantity
+  const decrementQuantity = useCallback((ticketId) => {
+    setTicketQuantities((prev) => ({
+      ...prev,
+      [ticketId]: Math.max(1, (prev[ticketId] || 1) - 1),
+    }));
   }, []);
 
+  // Load event data
   useEffect(() => {
-    const currentEvent = window.history.state?.usr?.event;
-    if (currentEvent) {
-      setEvent(currentEvent);
+    const fetchEventData = async () => {
+      try {
+        setLoadingEvent(true);
 
-      // Initialize ticket quantities
-      if (
-        currentEvent.ticketTemplates &&
-        currentEvent.ticketTemplates.length > 0
-      ) {
-        const initialQuantities = {};
-        currentEvent.ticketTemplates.forEach((ticket) => {
-          initialQuantities[ticket.ticketTemplateId] = 1;
-        });
-        setTicketQuantities(initialQuantities);
-      }
-    }
+        // First try to get event from history state
+        const currentEvent = window.history.state?.usr?.event;
 
-    const handleScroll = () => {
-      const sections = document.querySelectorAll("section[id]");
-      const scrollPosition = window.scrollY + 120;
-
-      sections.forEach((section) => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.offsetHeight;
-
-        if (
-          scrollPosition >= sectionTop &&
-          scrollPosition < sectionTop + sectionHeight
-        ) {
-          setCurrentSection(section.getAttribute("id"));
+        if (currentEvent) {
+          setEvent(currentEvent);
         }
-      });
+        // If not available in history state, fetch it using the API
+        else if (eventId) {
+          const eventData = await getEventByIdApi(eventId);
+          if (eventData) {
+            setEvent(eventData);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching event data:", error);
+        toast.error("Không thể tải thông tin sự kiện. Vui lòng thử lại sau.");
+      } finally {
+        setLoadingEvent(false);
+      }
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    fetchEventData();
+  }, [eventId]);
 
-  if (!event) return null;
+  // Load tickets
+  useEffect(() => {
+    const loadTickets = async () => {
+      if (event?.eventId) {
+        try {
+          setLoadingTickets(true);
+          const response = await getTicketTemplatesByEventId(event.eventId);
+
+          if (
+            response &&
+            response.isSuccess &&
+            Array.isArray(response.result)
+          ) {
+            const formattedTickets = response.result.map((ticket) => ({
+              ticketId: ticket.ticketTemplateId,
+              ticketTemplateId: ticket.ticketTemplateId,
+              ticketName: ticket.ticketName || "Vé không tên",
+              eventName: event.eventName || "Sự kiện không tên",
+              eventDate: event.eventDate || new Date().toISOString(),
+              ticketDescription: ticket.description || "",
+              ticketPrice: ticket.ticketPrice || 0,
+              ticketImage:
+                ticket.imageTicket ||
+                event.eventImage ||
+                "/api/placeholder/400/300",
+              city: event.location || "Không có địa điểm",
+              address: event.address || "",
+              serialNumber: ticket.ticketTemplateId,
+              rank: ticket.rank || "Thường",
+              categoryName: ticket.rank || "Thường",
+              availableQuantity: ticket.availableQuantity || 0,
+              totalQuantity: ticket.totalQuantity || 0,
+            }));
+
+            setTickets(formattedTickets);
+
+            // Initialize ticket quantities
+            const initialQuantities = {};
+            formattedTickets.forEach((ticket) => {
+              initialQuantities[ticket.ticketTemplateId] = 1;
+            });
+            setTicketQuantities(initialQuantities);
+          } else {
+            setTickets([]);
+          }
+        } catch (error) {
+          console.error("Error loading tickets:", error);
+          setTickets([]);
+        } finally {
+          setLoadingTickets(false);
+        }
+      }
+    };
+
+    loadTickets();
+  }, [event]);
+
+  // Handle theme classes
+  const theme = {
+    bg: isDarkMode ? "bg-gray-900" : "bg-gray-50",
+    text: isDarkMode ? "text-white" : "text-gray-900",
+    textSecondary: isDarkMode ? "text-gray-300" : "text-gray-600",
+    textMuted: isDarkMode ? "text-gray-400" : "text-gray-500",
+    border: isDarkMode ? "border-gray-800" : "border-gray-100",
+    card: isDarkMode ? "bg-gray-800/50" : "bg-white",
+  };
+
+  // Loading screen
+  if (loadingEvent) {
+    return (
+      <div
+        className={`min-h-screen flex items-center justify-center ${theme.bg}`}
+      >
+        <div className="flex flex-col items-center gap-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-orange-500 border-t-transparent"></div>
+          <p className={`text-xs ${theme.text}`}>
+            Đang tải thông tin sự kiện...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error if no event found
+  if (!event) {
+    return (
+      <div
+        className={`min-h-screen flex items-center justify-center ${theme.bg}`}
+      >
+        <div className="text-center max-w-xs mx-auto p-4">
+          <Info size={32} className="mx-auto mb-3 text-orange-500" />
+          <h2 className={`text-lg font-bold mb-1.5 ${theme.text}`}>
+            Không tìm thấy sự kiện
+          </h2>
+          <p className={`mb-4 text-xs ${theme.textMuted}`}>
+            Sự kiện này không tồn tại hoặc đã bị xóa. Vui lòng kiểm tra lại
+            đường dẫn.
+          </p>
+          <button
+            onClick={() => navigate("/events")}
+            className="px-4 py-1.5 rounded bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium transition-colors flex items-center gap-1 mx-auto"
+          >
+            <ArrowLeft size={14} />
+            <span>Quay lại trang sự kiện</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const eventDate = formatDate(event.eventDate);
-  const hasValidImage =
-    event.eventImage &&
-    (event.eventImage.startsWith("http") ||
-      event.eventImage.includes(".appspot.com"));
   const isPastEvent = new Date(event.eventDate) < new Date();
-  const hasTickets = event.ticketTemplates && event.ticketTemplates.length > 0;
-
-  // Theme colors
-  const primaryColor = isDarkMode ? "text-orange-400" : "text-orange-500";
-  const primaryBg = isDarkMode ? "bg-orange-500" : "bg-orange-500";
-  const primaryBgHover = isDarkMode
-    ? "hover:bg-orange-600"
-    : "hover:bg-orange-600";
-  const primaryBgLight = isDarkMode ? "bg-orange-500/10" : "bg-orange-50";
-  const bgBase = isDarkMode ? "bg-gray-900" : "bg-gray-50";
-  const bgElevated = isDarkMode ? "bg-gray-800" : "bg-white";
-  const bgElevated2 = isDarkMode ? "bg-gray-800/90" : "bg-white/90";
-  const bgElevated3 = isDarkMode ? "bg-gray-800/70" : "bg-white/70";
-  const textPrimary = isDarkMode ? "text-white" : "text-gray-900";
-  const textSecondary = isDarkMode ? "text-gray-300" : "text-gray-700";
-  const textTertiary = isDarkMode ? "text-gray-400" : "text-gray-500";
-  const borderColor = isDarkMode ? "border-gray-700" : "border-gray-200";
+  const hasTickets = tickets && tickets.length > 0;
 
   return (
-    <div className={`min-h-screen ${bgBase}`}>
-      {/* Header */}
-      <EventHeader
-        event={event}
-        eventDate={eventDate}
+    <div className={`min-h-screen ${theme.bg} ${theme.text}`}>
+      {/* Header Actions */}
+      <HeaderActions
+        onBackClick={() => navigate("/events")}
         isLiked={isLiked}
         setIsLiked={setIsLiked}
-        showShare={showShare}
-        setShowShare={setShowShare}
-        navigate={navigate}
-        isDarkMode={isDarkMode}
       />
 
-      {/* Navigation tabs */}
-      <div
-        className={`fixed top-16 left-0 right-0 z-40 ${bgElevated2} border-b ${borderColor}`}
-      >
-        <div className="max-w-6xl mx-auto">
-          <div className="px-4 flex gap-1 overflow-x-auto hide-scrollbar">
-            {[
-              { id: "overview", label: "Tổng quan" },
-              { id: "info", label: "Thông tin" },
-              { id: "location", label: "Địa điểm" },
-              ...(hasTickets ? [{ id: "tickets", label: "Vé" }] : []),
-            ].map((section) => (
-              <button
-                key={section.id}
-                onClick={() => scrollToSection(section.id)}
-                className={`px-4 py-3 text-sm font-medium whitespace-nowrap relative transition-colors ${
-                  currentSection === section.id ? primaryColor : textSecondary
-                }`}
-              >
-                {section.label}
-                {currentSection === section.id && (
-                  <span
-                    className={`absolute bottom-0 left-1/2 right-1/2 -translate-x-1/2 h-0.5 w-1/2 ${primaryBg} rounded-full`}
-                  ></span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Main content */}
-      <div className="max-w-6xl mx-auto pt-32 pb-24 px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left column - Main content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Overview section */}
-            <section id="overview" className="space-y-6">
-              {/* Hero card */}
-              <div className={`rounded-3xl overflow-hidden ${bgElevated}`}>
-                {/* Banner */}
-                <div className="relative h-72 w-full overflow-hidden">
-                  {hasValidImage ? (
-                    <>
-                      <img
-                        src={event.eventImage}
-                        alt={event.eventName}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-transparent"></div>
-                    </>
-                  ) : (
-                    <div
-                      className={`w-full h-full flex items-center justify-center ${
-                        isDarkMode ? "bg-gray-800" : "bg-gray-100"
-                      }`}
-                    >
-                      <Calendar
-                        className={`w-24 h-24 ${
-                          isDarkMode ? "text-gray-700" : "text-gray-300"
-                        }`}
-                      />
-                    </div>
-                  )}
+      <div className="flex flex-col lg:flex-row">
+        {/* Event information column */}
+        <div className="w-full lg:w-2/3 pt-0">
+          {/* Event Header with smaller dimensions */}
+          <EventHeader event={event} eventDate={eventDate} />
 
-                  {/* Event status */}
-                  <div className="absolute top-4 left-4">
-                    <span
-                      className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-medium 
-                      ${
-                        event.status === 1
-                          ? isDarkMode
-                            ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                            : "bg-green-500/10 text-green-600 border border-green-500/20"
-                          : isDarkMode
-                          ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                          : "bg-red-500/10 text-red-600 border border-red-500/20"
-                      }`}
-                    >
-                      <span
-                        className={`inline-block w-1.5 h-1.5 rounded-full ${
-                          event.status === 1 ? "bg-green-500" : "bg-red-500"
-                        }`}
-                      ></span>
-                      {event.status === 1 ? "Đang diễn ra" : "Không hoạt động"}
-                    </span>
-                  </div>
+          {/* Event Content - more compact padding */}
+          <div className="px-3 py-4 md:px-4">
+            {/* Event tags */}
+            <EventTags isDarkMode={isDarkMode} />
 
-                  {/* Event info */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <div className="flex justify-between items-end">
-                      <div className="flex gap-4 items-end">
-                        {/* Date */}
-                        <div
-                          className={`flex flex-col items-center rounded-2xl py-3 px-4 backdrop-blur-md ${bgElevated3} border border-white/10`}
-                        >
-                          <span
-                            className={`text-xs uppercase font-medium ${primaryColor}`}
-                          >
-                            {eventDate.month}
-                          </span>
-                          <span className="text-2xl font-bold text-white leading-none mt-1">
-                            {eventDate.day}
-                          </span>
-                          <span className="text-[10px] text-white/70">
-                            {eventDate.year}
-                          </span>
-                        </div>
+            {/* Event stats */}
+            <EventStats event={event} isDarkMode={isDarkMode} />
 
-                        <div>
-                          <h1 className="text-2xl font-bold text-white mb-1 leading-tight">
-                            {event.eventName}
-                          </h1>
-                          <p className="text-sm text-white/80">
-                            {eventDate.time} • {eventDate.weekday}
-                          </p>
-                        </div>
-                      </div>
+            {/* Description */}
+            <EventDescription
+              description={event.eventDescription}
+              showAllDescription={showAllDescription}
+              setShowAllDescription={setShowAllDescription}
+            />
 
-                      {/* Mobile CTA */}
-                      {hasTickets && !isPastEvent && (
-                        <button
-                          onClick={() => scrollToSection("tickets")}
-                          className=" sm:flex sm:items-center sm:gap-1 px-4 py-2 rounded-full text-sm font-medium text-white bg-white/20 backdrop-blur-md hover:bg-white/30"
-                        >
-                          <Ticket size={14} />
-                          <span>Đặt vé</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
+            {/* Event Highlights - smaller card layout */}
+            <EventHighlights
+              event={event}
+              tickets={tickets}
+              isDarkMode={isDarkMode}
+            />
 
-                {/* Event details */}
-                <div className="p-6">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={`mt-1 flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full ${primaryBgLight}`}
-                      >
-                        <CalendarDays className={`w-4 h-4 ${primaryColor}`} />
-                      </div>
-                      <div>
-                        <h3 className={`text-sm font-medium ${textSecondary}`}>
-                          Thời gian
-                        </h3>
-                        <p className={textPrimary}>{eventDate.full}</p>
-                      </div>
-                    </div>
+            {/* Location Details - more compact layout */}
+            <LocationSection
+              event={event}
+              eventDate={eventDate}
+              isDarkMode={isDarkMode}
+            />
 
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={`mt-1 flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full ${primaryBgLight}`}
-                      >
-                        <MapPin className={`w-4 h-4 ${primaryColor}`} />
-                      </div>
-                      <div>
-                        <h3 className={`text-sm font-medium ${textSecondary}`}>
-                          Địa điểm
-                        </h3>
-                        <p className={textPrimary}>{event.location}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {/* Organizer Information - smaller, cleaner layout */}
+            <OrganizerSection event={event} isDarkMode={isDarkMode} />
 
-              {/* Info preview */}
-              <div className={`p-6 rounded-3xl ${bgElevated}`}>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className={`text-xl font-bold ${textPrimary}`}>
-                    Thông tin sự kiện
-                  </h2>
-                  <button
-                    onClick={() => scrollToSection("info")}
-                    className={`flex items-center gap-1 text-sm font-medium ${primaryColor}`}
-                  >
-                    Xem thêm
-                    <ChevronRight size={16} />
-                  </button>
-                </div>
-
-                <p className={`${textSecondary} line-clamp-3`}>
-                  {event.eventDescription}
-                </p>
-              </div>
-            </section>
-
-            {/* Info section */}
-            <section id="info" className={`p-6 rounded-3xl ${bgElevated}`}>
-              <h2 className={`text-xl font-bold mb-6 ${textPrimary}`}>
-                Thông tin chi tiết
-              </h2>
-
-              <div
-                className={`whitespace-pre-wrap ${textSecondary} leading-relaxed`}
-              >
-                {event.eventDescription}
-              </div>
-
-              {/* Features */}
-              <div className="mt-8">
-                <h3 className={`font-medium mb-4 ${textPrimary}`}>
-                  Tính năng sự kiện
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { icon: Users, text: "Mọi lứa tuổi" },
-                    { icon: Star, text: "Đánh giá cao" },
-                    { icon: Check, text: "Chương trình đa dạng" },
-                    { icon: Clock, text: "Đúng giờ" },
-                  ].map((feature, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex items-center gap-3 p-3 rounded-2xl ${primaryBgLight}`}
-                    >
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center ${bgElevated}`}
-                      >
-                        <feature.icon className={`w-4 h-4 ${primaryColor}`} />
-                      </div>
-                      <div>
-                        <h3 className={`text-sm font-medium ${textSecondary}`}>
-                          {feature.text}
-                        </h3>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            {/* Tickets section */}
-            {hasTickets && (
-              <section id="tickets" className={`p-6 rounded-3xl ${bgElevated}`}>
-                <h2 className={`text-xl font-bold mb-6 ${textPrimary}`}>
-                  Vé sự kiện
-                </h2>
-
-                <div className="space-y-5">
-                  {event.ticketTemplates.map((ticket) => (
-                    <div
-                      key={ticket.ticketTemplateId}
-                      className={`p-5 rounded-2xl border ${borderColor} transition-all hover:border-orange-300 dark:hover:border-orange-600/50`}
-                    >
-                      <div className="flex flex-col gap-4">
-                        {/* Ticket info */}
-                        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                          {/* Ticket card */}
-                          <div
-                            className={`relative w-full sm:w-36 aspect-[2/1] sm:aspect-auto sm:h-24 overflow-hidden rounded-xl border ${borderColor} flex-shrink-0`}
-                          >
-                            {ticket.imageTicket ? (
-                              <img
-                                src={ticket.imageTicket}
-                                alt={ticket.ticketName}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div
-                                className={`w-full h-full flex items-center justify-center ${primaryBgLight}`}
-                              >
-                                <Ticket className={`w-8 h-8 ${primaryColor}`} />
-                              </div>
-                            )}
-
-                            {/* Price overlay */}
-                            <div className="absolute bottom-2 right-2 px-2 py-1 rounded-md text-xs font-bold backdrop-blur-sm bg-black/40 text-white">
-                              {new Intl.NumberFormat("vi-VN").format(
-                                ticket.ticketPrice,
-                              )}
-                              đ
-                            </div>
-                          </div>
-
-                          <div className="flex-1">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <h3
-                                    className={`font-medium text-lg ${textPrimary}`}
-                                  >
-                                    {ticket.ticketName}
-                                  </h3>
-                                  <span
-                                    className={`text-xs px-2 py-0.5 rounded-full ${
-                                      ticket.rank.toLowerCase().includes("vip")
-                                        ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
-                                        : primaryBgLight + " " + primaryColor
-                                    }`}
-                                  >
-                                    {ticket.rank}
-                                  </span>
-                                </div>
-
-                                <p className={`mt-1 ${textSecondary}`}>
-                                  Còn lại:{" "}
-                                  <span className="font-medium">
-                                    {ticket.availableQuantity}
-                                  </span>
-                                  /{ticket.totalQuantity} vé
-                                </p>
-
-                                <div className="mt-3">
-                                  <div className={`text-sm ${textSecondary}`}>
-                                    Giá:{" "}
-                                    <span
-                                      className={`font-medium text-base ${primaryColor}`}
-                                    >
-                                      {new Intl.NumberFormat("vi-VN").format(
-                                        ticket.ticketPrice,
-                                      )}{" "}
-                                      đ
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Progress bar */}
-                            <div className="w-full mt-3">
-                              <div
-                                className={`h-1.5 w-full rounded-full overflow-hidden ${
-                                  isDarkMode ? "bg-gray-700" : "bg-gray-200"
-                                }`}
-                              >
-                                <div
-                                  className={`h-full rounded-full ${
-                                    ticket.rank.toLowerCase().includes("vip")
-                                      ? "bg-purple-500 dark:bg-purple-600"
-                                      : primaryBg
-                                  }`}
-                                  style={{
-                                    width: `${
-                                      (ticket.availableQuantity /
-                                        ticket.totalQuantity) *
-                                      100
-                                    }%`,
-                                  }}
-                                ></div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Quantity and Button Section */}
-                        <div
-                          className={`mt-1 pt-3 border-t ${borderColor} flex justify-between items-center flex-wrap gap-3`}
-                        >
-                          {/* Quantity Controls */}
-                          <div className="flex items-center gap-3">
-                            <p className={`text-sm ${textSecondary}`}>
-                              Số lượng:
-                            </p>
-                            <div
-                              className={`flex items-center border ${borderColor} rounded-lg overflow-hidden`}
-                            >
-                              <button
-                                onClick={() =>
-                                  decreaseQuantity(ticket.ticketTemplateId)
-                                }
-                                className={`w-8 h-8 flex items-center justify-center transition ${
-                                  isDarkMode
-                                    ? "hover:bg-gray-700 text-gray-300"
-                                    : "hover:bg-gray-100 text-gray-700"
-                                }`}
-                                disabled={
-                                  ticketQuantities[ticket.ticketTemplateId] <= 1
-                                }
-                              >
-                                <Minus className="w-3.5 h-3.5" />
-                              </button>
-                              <div
-                                className={`w-10 text-center py-1 ${textPrimary}`}
-                              >
-                                {ticketQuantities[ticket.ticketTemplateId] || 1}
-                              </div>
-                              <button
-                                onClick={() =>
-                                  increaseQuantity(
-                                    ticket.ticketTemplateId,
-                                    ticket.availableQuantity,
-                                  )
-                                }
-                                className={`w-8 h-8 flex items-center justify-center transition ${
-                                  isDarkMode
-                                    ? "hover:bg-gray-700 text-gray-300"
-                                    : "hover:bg-gray-100 text-gray-700"
-                                }`}
-                                disabled={
-                                  (ticketQuantities[ticket.ticketTemplateId] ||
-                                    1) >= ticket.availableQuantity
-                                }
-                              >
-                                <Plus className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Action Buttons */}
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`text-lg font-medium ${primaryColor}`}
-                            >
-                              {new Intl.NumberFormat("vi-VN").format(
-                                ticket.ticketPrice *
-                                  (ticketQuantities[ticket.ticketTemplateId] ||
-                                    1),
-                              )}
-                              đ
-                            </span>
-
-                            <button
-                              onClick={() => handleBuyTicket(ticket)}
-                              disabled={isPastEvent || isAddingToCart}
-                              className={`px-4 py-2 rounded-xl flex items-center gap-2 transition ${
-                                !isPastEvent
-                                  ? ticket.rank.toLowerCase().includes("vip")
-                                    ? "bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-700 dark:hover:bg-purple-600"
-                                    : `${primaryBg} hover:bg-orange-600 text-white`
-                                  : "bg-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500"
-                              }`}
-                            >
-                              {isAddingToCart ? (
-                                <>
-                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                  <span>Đang thêm...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <ShoppingCart className="w-4 h-4" />
-                                  <span>Thêm vào giỏ</span>
-                                </>
-                              )}
-                            </button>
-
-                            <button
-                              onClick={() => {
-                                handleBuyTicket(ticket);
-                                setTimeout(() => navigate("/cart"), 500);
-                              }}
-                              disabled={isPastEvent || isAddingToCart}
-                              className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
-                                !isPastEvent
-                                  ? "bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
-                                  : "bg-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500"
-                              }`}
-                            >
-                              Mua ngay
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Info note */}
-                <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-orange-50 to-transparent dark:from-orange-900/10 dark:to-transparent">
-                  <div className="flex gap-3">
-                    <Info
-                      className={`w-5 h-5 mt-0.5 flex-shrink-0 ${primaryColor}`}
-                    />
-                    <p className={textSecondary}>
-                      Giá vé đã bao gồm thuế và phí dịch vụ. Vé không được hoàn
-                      trả sau khi đặt.
-                    </p>
-                  </div>
-                </div>
-              </section>
-            )}
+            {/* Related events section */}
+            <RelatedEvents isDarkMode={isDarkMode} />
           </div>
+        </div>
 
-          {/* Right column - Fixed sidebar */}
-          <div className="lg:block">
-            {hasTickets && !isPastEvent && (
-              <div className={`sticky top-32 p-6 rounded-3xl ${bgElevated}`}>
-                <h2 className={`text-xl font-bold mb-6 ${textPrimary}`}>
-                  Đặt vé ngay
-                </h2>
-
-                <div className="space-y-4 mb-4">
-                  {event.ticketTemplates.slice(0, 3).map((ticket) => (
-                    <div
-                      key={ticket.ticketTemplateId}
-                      className={`p-3 rounded-xl border ${borderColor} transition-all hover:border-orange-300 dark:hover:border-orange-600/50`}
-                    >
-                      <div className="flex flex-col gap-3">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <p className={textPrimary}>{ticket.ticketName}</p>
-                              <span
-                                className={`text-xs px-1.5 py-0.5 rounded-full ${
-                                  ticket.rank.toLowerCase().includes("vip")
-                                    ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
-                                    : primaryBgLight + " " + primaryColor
-                                }`}
-                              >
-                                {ticket.rank}
-                              </span>
-                            </div>
-                            <p className={`text-sm font-bold ${primaryColor}`}>
-                              {new Intl.NumberFormat("vi-VN").format(
-                                ticket.ticketPrice,
-                              )}
-                              đ
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          {/* Quantity Controls */}
-                          <div
-                            className={`flex items-center border ${borderColor} rounded-lg overflow-hidden`}
-                          >
-                            <button
-                              onClick={() =>
-                                decreaseQuantity(ticket.ticketTemplateId)
-                              }
-                              className={`w-7 h-7 flex items-center justify-center ${
-                                isDarkMode
-                                  ? "hover:bg-gray-700 text-gray-300"
-                                  : "hover:bg-gray-100 text-gray-700"
-                              }`}
-                              disabled={
-                                ticketQuantities[ticket.ticketTemplateId] <= 1
-                              }
-                            >
-                              <Minus className="w-3 h-3" />
-                            </button>
-                            <div
-                              className={`w-8 text-center text-sm py-1 ${textPrimary}`}
-                            >
-                              {ticketQuantities[ticket.ticketTemplateId] || 1}
-                            </div>
-                            <button
-                              onClick={() =>
-                                increaseQuantity(
-                                  ticket.ticketTemplateId,
-                                  ticket.availableQuantity,
-                                )
-                              }
-                              className={`w-7 h-7 flex items-center justify-center ${
-                                isDarkMode
-                                  ? "hover:bg-gray-700 text-gray-300"
-                                  : "hover:bg-gray-100 text-gray-700"
-                              }`}
-                              disabled={
-                                (ticketQuantities[ticket.ticketTemplateId] ||
-                                  1) >= ticket.availableQuantity
-                              }
-                            >
-                              <Plus className="w-3 h-3" />
-                            </button>
-                          </div>
-
-                          <button
-                            onClick={() => handleBuyTicket(ticket)}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-white text-sm ${
-                              isAddingToCart ? "opacity-70 cursor-wait" : ""
-                            } ${
-                              ticket.rank.toLowerCase().includes("vip")
-                                ? "bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600"
-                                : primaryBg + " " + primaryBgHover
-                            }`}
-                            disabled={isAddingToCart}
-                          >
-                            {isAddingToCart ? (
-                              <>
-                                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                <span>Đang thêm</span>
-                              </>
-                            ) : (
-                              <>
-                                <ShoppingCart className="w-3.5 h-3.5" />
-                                <span>Thêm</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {event.ticketTemplates.length > 3 && (
-                  <button
-                    onClick={() => scrollToSection("tickets")}
-                    className={`flex items-center justify-center gap-1.5 w-full py-2 rounded-xl border ${borderColor} ${textSecondary} transition-colors hover:${primaryBgLight}`}
-                  >
-                    <span>Xem tất cả vé</span>
-                    <ChevronDown size={16} />
-                  </button>
-                )}
-
-                <hr className={`my-6 border-t ${borderColor}`} />
-
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <Calendar
-                      className={`w-5 h-5 mt-0.5 flex-shrink-0 ${primaryColor}`}
-                    />
-                    <div>
-                      <h3 className={`font-medium ${textPrimary}`}>
-                        Thời gian
-                      </h3>
-                      <p className={`text-sm ${textSecondary}`}>
-                        {eventDate.full}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <MapPin
-                      className={`w-5 h-5 mt-0.5 flex-shrink-0 ${primaryColor}`}
-                    />
-                    <div>
-                      <h3 className={`font-medium ${textPrimary}`}>Địa điểm</h3>
-                      <p className={`text-sm ${textSecondary}`}>
-                        {event.location}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => navigate("/cart")}
-                  className={`w-full py-3 rounded-xl ${primaryBg} text-white font-medium mt-6 ${primaryBgHover} flex items-center justify-center gap-2`}
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                  <span>Đi đến giỏ hàng</span>
-                </button>
-              </div>
-            )}
-          </div>
+        {/* Tickets column */}
+        <div className="w-full lg:w-1/3 lg:border-l lg:border-gray-200 dark:lg:border-gray-800">
+          {loadingTickets ? (
+            <div className="h-36 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-orange-500 border-t-transparent"></div>
+            </div>
+          ) : (
+            <TicketSection
+              tickets={tickets}
+              ticketQuantities={ticketQuantities}
+              incrementQuantity={incrementQuantity}
+              decrementQuantity={decrementQuantity}
+              handleAddToCart={handleAddToCart}
+              isAddingToCart={isAddingToCart}
+              isDarkMode={isDarkMode}
+            />
+          )}
         </div>
       </div>
 
-      {/* Fixed CTA button for mobile */}
+      {/* Mobile only: Smaller floating action button for tickets */}
       {hasTickets && !isPastEvent && (
-        <div className="lg:hidden fixed bottom-5 left-4 right-4 z-50 flex gap-2">
+        <div className="lg:hidden fixed bottom-6 right-6 z-30">
           <button
-            onClick={() => scrollToSection("tickets")}
-            className={`flex-1 py-3.5 rounded-xl text-white font-medium shadow-lg ${primaryBg} ${primaryBgHover} flex items-center justify-center gap-2`}
+            onClick={() => {
+              document
+                .querySelector(".lg\\:w-1\\/3")
+                .scrollIntoView({ behavior: "smooth" });
+            }}
+            className="w-10 h-10 rounded-full bg-orange-500 hover:bg-orange-600 flex items-center justify-center shadow-md text-white transition-colors"
           >
-            <Ticket className="w-4 h-4" />
-            <span>Đặt vé ngay</span>
-          </button>
-
-          <button
-            onClick={() => navigate("/cart")}
-            className={`py-3.5 px-4 rounded-xl bg-white dark:bg-gray-800 text-orange-500 font-medium shadow-lg border border-orange-200 dark:border-gray-700 flex items-center justify-center`}
-          >
-            <ShoppingCart className="w-5 h-5" />
+            <Ticket size={16} />
           </button>
         </div>
       )}
