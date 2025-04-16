@@ -25,154 +25,63 @@ import { notifyCartUpdated } from "../../../utils/cartEvents";
 import { getTicketTemplatesByEventId } from "../../../services/ticketApi";
 import { getEventByIdApi } from "../../../services/eventApi";
 
-// Header Actions Component - Smaller, more subtle actions
-const HeaderActions = ({ onBackClick, isLiked, setIsLiked }) => (
-  <>
-    {/* Back button */}
-    <button
-      onClick={onBackClick}
-      className="fixed top-5 left-5 z-50 w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white transition-colors"
-      aria-label="Back to events"
-    >
-      <ArrowLeft size={16} />
-    </button>
-
-    {/* Action buttons */}
-    <div className="fixed top-5 right-5 z-50 flex items-center gap-1.5">
-      <button
-        onClick={() => setIsLiked(!isLiked)}
-        className="w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white transition-colors"
-        aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
-      >
-        <Heart
-          size={16}
-          className={isLiked ? "fill-red-500 text-red-500" : "text-white"}
-        />
-      </button>
-
-      <button
-        onClick={() =>
-          (window.location.href = `mailto:?subject=${encodeURIComponent(
-            "Check out this event!",
-          )}&body=${encodeURIComponent(window.location.href)}`)
-        }
-        className="w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white transition-colors"
-        aria-label="Share event"
-      >
-        <Share size={16} />
-      </button>
-
-      <button
-        onClick={() => (window.location.href = "/cart")}
-        className="w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white transition-colors"
-        aria-label="View cart"
-      >
-        <ShoppingCart size={16} />
-      </button>
-    </div>
-  </>
+// Add this to your CSS or define in the component
+const AnimatedBg = ({ children, isDarkMode }) => (
+  <div className="relative overflow-hidden rounded-3xl">
+    <div
+      className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent dark:from-orange-700/5 
+      before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1),transparent_70%)] 
+      before:opacity-0 before:hover:opacity-100 before:transition-opacity before:duration-1000"
+    ></div>
+    <div className="relative z-10">{children}</div>
+  </div>
 );
 
-// Event Header Component - More streamlined with better typography
-const EventHeader = ({ event, eventDate }) => {
-  const hasValidImage =
-    event.eventImage &&
-    (event.eventImage.startsWith("http") ||
-      event.eventImage.includes(".appspot.com"));
-
-  return (
-    <div className="relative h-[32vh] md:h-[38vh] overflow-hidden">
-      {/* Background image or placeholder */}
-      {hasValidImage ? (
-        <img
-          src={event.eventImage}
-          alt={event.eventName}
-          className="w-full h-full object-cover"
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gray-800">
-          <Calendar className="w-12 h-12 text-gray-700" />
-        </div>
-      )}
-
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/80"></div>
-
-      {/* Event basic info */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
-        {/* Event status pill */}
-        <div
-          className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium mb-1.5 
-          bg-orange-500/20 text-orange-300 border border-orange-500/30"
-        >
-          <span className="mr-1 h-1 w-1 rounded-full bg-orange-400"></span>
-          {event.status === 1 ? "Đang diễn ra" : "Đã kết thúc"}
-        </div>
-
-        {/* Event title */}
-        <h1 className="text-xl md:text-2xl font-bold text-white mb-2">
-          {event.eventName}
-        </h1>
-
-        {/* Event meta info - more compact */}
-        <div className="flex flex-wrap gap-2 text-xs text-white/90">
-          <div className="flex items-center">
-            <Calendar className="w-3.5 h-3.5 mr-1 text-orange-400/90" />
-            <span>
-              {eventDate.weekday.charAt(0).toUpperCase() +
-                eventDate.weekday.slice(1)}
-              , {eventDate.day} {eventDate.month}
-            </span>
-          </div>
-
-          <div className="flex items-center">
-            <Clock className="w-3.5 h-3.5 mr-1 text-orange-400/90" />
-            <span>{eventDate.time}</span>
-          </div>
-
-          <div className="flex items-center">
-            <MapPin className="w-3.5 h-3.5 mr-1 text-orange-400/90" />
-            <span>{event.location}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Section Title component for consistent headings
+// Section Title component with animated accent
 const SectionTitle = ({ icon: Icon, title }) => (
-  <h2 className="text-base font-bold mb-2.5 flex items-center">
-    <Icon className="w-4 h-4 mr-1.5 text-orange-500" />
-    {title}
+  <h2 className="text-base font-bold mb-4 flex items-center">
+    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 mr-3 shadow-md shadow-orange-500/10">
+      <Icon className="w-4 h-4 text-white" />
+    </div>
+    <span className="relative">
+      {title}
+      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 animate-expand-line"></span>
+    </span>
   </h2>
 );
 
-// Event Description Section - More compact
+// Event Description Section - With interactive expanding card
 const EventDescription = ({
   description,
   showAllDescription,
   setShowAllDescription,
 }) => (
-  <section className="mb-4">
+  <section className="mb-6 backdrop-blur-[2px]">
     <SectionTitle icon={Info} title="Thông tin sự kiện" />
 
     <div
-      className={`prose prose-sm max-w-none ${
-        !showAllDescription && description?.length > 150 ? "line-clamp-3" : ""
-      }`}
+      className={`prose prose-sm max-w-none relative ${
+        !showAllDescription && description?.length > 150
+          ? "max-h-24 overflow-hidden"
+          : ""
+      } bg-gray-100/5 dark:bg-gray-800/20 p-5 rounded-3xl border border-gray-200/10 dark:border-gray-700/30 
+      transition-all duration-500 ease-in-out shadow-sm hover:shadow-md hover:border-orange-500/20`}
     >
       {description || "Không có thông tin chi tiết cho sự kiện này."}
+
+      {!showAllDescription && description?.length > 150 && (
+        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-gray-100/90 dark:from-gray-800/90 to-transparent"></div>
+      )}
     </div>
 
     {description && description.length > 150 && (
       <button
         onClick={() => setShowAllDescription(!showAllDescription)}
-        className="mt-1 text-orange-500 text-xs font-medium hover:underline flex items-center"
+        className="mt-2 px-4 py-1.5 text-orange-500 text-xs font-medium bg-orange-500/5 hover:bg-orange-500/10 rounded-full flex items-center justify-center mx-auto border border-orange-500/10 hover:border-orange-500/30 transition-all duration-300"
       >
         {showAllDescription ? "Thu gọn" : "Xem thêm"}
         <ChevronDown
-          className={`ml-0.5 w-3 h-3 transform transition-transform ${
+          className={`ml-1 w-3.5 h-3.5 transform transition-transform ${
             showAllDescription ? "rotate-180" : ""
           }`}
         />
@@ -181,33 +90,38 @@ const EventDescription = ({
   </section>
 );
 
-// Highlight Card Component - More compact and elegant
+// Highlight Card Component - With animated hover effect
 const HighlightCard = ({ icon: Icon, title, content, isDarkMode }) => (
   <div
-    className={`p-2.5 rounded-lg border ${
+    className={`p-4 rounded-3xl border relative group overflow-hidden ${
       isDarkMode
-        ? "border-gray-700/70 bg-gray-800/30"
-        : "border-gray-200/70 bg-white"
-    } flex items-start`}
+        ? "border-gray-700/40 bg-gray-800/20"
+        : "border-gray-200/50 bg-white/70"
+    } transition-all duration-500 hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/5`}
   >
-    <div className="w-6 h-6 rounded-full bg-orange-100/70 dark:bg-orange-900/20 flex items-center justify-center mr-2 flex-shrink-0">
-      <Icon className="w-3.5 h-3.5 text-orange-500" />
-    </div>
-    <div>
-      <h3 className="font-medium text-xs mb-0.5">{title}</h3>
-      <p className="text-xs text-gray-600 dark:text-gray-400 leading-snug">
-        {content}
-      </p>
+    {/* Spotlight hover effect */}
+    <div className="absolute -inset-full h-full w-full bg-gradient-to-r from-orange-500/0 via-orange-500/10 to-orange-500/0 opacity-0 group-hover:opacity-100 group-hover:animate-shimmer"></div>
+
+    <div className="flex items-start relative z-10">
+      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center mr-3 flex-shrink-0 shadow-md shadow-orange-500/10 group-hover:shadow-orange-500/30 transition-all duration-500 group-hover:scale-110">
+        <Icon className="w-5 h-5 text-white" />
+      </div>
+      <div>
+        <h3 className="font-semibold text-sm mb-1">{title}</h3>
+        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+          {content}
+        </p>
+      </div>
     </div>
   </div>
 );
 
 // Event Highlights Section - Grid with smaller cards
 const EventHighlights = ({ event, tickets, isDarkMode }) => (
-  <section className="mb-4">
+  <section className="mb-5">
     <SectionTitle icon={Star} title="Điểm nổi bật" />
 
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-2 gap-3">
       <HighlightCard
         icon={Users}
         title="Đối tượng"
@@ -242,14 +156,14 @@ const EventHighlights = ({ event, tickets, isDarkMode }) => (
 
 // Location Section - Refined layout with better use of space
 const LocationSection = ({ event, eventDate, isDarkMode }) => (
-  <section className="mb-4">
+  <section className="mb-5">
     <SectionTitle icon={MapPin} title="Địa điểm" />
 
     <div
-      className={`p-3 rounded-lg border ${
+      className={`p-4 rounded-2xl border backdrop-blur-[2px] ${
         isDarkMode
-          ? "border-gray-700/70 bg-gray-800/30"
-          : "border-gray-200/70 bg-white"
+          ? "border-gray-700/40 bg-gray-800/20"
+          : "border-gray-200/50 bg-white/70"
       }`}
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -270,7 +184,7 @@ const LocationSection = ({ event, eventDate, isDarkMode }) => (
           )}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs rounded flex items-center gap-1 transition-colors self-start whitespace-nowrap"
+          className="px-3 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs rounded-full flex items-center gap-1.5 transition-all duration-300 self-start whitespace-nowrap"
         >
           <MapPin className="w-3 h-3" />
           Xem trên bản đồ
@@ -282,18 +196,18 @@ const LocationSection = ({ event, eventDate, isDarkMode }) => (
 
 // Organizer Section - More compact with better information hierarchy
 const OrganizerSection = ({ event, isDarkMode }) => (
-  <section className="mb-4">
+  <section className="mb-5">
     <SectionTitle icon={Users} title="Ban tổ chức" />
 
     <div
-      className={`p-3 rounded-lg border ${
+      className={`p-4 rounded-2xl border backdrop-blur-[2px] ${
         isDarkMode
-          ? "border-gray-700/70 bg-gray-800/30"
-          : "border-gray-200/70 bg-white"
-      } flex flex-row gap-3`}
+          ? "border-gray-700/40 bg-gray-800/20"
+          : "border-gray-200/50 bg-white/70"
+      } flex flex-row gap-4`}
     >
-      <div className="w-10 h-10 rounded-full bg-orange-100/70 dark:bg-orange-900/20 flex items-center justify-center flex-shrink-0">
-        <Users className="w-5 h-5 text-orange-500" />
+      <div className="w-12 h-12 rounded-full bg-orange-100/70 dark:bg-orange-900/20 flex items-center justify-center flex-shrink-0">
+        <Users className="w-6 h-6 text-orange-500" />
       </div>
 
       <div className="flex-1">
@@ -321,7 +235,7 @@ const OrganizerSection = ({ event, isDarkMode }) => (
   </section>
 );
 
-// Ticket Card Component - More refined and compact
+// Ticket Card Component - With interactive 3D effect
 const TicketCard = ({
   ticket,
   quantity,
@@ -337,93 +251,133 @@ const TicketCard = ({
 
   return (
     <div
-      className={`p-3 rounded-lg border ${
-        isDarkMode
-          ? "border-gray-700/70 hover:border-gray-600"
-          : "border-gray-200/70 hover:border-gray-300"
-      } transition-colors`}
+      className={`p-5 rounded-3xl border transform-gpu transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/10
+        ${
+          isDarkMode
+            ? "border-gray-700/40 bg-gray-800/20 hover:border-orange-500/30"
+            : "border-gray-200/50 bg-white/70 hover:border-orange-500/20"
+        } relative group perspective`}
     >
-      <div className="flex justify-between items-start mb-1.5">
+      {/* Ticket animation line */}
+      <div className="absolute -left-1 top-8 bottom-8 w-[2px] border-l-2 border-dashed border-orange-500/30"></div>
+
+      {/* Price tag */}
+      <div className="absolute -right-2 -top-2 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-full px-3 py-1 text-xs font-bold shadow-lg transform rotate-3 z-10">
+        {formatCurrency(ticket.ticketPrice)}
+      </div>
+
+      <div className="flex justify-between items-start mb-3 relative">
         <div>
-          <h3 className="font-medium text-sm">{ticket.ticketName}</h3>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
+          <h3 className="font-semibold text-base mb-1 pr-16">
+            {ticket.ticketName}
+          </h3>
+          <div className="text-xs inline-flex items-center px-2 py-1 rounded-full bg-orange-500/10 text-orange-500 border border-orange-500/20">
             {ticket.rank || "Vé thường"}
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-orange-500 font-medium text-sm">
-            {formatCurrency(ticket.ticketPrice)}
-          </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            {ticket.availableQuantity > 0
-              ? `Còn ${ticket.availableQuantity} vé`
-              : "Hết vé"}
           </div>
         </div>
       </div>
 
       {ticket.ticketDescription && (
-        <p className="text-xs mb-2 text-gray-600 dark:text-gray-400 leading-snug">
+        <p className="text-xs mb-4 text-gray-600 dark:text-gray-400 leading-relaxed">
           {ticket.ticketDescription}
         </p>
       )}
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <button
-            onClick={() => onDecrement(ticket.ticketTemplateId)}
-            className={`w-6 h-6 rounded-l border ${
-              isDarkMode
-                ? "bg-gray-800 border-gray-700 hover:bg-gray-700"
-                : "bg-gray-50 border-gray-200 hover:bg-gray-100"
-            } flex items-center justify-center transition-colors`}
-            disabled={quantity <= 1}
-          >
-            <Minus size={12} className={quantity <= 1 ? "opacity-40" : ""} />
-          </button>
-          <div
-            className={`w-7 h-6 border-t border-b text-center ${
-              isDarkMode
-                ? "bg-gray-800 border-gray-700"
-                : "bg-gray-50 border-gray-200"
-            } flex items-center justify-center text-xs font-medium`}
-          >
-            {quantity || 1}
-          </div>
-          <button
-            onClick={() => onIncrement(ticket.ticketTemplateId)}
-            className={`w-6 h-6 rounded-r border ${
-              isDarkMode
-                ? "bg-gray-800 border-gray-700 hover:bg-gray-700"
-                : "bg-gray-50 border-gray-200 hover:bg-gray-100"
-            } flex items-center justify-center transition-colors`}
-            disabled={ticket.availableQuantity <= quantity}
-          >
-            <Plus
-              size={12}
-              className={
-                ticket.availableQuantity <= quantity ? "opacity-40" : ""
-              }
-            />
-          </button>
+      <div className="flex flex-col gap-3">
+        {/* Available tickets */}
+        <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-2">
+          <Ticket className="w-3.5 h-3.5 mr-1.5 text-orange-500" />
+          {ticket.availableQuantity > 0
+            ? `Còn ${ticket.availableQuantity} vé`
+            : "Hết vé"}
+
+          {/* Progressive bar */}
+          {ticket.availableQuantity > 0 && ticket.totalQuantity > 0 && (
+            <div className="ml-auto flex items-center gap-2">
+              <div className="h-1.5 w-24 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full"
+                  style={{
+                    width: `${
+                      (ticket.availableQuantity / ticket.totalQuantity) * 100
+                    }%`,
+                  }}
+                ></div>
+              </div>
+              <span>
+                {Math.round(
+                  (ticket.availableQuantity / ticket.totalQuantity) * 100,
+                )}
+                %
+              </span>
+            </div>
+          )}
         </div>
 
-        <button
-          onClick={() => onAddToCart(ticket)}
-          disabled={isAddingToCart || ticket.availableQuantity <= 0}
-          className={`px-2.5 py-1 rounded text-xs font-medium ${
-            ticket.availableQuantity > 0
-              ? "bg-orange-500 hover:bg-orange-600 text-white"
-              : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-          } transition-colors flex items-center gap-1`}
-        >
-          <ShoppingCart size={12} />
-          {isAddingToCart
-            ? "Đang xử lý..."
-            : ticket.availableQuantity > 0
-            ? "Thêm vào giỏ"
-            : "Hết vé"}
-        </button>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <button
+              onClick={() => onDecrement(ticket.ticketTemplateId)}
+              className={`w-9 h-9 rounded-l-full border ${
+                isDarkMode
+                  ? "bg-gray-800/80 border-gray-700 hover:bg-gray-700"
+                  : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+              } flex items-center justify-center transition-colors`}
+              disabled={quantity <= 1}
+            >
+              <Minus size={15} className={quantity <= 1 ? "opacity-40" : ""} />
+            </button>
+            <div
+              className={`w-10 h-9 border-t border-b text-center ${
+                isDarkMode
+                  ? "bg-gray-800/80 border-gray-700"
+                  : "bg-gray-50 border-gray-200"
+              } flex items-center justify-center text-xs font-medium`}
+            >
+              {quantity || 1}
+            </div>
+            <button
+              onClick={() => onIncrement(ticket.ticketTemplateId)}
+              className={`w-9 h-9 rounded-r-full border ${
+                isDarkMode
+                  ? "bg-gray-800/80 border-gray-700 hover:bg-gray-700"
+                  : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+              } flex items-center justify-center transition-colors`}
+              disabled={ticket.availableQuantity <= quantity}
+            >
+              <Plus
+                size={15}
+                className={
+                  ticket.availableQuantity <= quantity ? "opacity-40" : ""
+                }
+              />
+            </button>
+          </div>
+
+          <button
+            onClick={() => onAddToCart(ticket)}
+            disabled={isAddingToCart || ticket.availableQuantity <= 0}
+            className={`relative px-4 py-2.5 rounded-full text-xs font-medium overflow-hidden ${
+              ticket.availableQuantity > 0
+                ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+            } transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-lg group`}
+          >
+            {/* Animated background effect */}
+            {ticket.availableQuantity > 0 && (
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></span>
+            )}
+
+            <ShoppingCart size={14} className="relative z-10" />
+            <span className="relative z-10">
+              {isAddingToCart
+                ? "Đang xử lý..."
+                : ticket.availableQuantity > 0
+                ? "Thêm vào giỏ"
+                : "Hết vé"}
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -439,11 +393,11 @@ const TicketSection = ({
   isAddingToCart,
   isDarkMode,
 }) => (
-  <div className="sticky top-14 p-3">
+  <div>
     <SectionTitle icon={Ticket} title="Vé sự kiện" />
 
     {tickets.length > 0 ? (
-      <div className="space-y-2">
+      <div className="space-y-4">
         {tickets.map((ticket) => (
           <TicketCard
             key={ticket.ticketId}
@@ -457,14 +411,14 @@ const TicketSection = ({
           />
         ))}
 
-        <div className="mt-3 pt-2 border-t border-dashed border-gray-300 dark:border-gray-700">
+        <div className="mt-6 pt-4 border-t border-dashed border-gray-300/50 dark:border-gray-700/50">
           <button
             onClick={() => (window.location.href = "/cart")}
-            className={`w-full py-1.5 rounded ${
+            className={`w-full py-3 rounded-full ${
               isDarkMode
-                ? "bg-gray-800 hover:bg-gray-700"
+                ? "bg-gray-800/80 hover:bg-gray-700"
                 : "bg-gray-100 hover:bg-gray-200"
-            } font-medium transition-colors text-xs flex items-center justify-center gap-1`}
+            } font-medium transition-colors text-xs flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md`}
           >
             <ShoppingCart size={14} />
             Xem giỏ hàng
@@ -472,10 +426,10 @@ const TicketSection = ({
         </div>
       </div>
     ) : (
-      <div className="flex flex-col items-center justify-center py-6 text-center">
-        <Ticket className="w-10 h-10 mb-2 text-gray-400 opacity-30" />
+      <div className="flex flex-col items-center justify-center py-8 text-center backdrop-blur-[2px] bg-gray-100/5 dark:bg-gray-800/20 rounded-2xl border border-gray-200/10 dark:border-gray-700/30">
+        <Ticket className="w-12 h-12 mb-3 text-gray-400 opacity-30" />
         <h3 className="text-sm font-medium mb-1">Không có vé nào</h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">
+        <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs px-4">
           Hiện tại chưa có vé nào cho sự kiện này. Vui lòng quay lại sau.
         </p>
       </div>
@@ -488,15 +442,15 @@ const EventTags = ({
   tags = ["Hòa nhạc", "Âm nhạc", "Giải trí"],
   isDarkMode,
 }) => (
-  <div className="flex flex-wrap gap-1 mb-4">
+  <div className="flex flex-wrap gap-1.5 mb-5">
     {tags.map((tag) => (
       <span
         key={tag}
-        className={`text-xs px-2 py-0.5 rounded-full ${
+        className={`text-xs px-3 py-1 rounded-full ${
           isDarkMode
-            ? "bg-gray-800 text-gray-300 border border-gray-700"
-            : "bg-gray-100 text-gray-600 border border-gray-200"
-        }`}
+            ? "bg-gray-800/50 text-gray-300 border border-gray-700/50 backdrop-blur-[2px]"
+            : "bg-gray-100/70 text-gray-600 border border-gray-200/50 backdrop-blur-[2px]"
+        } transition-colors hover:border-orange-500/30`}
       >
         {tag}
       </span>
@@ -507,15 +461,17 @@ const EventTags = ({
 // Event Stats - small stats about the event
 const EventStats = ({ event, isDarkMode }) => (
   <div
-    className={`grid grid-cols-3 gap-2 mb-4 p-2 rounded-lg ${
-      isDarkMode ? "bg-gray-800/30" : "bg-gray-50"
+    className={`grid grid-cols-3 gap-2 mb-5 p-3 rounded-2xl backdrop-blur-[2px] ${
+      isDarkMode
+        ? "bg-gray-800/20 border border-gray-700/30"
+        : "bg-gray-50/70 border border-gray-200/30"
     }`}
   >
     <div className="text-center">
       <div className="text-xs text-gray-500 dark:text-gray-400">Lượt xem</div>
       <div className="font-medium text-sm">2.5k</div>
     </div>
-    <div className="text-center border-x border-gray-200 dark:border-gray-700">
+    <div className="text-center border-x border-gray-200/50 dark:border-gray-700/50">
       <div className="text-xs text-gray-500 dark:text-gray-400">Vé đã bán</div>
       <div className="font-medium text-sm">78%</div>
     </div>
@@ -530,25 +486,35 @@ const EventStats = ({ event, isDarkMode }) => (
 
 // Related events section - "You might also like"
 const RelatedEvents = ({ isDarkMode }) => (
-  <section className="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700">
-    <div className="flex items-center justify-between mb-3">
-      <h3 className="text-sm font-medium">Sự kiện liên quan</h3>
-      <a href="/events" className="text-xs text-orange-500 flex items-center">
+  <section className="mt-6 pt-5 border-t border-gray-200/50 dark:border-gray-700/50">
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-sm font-bold flex items-center">
+        <div className="flex items-center justify-center h-6 w-6 rounded-full bg-orange-500/10 mr-2">
+          <Calendar className="w-3.5 h-3.5 text-orange-500" />
+        </div>
+        Sự kiện liên quan
+      </h3>
+      <a
+        href="/events"
+        className="text-xs text-orange-500 flex items-center hover:underline"
+      >
         Xem tất cả <ChevronsRight className="w-3 h-3 ml-0.5" />
       </a>
     </div>
 
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-2 gap-3">
       {[1, 2].map((i) => (
         <a
           key={i}
           href="/events/1"
-          className={`block rounded-lg overflow-hidden border ${
-            isDarkMode ? "border-gray-700" : "border-gray-200"
+          className={`block rounded-2xl overflow-hidden border backdrop-blur-[2px] transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/5 hover:scale-[1.02] ${
+            isDarkMode
+              ? "border-gray-700/40 bg-gray-800/20"
+              : "border-gray-200/50 bg-white/70"
           }`}
         >
-          <div className="h-20 bg-gray-300 dark:bg-gray-700 relative">
-            <div className="absolute inset-0 flex items-end p-2">
+          <div className="h-24 bg-gradient-to-br from-gray-700 to-gray-900 dark:from-gray-800 dark:to-gray-900 relative">
+            <div className="absolute inset-0 flex items-end p-3 bg-gradient-to-t from-black/60 to-transparent">
               <div className="text-white text-xs font-medium">Sự kiện {i}</div>
             </div>
           </div>
@@ -781,7 +747,9 @@ const EventDetails = () => {
     textSecondary: isDarkMode ? "text-gray-300" : "text-gray-600",
     textMuted: isDarkMode ? "text-gray-400" : "text-gray-500",
     border: isDarkMode ? "border-gray-800" : "border-gray-100",
-    card: isDarkMode ? "bg-gray-800/50" : "bg-white",
+    card: isDarkMode
+      ? "bg-gray-800/50 backdrop-filter backdrop-blur-[2px]"
+      : "bg-white/80 backdrop-filter backdrop-blur-[2px]",
   };
 
   // Loading screen
@@ -790,9 +758,9 @@ const EventDetails = () => {
       <div
         className={`min-h-screen flex items-center justify-center ${theme.bg}`}
       >
-        <div className="flex flex-col items-center gap-2">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-orange-500 border-t-transparent"></div>
-          <p className={`text-xs ${theme.text}`}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-orange-500 border-t-transparent"></div>
+          <p className={`text-sm ${theme.text}`}>
             Đang tải thông tin sự kiện...
           </p>
         </div>
@@ -806,20 +774,20 @@ const EventDetails = () => {
       <div
         className={`min-h-screen flex items-center justify-center ${theme.bg}`}
       >
-        <div className="text-center max-w-xs mx-auto p-4">
-          <Info size={32} className="mx-auto mb-3 text-orange-500" />
-          <h2 className={`text-lg font-bold mb-1.5 ${theme.text}`}>
+        <div className="text-center max-w-xs mx-auto p-5 rounded-2xl backdrop-blur-[2px] bg-gray-100/5 dark:bg-gray-800/20 border border-gray-200/10 dark:border-gray-700/30">
+          <Info size={40} className="mx-auto mb-4 text-orange-500" />
+          <h2 className={`text-xl font-bold mb-2 ${theme.text}`}>
             Không tìm thấy sự kiện
           </h2>
-          <p className={`mb-4 text-xs ${theme.textMuted}`}>
+          <p className={`mb-5 text-sm ${theme.textMuted}`}>
             Sự kiện này không tồn tại hoặc đã bị xóa. Vui lòng kiểm tra lại
             đường dẫn.
           </p>
           <button
             onClick={() => navigate("/events")}
-            className="px-4 py-1.5 rounded bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium transition-colors flex items-center gap-1 mx-auto"
+            className="px-5 py-2 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-sm font-medium transition-all duration-300 flex items-center gap-2 mx-auto shadow-md hover:shadow-lg"
           >
-            <ArrowLeft size={14} />
+            <ArrowLeft size={16} />
             <span>Quay lại trang sự kiện</span>
           </button>
         </div>
@@ -833,75 +801,130 @@ const EventDetails = () => {
 
   return (
     <div className={`min-h-screen ${theme.bg} ${theme.text}`}>
-      {/* Header Actions */}
-      <HeaderActions
-        onBackClick={() => navigate("/events")}
-        isLiked={isLiked}
-        setIsLiked={setIsLiked}
-      />
+      <div className="w-full">
+        {/* Main Content Area */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+          {/* Event title */}
+          <div className="mb-6 text-center">
+            <h1 className={`text-2xl md:text-3xl font-bold ${theme.text}`}>
+              {event.eventName}
+            </h1>
+            <div className="flex flex-wrap items-center justify-center gap-4 mt-3 text-sm">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="w-4 h-4 text-orange-500" />
+                <span className={theme.textSecondary}>{eventDate.full}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-orange-500" />
+                <span className={theme.textSecondary}>{event.location}</span>
+              </div>
+            </div>
+          </div>
 
-      {/* Main content */}
-      <div className="flex flex-col lg:flex-row">
-        {/* Event information column */}
-        <div className="w-full lg:w-2/3 pt-0">
-          {/* Event Header with smaller dimensions */}
-          <EventHeader event={event} eventDate={eventDate} />
+          {/* Main content */}
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Event information column */}
+            <div className="w-full lg:w-2/3">
+              {/* Content wrapper with proper spacing */}
+              <div className="p-5 rounded-3xl backdrop-blur-[2px] bg-white/5 dark:bg-gray-800/5 border border-white/10 dark:border-gray-700/10 shadow-lg">
+                {/* Event image - now in left column */}
+                <div className="mb-6">
+                  <div className="relative w-full h-[220px] md:h-[280px] overflow-hidden rounded-xl shadow-md">
+                    {event.eventImage &&
+                    (event.eventImage.startsWith("http") ||
+                      event.eventImage.includes(".appspot.com")) ? (
+                      <img
+                        src={event.eventImage}
+                        alt={event.eventName}
+                        className="w-full h-full object-cover object-center"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                        <Calendar className="w-16 h-16 text-gray-600 opacity-30" />
+                      </div>
+                    )}
 
-          {/* Event Content - more compact padding */}
-          <div className="px-3 py-4 md:px-4">
-            {/* Event tags */}
-            <EventTags isDarkMode={isDarkMode} />
+                    {/* Overlay gradient for better contrast */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
 
-            {/* Event stats */}
-            <EventStats event={event} isDarkMode={isDarkMode} />
+                    {/* Event status pill */}
+                    <div className="absolute top-3 left-3">
+                      <div className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-orange-500/80 to-orange-600/80 text-white border border-orange-500/40 shadow-sm">
+                        <span className="mr-1 h-1.5 w-1.5 rounded-full bg-white inline-flex"></span>
+                        {event.status === 1 ? "Đang diễn ra" : "Đã kết thúc"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-            {/* Description */}
-            <EventDescription
-              description={event.eventDescription}
-              showAllDescription={showAllDescription}
-              setShowAllDescription={setShowAllDescription}
-            />
+                {/* Event tags */}
+                <EventTags isDarkMode={isDarkMode} />
 
-            {/* Event Highlights - smaller card layout */}
-            <EventHighlights
-              event={event}
-              tickets={tickets}
-              isDarkMode={isDarkMode}
-            />
+                {/* Event stats */}
+                <EventStats event={event} isDarkMode={isDarkMode} />
 
-            {/* Location Details - more compact layout */}
-            <LocationSection
-              event={event}
-              eventDate={eventDate}
-              isDarkMode={isDarkMode}
-            />
+                {/* Description */}
+                <EventDescription
+                  description={event.eventDescription}
+                  showAllDescription={showAllDescription}
+                  setShowAllDescription={setShowAllDescription}
+                />
 
-            {/* Organizer Information - smaller, cleaner layout */}
-            <OrganizerSection event={event} isDarkMode={isDarkMode} />
+                {/* Event Highlights */}
+                <EventHighlights
+                  event={event}
+                  tickets={tickets}
+                  isDarkMode={isDarkMode}
+                />
 
-            {/* Related events section */}
-            <RelatedEvents isDarkMode={isDarkMode} />
+                {/* Location Details */}
+                <LocationSection
+                  event={event}
+                  eventDate={eventDate}
+                  isDarkMode={isDarkMode}
+                />
+
+                {/* Organizer Information */}
+                <OrganizerSection event={event} isDarkMode={isDarkMode} />
+
+                {/* Related events section */}
+                <RelatedEvents isDarkMode={isDarkMode} />
+              </div>
+            </div>
+
+            {/* Tickets column */}
+            <div className="w-full lg:w-1/3 md:sticky md:top-5 self-start">
+              {loadingTickets ? (
+                <div className="h-36 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-orange-500 border-t-transparent"></div>
+                </div>
+              ) : (
+                <div className="p-5 rounded-3xl backdrop-blur-[2px] bg-white/5 dark:bg-gray-800/5 border border-white/10 dark:border-gray-700/10 shadow-lg">
+                  <TicketSection
+                    tickets={tickets}
+                    ticketQuantities={ticketQuantities}
+                    incrementQuantity={incrementQuantity}
+                    decrementQuantity={decrementQuantity}
+                    handleAddToCart={handleAddToCart}
+                    isAddingToCart={isAddingToCart}
+                    isDarkMode={isDarkMode}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Tickets column */}
-        <div className="w-full lg:w-1/3 lg:border-l lg:border-gray-200 dark:lg:border-gray-800">
-          {loadingTickets ? (
-            <div className="h-36 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-orange-500 border-t-transparent"></div>
-            </div>
-          ) : (
-            <TicketSection
-              tickets={tickets}
-              ticketQuantities={ticketQuantities}
-              incrementQuantity={incrementQuantity}
-              decrementQuantity={decrementQuantity}
-              handleAddToCart={handleAddToCart}
-              isAddingToCart={isAddingToCart}
-              isDarkMode={isDarkMode}
-            />
-          )}
-        </div>
+      {/* Back to events button - floating at bottom left */}
+      <div className="fixed bottom-6 left-6 z-30">
+        <button
+          onClick={() => navigate("/events")}
+          className="flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md text-white transition-all border border-white/20 shadow-lg"
+        >
+          <ArrowLeft size={16} />
+          <span className="text-sm">Quay lại</span>
+        </button>
       </div>
 
       {/* Mobile only: Smaller floating action button for tickets */}
@@ -913,9 +936,9 @@ const EventDetails = () => {
                 .querySelector(".lg\\:w-1\\/3")
                 .scrollIntoView({ behavior: "smooth" });
             }}
-            className="w-10 h-10 rounded-full bg-orange-500 hover:bg-orange-600 flex items-center justify-center shadow-md text-white transition-colors"
+            className="w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 flex items-center justify-center shadow-lg text-white transition-all duration-300 hover:shadow-orange-500/30 border border-white/10"
           >
-            <Ticket size={16} />
+            <Ticket size={20} />
           </button>
         </div>
       )}

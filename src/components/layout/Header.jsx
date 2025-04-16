@@ -1,3 +1,5 @@
+"use client";
+
 import React, {
   memo,
   lazy,
@@ -9,15 +11,47 @@ import React, {
 import { useHeaderScroll } from "../../hooks/useHeaderScroll";
 import HeaderLogo from "../header/header/HeaderLogo";
 import DesktopNav from "../header/header/DesktopNav";
-import SearchBar from "../header/header/SearchBar";
 import ThemeToggle from "../header/header/ThemeToggle";
 import UserMenu from "../header/UserMenu";
 import CartButton from "../header/CartButton";
 import MobileMenuButton from "../header/MobileMenu/MobileMenuButton";
 import { AnimatePresence, motion } from "framer-motion";
 
-// Lazy load mobile navigation
-const MobileNav = lazy(() => import("../header/MobileMenu"));
+// Import MobileNav directly as a failsafe in case lazy loading fails
+import MobileNavDirect from "../header/MobileMenu";
+
+// ErrorBoundary for gracefully handling lazy loading errors
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Error loading component:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // Fallback to direct import if lazy loading fails
+      return this.props.fallback || null;
+    }
+    return this.props.children;
+  }
+}
+
+// Lazy load mobile navigation with error boundary fallback
+const MobileNav = lazy(() =>
+  import("../header/MobileMenu").catch((err) => {
+    console.error("Failed to lazy load MobileMenu:", err);
+    // Return a module-like object that will use the direct import
+    return { default: MobileNavDirect };
+  }),
+);
 
 // Simplified breakpoints
 const BREAKPOINTS = {
@@ -25,21 +59,21 @@ const BREAKPOINTS = {
   TABLET: 1024,
 };
 
-// Simplified animation variants
+// Enhanced animation variants
 const headerVariants = {
-  hidden: { y: -100 },
-  visible: { y: 0 },
+  hidden: { y: -100, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut",
+    },
+  },
 };
 
 /**
- * Enhanced Header Component with improved UX and performance
- *
- * Features:
- * - Optimized animations with reduced layout shifts
- * - Better accessibility with improved focus management
- * - Enhanced responsive behavior with smoother transitions
- * - Reduced render cycles with memoization and callback optimizations
- * - Improved compact mode with subtle visual cues
+ * Modern Header Component with optimized UI
  */
 const Header = () => {
   const {
@@ -64,10 +98,10 @@ const Header = () => {
 
   const showMobileNav = windowWidth < BREAKPOINTS.MOBILE || forceMobileMode;
 
-  // Simplified header background
+  // Clean header background styling
   const headerBgClass = isScrolled
     ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm"
-    : "bg-transparent";
+    : "bg-white dark:bg-gray-900";
 
   // Optimized resize handler
   const handleResize = useCallback(() => {
@@ -121,17 +155,13 @@ const Header = () => {
       </a>
 
       {/* Main Header */}
-      <motion.header
+      <header
         ref={headerRef}
-        className={`fixed top-0 left-0 w-full z-50 ${headerBgClass} transition-colors duration-200`}
-        initial="hidden"
-        animate={isHeaderVisible ? "visible" : "hidden"}
-        variants={headerVariants}
-        role="banner"
+        className={`fixed top-0 left-0 w-full z-50 ${headerBgClass} transition-all duration-300`}
       >
-        <div className="max-w-screen-xl mx-auto">
-          <div className="px-4 py-3">
-            <div className="flex items-center justify-between gap-2">
+        <div className="max-w-7xl mx-auto">
+          <div className="px-4 py-4">
+            <div className="flex items-center justify-between">
               {/* Logo */}
               <div className="flex-shrink-0">
                 <HeaderLogo />
@@ -139,14 +169,13 @@ const Header = () => {
 
               {/* Desktop Navigation */}
               {!showMobileNav && (
-                <div className="flex-1 flex justify-center">
+                <div className="flex-1 flex justify-center mx-8">
                   <DesktopNav />
                 </div>
               )}
 
               {/* Actions */}
-              <div className="flex items-center gap-2">
-                <SearchBar mini={showMobileNav} />
+              <div className="flex items-center space-x-4">
                 <ThemeToggle />
                 {userRole && userRole !== "ORGANIZATION" && <CartButton />}
                 <UserMenu />
@@ -160,22 +189,30 @@ const Header = () => {
           </div>
 
           {/* Mobile Navigation */}
-          <Suspense
+          <ErrorBoundary
             fallback={
-              <div className="p-4 text-center text-sm text-gray-500">
-                <div className="inline-block w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></div>
-                Đang tải...
-              </div>
+              isMenuOpen && showMobileNav ? (
+                <MobileNavDirect isOpen={isMenuOpen} onItemClick={closeMenu} />
+              ) : null
             }
           >
-            <AnimatePresence>
-              {isMenuOpen && showMobileNav && (
-                <MobileNav isOpen={isMenuOpen} onItemClick={closeMenu} />
-              )}
-            </AnimatePresence>
-          </Suspense>
+            <Suspense
+              fallback={
+                <div className="p-4 text-center text-sm text-gray-500">
+                  <div className="inline-block w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Đang tải...
+                </div>
+              }
+            >
+              <AnimatePresence>
+                {isMenuOpen && showMobileNav && (
+                  <MobileNav isOpen={isMenuOpen} onItemClick={closeMenu} />
+                )}
+              </AnimatePresence>
+            </Suspense>
+          </ErrorBoundary>
         </div>
-      </motion.header>
+      </header>
 
       {/* Spacer */}
       <div

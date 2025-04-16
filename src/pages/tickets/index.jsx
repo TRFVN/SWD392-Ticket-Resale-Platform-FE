@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
+import ReactDOM from "react-dom";
 import {
   Ticket,
   AlertCircle,
@@ -16,12 +17,17 @@ import {
   Map,
   CreditCard,
   Calendar,
+  Info,
+  Music,
+  X,
+  ExternalLink,
 } from "lucide-react";
 import { getAllTicketsApi } from "../../services/ticket";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../config/axiosConfig";
 import { toast } from "react-toastify";
 import { notifyCartUpdated } from "../../utils/cartEvents";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Notification Toast Component
 const Toast = ({ message, type }) => (
@@ -33,6 +39,234 @@ const Toast = ({ message, type }) => (
     <p className="font-medium">{message}</p>
   </div>
 );
+
+/**
+ * HƯỚNG DẪN THÊM FILE NHẠC:
+ *
+ * 1. Tạo thư mục: public/audio/
+ * 2. Tải file MP3 "Đừng Làm Trái Tim Anh Đau" của Sơn Tùng MTP
+ * 3. Đặt file vào thư mục public/audio/ với tên dunglamtraitimanhdau.mp3
+ * 4. File sẽ được tự động truy cập thông qua đường dẫn "/audio/dunglamtraitimanhdau.mp3"
+ *
+ * LƯU Ý: Đảm bảo bạn có quyền sử dụng file nhạc này hoặc thay thế bằng file khác có bản quyền
+ */
+
+// Feature Announcement Popup
+const FeaturePopup = ({ isOpen, onClose, isDarkMode }) => {
+  const navigate = useNavigate();
+  const [videoPlaying, setVideoPlaying] = useState(true);
+  const [videoError, setVideoError] = useState(false);
+  const iframeRef = React.useRef(null);
+
+  // Xử lý scroll body khi popup xuất hiện
+  useEffect(() => {
+    if (isOpen) {
+      // Ngăn cuộn trang khi popup hiển thị
+      document.body.style.overflow = "hidden";
+
+      // Thêm padding-right để tránh shift layout khi scrollbar biến mất
+      const scrollbarWidth =
+        window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    } else {
+      // Cho phép cuộn trang khi popup đóng
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
+  }, [isOpen]);
+
+  // Function to control YouTube video
+  const toggleVideo = () => {
+    if (iframeRef.current) {
+      try {
+        // Send message to iframe to play/pause video
+        const message = videoPlaying
+          ? '{"event":"command","func":"pauseVideo","args":""}'
+          : '{"event":"command","func":"playVideo","args":""}';
+
+        iframeRef.current.contentWindow.postMessage(message, "*");
+        setVideoPlaying(!videoPlaying);
+      } catch (error) {
+        console.error("YouTube control error:", error);
+        setVideoError(true);
+      }
+    }
+  };
+
+  // Go to events page
+  const goToEvents = () => {
+    // Try to pause the video before navigation
+    if (iframeRef.current) {
+      try {
+        iframeRef.current.contentWindow.postMessage(
+          '{"event":"command","func":"pauseVideo","args":""}',
+          "*",
+        );
+      } catch (e) {
+        console.error("Error pausing YouTube video:", e);
+      }
+    }
+    onClose();
+    navigate("/events");
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9998,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              backdropFilter: "blur(4px)",
+            }}
+            className="z-[9999]"
+            onClick={onClose}
+          />
+
+          {/* Popup */}
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 0 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            style={{
+              position: "relative",
+              margin: 0,
+              maxHeight: "90vh",
+              overflowY: "auto",
+              zIndex: 10000,
+            }}
+            className={`w-11/12 max-w-md rounded-xl p-6 shadow-xl border
+              ${
+                isDarkMode
+                  ? "bg-gray-800 border-gray-700 text-white"
+                  : "bg-white border-gray-200 text-gray-900"
+              }`}
+          >
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Content */}
+            <div className="flex flex-col items-center text-center">
+              <div
+                className={`w-20 h-20 rounded-full flex items-center justify-center mb-4
+                bg-gradient-to-r ${
+                  isDarkMode
+                    ? "from-orange-600/40 to-violet-500/40"
+                    : "from-orange-200 to-purple-200"
+                }`}
+              >
+                <Info
+                  className={`w-10 h-10 ${
+                    isDarkMode ? "text-orange-400" : "text-orange-500"
+                  }`}
+                />
+              </div>
+
+              <h3 className="text-xl font-bold mb-2 bg-gradient-to-r from-orange-500 to-purple-600 bg-clip-text text-transparent">
+                Tính năng đang hoàn thiện
+              </h3>
+
+              <p
+                className={`mb-4 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-600"
+                }`}
+              >
+                Chúng tôi đang nâng cấp trang vé để mang đến trải nghiệm tốt
+                hơn. Vui lòng ghé thăm trang sự kiện để mua vé và có trải nghiệm
+                tốt nhất.
+              </p>
+
+              {/* YouTube Video Player */}
+              <div className="w-full mb-4 rounded-lg overflow-hidden aspect-video shadow-lg border border-orange-500/30">
+                <iframe
+                  ref={iframeRef}
+                  id="youtube-player"
+                  width="100%"
+                  height="100%"
+                  src="https://www.youtube.com/embed/abPmZCZZrFA?list=RDNjD0H4eBfng&start=107&autoplay=1&enablejsapi=1"
+                  title="Đừng Làm Trái Tim Anh Đau - Sơn Tùng MTP"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                ></iframe>
+              </div>
+
+              {/* Video Controls */}
+              <div
+                className={`w-full p-2 rounded-lg mb-4 flex items-center justify-center gap-3
+                ${isDarkMode ? "bg-gray-700" : "bg-gray-100"}`}
+              >
+                <button
+                  onClick={toggleVideo}
+                  className={`px-4 py-1 rounded-full flex items-center justify-center gap-2
+                    ${
+                      videoPlaying
+                        ? "bg-orange-500 text-white"
+                        : "bg-white dark:bg-gray-800 text-orange-500"
+                    } 
+                    shadow-sm transition-colors`}
+                >
+                  <Music className="w-4 h-4" />
+                  <span>{videoPlaying ? "Tạm dừng" : "Tiếp tục"}</span>
+                </button>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <button
+                  onClick={onClose}
+                  className={`flex-1 py-2 px-4 rounded-lg border transition-colors
+                    ${
+                      isDarkMode
+                        ? "border-gray-700 hover:bg-gray-700"
+                        : "border-gray-200 hover:bg-gray-100"
+                    }`}
+                >
+                  Quay lại
+                </button>
+
+                <button
+                  onClick={goToEvents}
+                  className="flex-1 py-2 px-4 rounded-lg bg-orange-500 hover:bg-orange-600 text-white 
+                    transition-colors flex items-center justify-center gap-2"
+                >
+                  <span>Đến trang sự kiện</span>
+                  <ExternalLink className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 // Enhanced Ticket Card Component
 const TicketCard = ({ ticket, onAction, onAddToCart, isDarkMode }) => {
@@ -129,7 +363,7 @@ const TicketCard = ({ ticket, onAction, onAddToCart, isDarkMode }) => {
           isDarkMode ? "border-gray-700" : "border-gray-100"
         }`}
       >
-        <button
+        {/* <button
           onClick={() => onAction(ticket)}
           className={`flex-1 py-3 text-sm font-medium transition-colors
             ${
@@ -139,7 +373,7 @@ const TicketCard = ({ ticket, onAction, onAddToCart, isDarkMode }) => {
             }`}
         >
           Xem chi tiết
-        </button>
+        </button> */}
         <div
           className={`w-px ${isDarkMode ? "bg-gray-700" : "bg-gray-100"}`}
         ></div>
@@ -170,6 +404,7 @@ const TicketsPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState(0);
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [showFeaturePopup, setShowFeaturePopup] = useState(false);
 
   const isDarkMode = useSelector((state) => state.theme?.isDarkMode);
   const navigate = useNavigate();
@@ -188,6 +423,25 @@ const TicketsPage = () => {
       max: Math.max(...tickets.map((t) => t.ticketPrice)),
     };
   }, [tickets]);
+
+  // Show popup when component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowFeaturePopup(true);
+
+      // Thêm một lớp animation cho body khi popup hiển thị
+      document.body.classList.add("popup-active");
+
+      return () => {
+        document.body.classList.remove("popup-active");
+      };
+    }, 1000); // Show popup after 1 second
+
+    return () => {
+      clearTimeout(timer);
+      document.body.classList.remove("popup-active");
+    };
+  }, []);
 
   // Effects
   useEffect(() => {
@@ -323,6 +577,13 @@ const TicketsPage = () => {
         isDarkMode ? "bg-gray-900" : "bg-gray-50"
       } min-h-screen`}
     >
+      {/* Feature Popup - Đặt ở đầu để đảm bảo hiển thị đúng */}
+      <FeaturePopup
+        isOpen={showFeaturePopup}
+        onClose={() => setShowFeaturePopup(false)}
+        isDarkMode={isDarkMode}
+      />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10">
