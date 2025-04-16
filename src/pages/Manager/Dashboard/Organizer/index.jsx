@@ -28,8 +28,8 @@ const Organizer = () => {
   useEffect(() => {
     const fetchData = async () => {
       const data = await getOrganizer();
-      setCustomers(data.customers);
-      generateChartData(data.customers);
+      setCustomers(data.organizers);
+      generateChartData(data.organizers);
     };
 
     fetchData();
@@ -43,7 +43,7 @@ const Organizer = () => {
       return acc;
     }, {});
 
-    const chartData = Object.keys(countryCount).map((country) => ({
+    const chartData = Object.keys(countryCount)?.map((country) => ({
       country,
       count: countryCount[country],
       color: getRandomColor(),

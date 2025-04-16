@@ -1,5 +1,6 @@
 import { toast } from "react-toastify";
 import axiosInstance from "../config/axiosConfig";
+import axios from "axios";
 
 export const getRevenue = async () => {
   try {
@@ -146,5 +147,17 @@ export const getCustomer = async () => {
   } catch (error) {
     console.log(error.message || "Lỗi khi lấy customer");
     throw new Error(error.message || "Lỗi khi lấy customer");
+  }
+};
+
+export const createOrganizationAccount = async (data) => {
+  try {
+    const response = await axiosInstance.post("/sign-up-organization", data);
+    if (response.data.result) toast.success("Create Organiztion Account");
+    return response.data.result;
+  } catch (error) {
+    toast.error("Create Organization Account Failed");
+    console.log(error.message || "Create Organization Account Failed");
+    throw new Error(error.message || "Create Organization Account Failed");
   }
 };

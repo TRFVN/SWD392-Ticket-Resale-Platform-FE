@@ -12,7 +12,14 @@ import {
   Mail,
   Lock,
   AlertCircle,
+  Building2,
+  Globe,
+  Landmark,
+  Eye,
+  EyeOff,
 } from "lucide-react";
+import { createOrganizationAccount } from "../../../services/manager";
+import { useNavigate } from "react-router-dom";
 
 const steps = ["Organization Info", "Contact Info", "Account Info"];
 
@@ -25,7 +32,9 @@ const validationSchemas = [
     address: Yup.string().required("Required"),
   }),
   Yup.object({
-    taxId: Yup.string().required("Required"),
+    taxId: Yup.string()
+      .required("Required")
+      .matches(/^\d{10}$/, "Tax ID must be 10 digits"),
     phoneNumber: Yup.string()
       .matches(/^\d{10}$/, "Phone must be 10 digits")
       .required("Required"),
@@ -47,7 +56,9 @@ const validationSchemas = [
 
 export default function OrganizationRegister() {
   const [step, setStep] = useState(0);
-
+  const [isShowPassword, setIsShowPassword] = useState(false);
+  const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false);
+  const naviagte = useNavigate();
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6">
       <motion.div
@@ -127,8 +138,10 @@ export default function OrganizationRegister() {
             confirmPassword: "",
           }}
           validationSchema={validationSchemas[step]}
-          onSubmit={(values) => {
-            console.log("Submitted values", values);
+          onSubmit={async (values, { resetForm }) => {
+            createOrganizationAccount(values);
+            resetForm();
+            naviagte("/manager/dashboard");
           }}
         >
           {({ values, errors, touched, isValid, validateForm }) => (
@@ -173,7 +186,7 @@ export default function OrganizationRegister() {
                       <div>
                         <label className="block">
                           <div className="flex items-center mb-2">
-                            <MapPin className="w-5 h-5 mr-2 text-orange-400" />
+                            <Globe className="w-5 h-5 mr-2 text-orange-400" />
                             <span className="text-white">Country</span>
                           </div>
                           <Field
@@ -219,7 +232,7 @@ export default function OrganizationRegister() {
                       <div>
                         <label className="block">
                           <div className="flex items-center mb-2">
-                            <MapPin className="w-5 h-5 mr-2 text-orange-400" />
+                            <Building2 className="w-5 h-5 mr-2 text-orange-400" />
                             <span className="text-white">City</span>
                           </div>
                           <Field
@@ -267,7 +280,7 @@ export default function OrganizationRegister() {
                       <div className="col-span-2">
                         <label className="block">
                           <div className="flex items-center mb-2">
-                            <MapPin className="w-5 h-5 mr-2 text-orange-400" />
+                            <Landmark className="w-5 h-5 mr-2 text-orange-400" />
                             <span className="text-white">Address Details</span>
                           </div>
                           <Field
@@ -417,12 +430,28 @@ export default function OrganizationRegister() {
                           <Lock className="w-5 h-5 mr-2 text-orange-400" />
                           <span className="text-white">Password</span>
                         </div>
-                        <Field
-                          type="password"
-                          name="password"
-                          className="w-full mt-1 p-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-white"
-                          placeholder="Create password"
-                        />
+
+                        <div className="relative">
+                          <Field
+                            type={isShowPassword ? "text" : "password"}
+                            name="password"
+                            className="w-full p-3 pr-10 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-white"
+                            placeholder="Create password"
+                          />
+
+                          {isShowPassword ? (
+                            <EyeOff
+                              onClick={() => setIsShowPassword(false)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-white text-opacity-80 w-5 h-5"
+                            />
+                          ) : (
+                            <Eye
+                              onClick={() => setIsShowPassword(true)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-white text-opacity-80 w-5 h-5"
+                            />
+                          )}
+                        </div>
+
                         <ErrorMessage
                           name="password"
                           className="text-orange-300 text-sm mt-1"
@@ -433,6 +462,7 @@ export default function OrganizationRegister() {
                             </div>
                           )}
                         />
+
                         <div className="text-white text-opacity-80 text-xs mt-2">
                           Password must contain at least 8 characters, including
                           uppercase, lowercase, number and special character.
@@ -444,12 +474,28 @@ export default function OrganizationRegister() {
                           <Lock className="w-5 h-5 mr-2 text-orange-400" />
                           <span className="text-white">Confirm Password</span>
                         </div>
-                        <Field
-                          type="password"
-                          name="confirmPassword"
-                          className="w-full mt-1 p-3 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-white"
-                          placeholder="Confirm password"
-                        />
+
+                        <div className="relative">
+                          <Field
+                            type={isShowConfirmPassword ? "text" : "password"}
+                            name="confirmPassword"
+                            className="w-full p-3 pr-10 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent transition text-white"
+                            placeholder="Confirm password"
+                          />
+
+                          {isShowConfirmPassword ? (
+                            <EyeOff
+                              onClick={() => setIsShowConfirmPassword(false)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-white text-opacity-80 w-5 h-5"
+                            />
+                          ) : (
+                            <Eye
+                              onClick={() => setIsShowConfirmPassword(true)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-white text-opacity-80 w-5 h-5"
+                            />
+                          )}
+                        </div>
+
                         <ErrorMessage
                           name="confirmPassword"
                           className="text-orange-300 text-sm mt-1"
