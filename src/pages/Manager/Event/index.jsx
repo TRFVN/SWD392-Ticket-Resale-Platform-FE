@@ -188,6 +188,7 @@ const Event = () => {
                         <div
                           key={event.eventId}
                           className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:scale-105 transition cursor-pointer"
+                          onClick={() => handleShowDetail(event)}
                         >
                           <img
                             src={event.eventImage}

@@ -106,14 +106,9 @@ export const getEvent = async () => {
   }
 };
 
-export const getTicket = async (pageNumber) => {
+export const getTicket = async () => {
   try {
-    const response = await axiosInstance.get(`/api/tickets/templates`, {
-      params: {
-        pageNumber: pageNumber,
-      },
-    });
-    console.log(response.data.result);
+    const response = await axiosInstance.get(`/api/tickets/templates`);
 
     return response.data.result;
   } catch (error) {
@@ -124,7 +119,6 @@ export const getTicket = async (pageNumber) => {
 export const getTicketByEventId = async (eventId) => {
   try {
     const response = await axiosInstance.get(`/api/tickets/event/${eventId}`);
-    console.log(response.data.result);
 
     return response.data.result;
   } catch (error) {

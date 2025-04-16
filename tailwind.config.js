@@ -42,6 +42,7 @@ export default {
         "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "ticket-float": "float 6s ease-in-out infinite",
         "fade-in": "fadeIn 0.5s ease-out",
+        spinOnce: "spinOnce 0.5s linear",
       },
       keyframes: {
         "gradient-y": {
@@ -89,6 +90,10 @@ export default {
           "100%": {
             opacity: "1",
           },
+        },
+        spinOnce: {
+          "0%": { transform: "rotate(360deg)" },
+          "100%": { transform: "rotate(0deg)" },
         },
       },
       boxShadow: {
