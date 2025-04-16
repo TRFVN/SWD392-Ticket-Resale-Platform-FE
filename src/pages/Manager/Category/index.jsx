@@ -1,23 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { createCategory, getCategory } from "../../../services/manager";
-import TableSkeletonLoading from "../components/TableSkeletonLoading";
+import {
+  createCategory,
+  deleteCategory,
+  getCategory,
+} from "../../../services/manager";
+import CategoryLoading from "../components/CategoryLoading";
 import { Edit, Trash, Plus, Search, X } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { toast } from "react-toastify";
 const Category = () => {
   const [category, setCategory] = useState([]);
-  const [isLoadingCategory, setIsLoadingCategory] = useState(true);
+  const [isCategoryLoading, setIsCategoryLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const categoriesPerPage = 5;
+  const categoriesPerPage = 7;
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+
   useEffect(() => {
     const fetchCategory = async () => {
       const response = await getCategory();
       if (response) {
         setCategory(response);
-        setIsLoadingCategory(false);
+        setIsCategoryLoading(false);
       }
     };
     fetchCategory();
@@ -33,25 +39,12 @@ const Category = () => {
     currentPage * categoriesPerPage,
   );
 
-  const handleCreateCategory = async (categoryName) => {
-    const res = await createCategory(categoryName);
-    try {
-      if (res.statusCode == 200) {
-        toast.success("Create category successfully");
-      }
-      return;
-    } catch (error) {
-      toast.error("Create category failed");
-      console.log(error.message || "Create category failed");
-    }
-    return;
-  };
   return (
     <main className="flex flex-col gap-12 p-6">
       <section className="text-white text-3xl font-bold">Category</section>
 
-      {isLoadingCategory ? (
-        <TableSkeletonLoading />
+      {isCategoryLoading ? (
+        <CategoryLoading />
       ) : (
         <>
           <div className="flex flex-col gap-6">
@@ -125,10 +118,19 @@ const Category = () => {
                         )}
                       </td>
                       <td className="flex gap-3 px-6 py-4 text-sm">
-                        <span className="bg-yellow-500/10 p-1 rounded-md cursor-pointer hover:bg-yellow-500/50">
+                        <span
+                          className="bg-yellow-500/10 p-1 rounded-md cursor-pointer hover:bg-yellow-500/50"
+                          onClick={() => alert("Có cái loz API mà edit")}
+                        >
                           <Edit className="text-yellow-500" />
                         </span>
-                        <span className="bg-red-500/10 p-1 rounded-md cursor-pointer hover:bg-red-500/50">
+                        <span
+                          className="bg-red-500/10 p-1 rounded-md cursor-pointer hover:bg-red-500/50"
+                          onClick={() => {
+                            setShowConfirm(true);
+                            setCategoryToDelete(cat);
+                          }}
+                        >
                           <Trash className="text-red-500" />
                         </span>
                       </td>
@@ -199,9 +201,12 @@ const Category = () => {
                       .min(3, "Must be at least 3 characters")
                       .required("Required"),
                   })}
-                  onSubmit={(values, { resetForm }) => {
+                  onSubmit={async (values, { resetForm }) => {
                     console.log("Created:", values);
-                    handleCreateCategory(values);
+                    const newCategory = await createCategory(
+                      values.categoryName,
+                    );
+                    setCategory((prev) => [newCategory, ...prev]);
                     resetForm();
                     setIsModalOpen(false);
                   }}
@@ -248,6 +253,50 @@ const Category = () => {
             </div>
           )}
         </>
+      )}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-manager-secondary text-white p-6 rounded-2xl shadow-lg border border-gray-700 w-[90%] max-w-md">
+            <h2 className="text-xl font-semibold mb-4">Confirm Delete</h2>
+            <p className="mb-6">
+              Are you sure you want to delete{" "}
+              <span className="font-bold text-red-400">
+                {categoryToDelete?.categoryName}
+              </span>
+              ?
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                className="px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-600"
+                onClick={() => {
+                  setShowConfirm(false);
+                  setCategoryToDelete(null);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700"
+                onClick={async () => {
+                  try {
+                    await deleteCategory(categoryToDelete.categoryId);
+                    setCategory((prev) =>
+                      prev.filter(
+                        (cat) => cat.categoryId !== categoryToDelete.categoryId,
+                      ),
+                    );
+                    setShowConfirm(false);
+                    setCategoryToDelete(null);
+                  } catch (error) {
+                    console.error("Failed to delete", error);
+                  }
+                }}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );
