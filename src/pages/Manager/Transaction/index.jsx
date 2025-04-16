@@ -25,14 +25,14 @@ const Transaction = () => {
 
   return (
     <div className="p-6 text-white min-h-screen">
-      <h1 className="text-3xl font-bold mb-4">Transaction Management</h1>
+      <h1 className="text-3xl font-bold mb-12">Transaction Management</h1>
 
-      <div className="bg-gray-800 p-4 rounded-lg shadow-md mb-6 flex items-center gap-4">
+      <div className="bg-gray-800 p-4 rounded-lg shadow-md mb-12 flex items-center gap-4">
         <FaMoneyBillWave className="text-green-400 text-3xl" />
         <div>
           <p className="text-gray-300">Total Profit</p>
           <p className="text-xl font-semibold text-green-300">
-            {totalProfit.toLocaleString()} VND
+            {totalProfit.toLocaleString()} ₫
           </p>
         </div>
       </div>
@@ -44,6 +44,7 @@ const Transaction = () => {
           <table className="min-w-full bg-gray-800 text-white rounded-lg shadow-md">
             <thead>
               <tr className="bg-gray-700 text-left">
+                <th className="p-3">No.</th>
                 <th className="p-3">Customer</th>
                 <th className="p-3">Email</th>
                 <th className="p-3">Amount</th>
@@ -53,23 +54,26 @@ const Transaction = () => {
               </tr>
             </thead>
             <tbody>
-              {transactions.map((tx) => (
+              {transactions.map((tx, index) => (
                 <tr
                   key={tx.transactionId}
                   className="border-b border-gray-700 hover:bg-gray-700"
                 >
-                  <td className="p-3">
+                  <td className="p-3 bg-gray-900">{index}</td>
+                  <td className="p-3 bg-gray-800">
                     {tx.customer?.user?.fullName || "No name"}
                   </td>
-                  <td className="p-3">{tx.customer?.user?.email || "N/A"}</td>
-                  <td className="p-3 text-green-400">
-                    {tx.amount.toLocaleString()} VND
+                  <td className="p-3 bg-gray-900">
+                    {tx.customer?.user?.email || "N/A"}
                   </td>
-                  <td className="p-3">{tx.transactionMethod}</td>
-                  <td className="p-3">
+                  <td className="p-3 bg-gray-800 text-green-400">
+                    {tx.amount.toLocaleString()} ₫
+                  </td>
+                  <td className="p-3 bg-gray-900">{tx.transactionMethod}</td>
+                  <td className="p-3 bg-gray-800">
                     {new Date(tx.transactionDateTime).toLocaleString("vi-VN")}
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 bg-gray-900">
                     <span
                       className={`px-2 py-1 text-sm rounded ${
                         tx.status === "PAID"
@@ -84,7 +88,10 @@ const Transaction = () => {
               ))}
               {transactions.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="text-center p-4 text-gray-400">
+                  <td
+                    colSpan="6"
+                    className="text-center p-4 text-gray-400 bg-gray-900"
+                  >
                     No transactions found.
                   </td>
                 </tr>

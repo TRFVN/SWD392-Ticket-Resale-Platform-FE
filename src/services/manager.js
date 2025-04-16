@@ -7,16 +7,19 @@ export const getRevenue = async () => {
     const startDate = "01/01/2000";
 
     const today = new Date();
-    const endDate = today.toLocaleDateString("en-US");
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
 
+    const endDate = tomorrow.toLocaleDateString("en-US");
     const response = await axiosInstance.get(`/api/revenue/profit`, {
       params: {
-        startDate,
-        endDate,
-        // pageNumber: 1,
-        // pageSize: 10,
+        startDate: startDate,
+        endDate: endDate,
+        pageNumber: 1,
+        pageSize: 10000,
       },
     });
+    console.log(response.data.result);
 
     return response.data.result;
   } catch (error) {
@@ -146,7 +149,12 @@ export const getTicketByEventId = async (eventId) => {
 };
 export const getOrganizer = async () => {
   try {
-    const response = await axiosInstance.get(`/api/revenue/organizer`);
+    const response = await axiosInstance.get(`/api/revenue/organizer`, {
+      params: {
+        pageNumber: 1,
+        pageSize: 1000,
+      },
+    });
     console.log(response.data.result);
 
     return response.data.result;
@@ -158,7 +166,12 @@ export const getOrganizer = async () => {
 
 export const getCustomer = async () => {
   try {
-    const response = await axiosInstance.get(`/api/revenue/customer`);
+    const response = await axiosInstance.get(`/api/revenue/customer`, {
+      params: {
+        pageNumber: 1,
+        pageSize: 1000,
+      },
+    });
     return response.data.result.customers;
   } catch (error) {
     console.log(error.message || "Lỗi khi lấy customer");
