@@ -25,7 +25,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               position="bottom-right"
               autoClose={5000}
               hideProgressBar={false}
-              newestOnTop={false}
+              newestOnTop
               closeOnClick
               rtl={false}
               pauseOnFocusLoss
@@ -33,6 +33,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               pauseOnHover
               theme="dark"
               className="custom-toast-container"
+              limit={2}
             />
           </ChatProvider>
         </AuthProvider>

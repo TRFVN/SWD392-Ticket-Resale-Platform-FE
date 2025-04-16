@@ -1,5 +1,4 @@
 import React, { useState, useEffect, memo, useCallback } from "react";
-import { motion } from "framer-motion";
 import { useNavigationItems } from "../../../hooks/useNavigationItems";
 import { Ticket, Calendar, MapPin, TrendingUp, PlusCircle } from "lucide-react";
 
@@ -26,13 +25,7 @@ const NavIcon = memo(({ id, isActive }) => {
 NavIcon.displayName = "NavIcon";
 
 /**
- * Enhanced Desktop Navigation
- *
- * - Cải thiện hiệu ứng với giảm thiểu sự dịch chuyển bố cục
- * - Tính năng truy cập tốt hơn với thuộc tính ARIA và điều hướng bàn phím
- * - Cải thiện phản hồi trực quan cho trạng thái tương tác
- * - Tối ưu hóa hiệu suất render
- * - Hành vi thích ứng dựa trên không gian có sẵn
+ * Desktop Navigation - Simplified for modern UI
  */
 const DesktopNav = () => {
   const { navItems, activeTab, setActiveTab, handleNavigation } =
@@ -64,18 +57,12 @@ const DesktopNav = () => {
   return (
     <nav className="overflow-hidden max-w-full" aria-label="Điều Hướng Chính">
       <div className="relative flex items-center gap-1 px-1 py-1">
-        {/* Animated indicator */}
-        <motion.div
-          className="absolute inset-0 h-full bg-orange-500/10 dark:bg-orange-500/20 rounded-lg"
-          initial={false}
-          animate={{
+        {/* Simplified indicator */}
+        <div
+          className="absolute inset-0 h-full bg-orange-500/10 dark:bg-orange-500/20 rounded-lg transition-all duration-300 ease-out"
+          style={{
             left: indicatorProps.left,
             width: indicatorProps.width,
-          }}
-          transition={{
-            type: "spring",
-            stiffness: 300,
-            damping: 30,
           }}
         />
 

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { ShoppingCart } from "lucide-react";
 import { useSelector } from "react-redux";
 import axiosInstance from "../../../config/axiosConfig";
 import { subscribeToCartUpdates } from "../../../utils/cartEvents";
 
+/**
+ * Cart button with simplified modern design
+ */
 const CartButton = () => {
   const [cartCount, setCartCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -45,22 +47,8 @@ const CartButton = () => {
     };
   }, []);
 
-  // Badge animation variants
-  const badgeVariants = {
-    initial: { scale: 0 },
-    animate: {
-      scale: 1,
-      transition: { type: "spring", stiffness: 500, damping: 25 },
-    },
-    exit: { scale: 0 },
-  };
-
   return (
-    <motion.div
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.95 }}
-      className="relative"
-    >
+    <div className="relative transition-transform duration-200 hover:scale-105">
       <button
         onClick={() => navigate("/cart")}
         className={`p-2 rounded-full transition-colors ${
@@ -72,21 +60,14 @@ const CartButton = () => {
       >
         <ShoppingCart className="w-5 h-5" />
 
-        {/* Badge with animation */}
+        {/* Badge - simplified */}
         {cartCount > 0 && (
-          <motion.span
-            className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-orange-500 rounded-full"
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            variants={badgeVariants}
-            key={cartCount} // Key change will trigger animation on count change
-          >
+          <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-orange-500 rounded-full">
             {cartCount > 99 ? "99+" : cartCount}
-          </motion.span>
+          </span>
         )}
       </button>
-    </motion.div>
+    </div>
   );
 };
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Sun, Moon } from "lucide-react";
-import { toggleTheme } from "../../../store/slice/themeSlice";
+import { HiMoon, HiSun } from "react-icons/hi";
+import { toggleTheme } from "../../store/slice/themeSlice";
 
 /**
  * Simple modern theme toggle button component
@@ -17,14 +17,19 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={handleToggle}
-      className="relative h-8 w-8 rounded-full bg-primary/10 dark:bg-gray-800 flex items-center 
-        justify-center hover:bg-primary/20 dark:hover:bg-gray-700 transition-colors duration-200 shadow-sm"
+      className={`fixed top-4 right-4 p-2 rounded-full z-50
+        ${
+          isDarkMode
+            ? "bg-gray-800 text-orange-400 hover:bg-gray-700"
+            : "bg-white text-orange-500 hover:bg-gray-100"
+        } 
+        shadow-md transition-colors duration-200`}
       aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
     >
       {isDarkMode ? (
-        <Moon className="w-4 h-4 text-gray-200" />
+        <HiSun className="w-5 h-5" />
       ) : (
-        <Sun className="w-4 h-4 text-primary" />
+        <HiMoon className="w-5 h-5" />
       )}
     </button>
   );

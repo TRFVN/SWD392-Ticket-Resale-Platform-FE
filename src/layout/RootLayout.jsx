@@ -7,6 +7,7 @@ import Loader from "../components/common/Loader";
 import Header from "../components/layout/Header";
 import BreadCrumb from "../components/common/BreadCrumb";
 import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
+import ErrorBoundary from "../components/common/ErrorBoundary";
 
 // Animation variants
 const pageTransition = {
@@ -32,19 +33,22 @@ const LoaderWrapper = () => (
 
 const AuthLayout = () => (
   <div className="min-h-screen dark:bg-gray-900 transition-colors duration-200">
-    <Suspense fallback={<LoaderWrapper />}>
-      <motion.div
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        variants={pageTransition}
-        className="p-4 sm:p-0"
-      >
-        <Outlet />
-      </motion.div>
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={<LoaderWrapper />}>
+        <motion.div
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          variants={pageTransition}
+          className="p-4 sm:p-0"
+        >
+          <Outlet />
+        </motion.div>
+      </Suspense>
+    </ErrorBoundary>
   </div>
 );
+
 const MainLayout = () => {
   const location = useLocation();
   const isProfilePage = location.pathname.startsWith("/profile");
@@ -67,47 +71,45 @@ const MainLayout = () => {
         overflow-x-hidden
       `}
       >
-        <Suspense fallback={<LoaderWrapper />}>
-          {isChatPage ? (
-            // Direct render without animations for chat
-            <div className="w-full h-full">
-              <Outlet />
-            </div>
-          ) : (
-            // Normal page rendering with animations
-            <motion.div
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              variants={pageTransition}
-              className="w-full max-w-[100vw] overflow-x-hidden"
-            >
-              {/* {!isProfilePage && (
-                <div className="mb-4">
-                  <BreadCrumb />
-                </div>
-              )} */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={location.pathname}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  variants={pageTransition}
-                  className="w-full"
-                >
-                  <Outlet />
-                </motion.div>
-              </AnimatePresence>
-            </motion.div>
-          )}
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<LoaderWrapper />}>
+            {isChatPage ? (
+              // Direct render without animations for chat
+              <div className="w-full h-full">
+                <Outlet />
+              </div>
+            ) : (
+              // Normal page rendering with animations
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageTransition}
+                className="w-full max-w-[100vw] overflow-x-hidden"
+              >
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={location.pathname}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    variants={pageTransition}
+                    className="w-full"
+                  >
+                    <Outlet />
+                  </motion.div>
+                </AnimatePresence>
+              </motion.div>
+            )}
+          </Suspense>
+        </ErrorBoundary>
       </main>
 
       {!isChatPage && <Footer />}
     </div>
   );
 };
+
 const RootLayout = () => {
   const { pathname } = useLocation();
   const isAuthPage = ["/login", "/signup", "/verifyemail"].includes(pathname);
@@ -150,17 +152,19 @@ const RootLayout = () => {
 
   return (
     <AnalyticsWrapper>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={isAuthPage ? "auth" : "main"}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          variants={pageTransition}
-        >
-          {isAuthPage ? <AuthLayout /> : <MainLayout />}
-        </motion.div>
-      </AnimatePresence>
+      <ErrorBoundary>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={isAuthPage ? "auth" : "main"}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            variants={pageTransition}
+          >
+            {isAuthPage ? <AuthLayout /> : <MainLayout />}
+          </motion.div>
+        </AnimatePresence>
+      </ErrorBoundary>
     </AnalyticsWrapper>
   );
 };

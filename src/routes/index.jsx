@@ -1,45 +1,67 @@
 // router/index.js
+import React, { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import RootLayout from "../layout/RootLayout";
-import Home from "../pages/home/Home";
-import SignUp from "../pages/auth/SignUp";
-import Login from "../pages/auth/Login";
-import About from "../pages/About/About";
-import Ticket from "../pages/tickets";
 import NotFound from "../pages/auth/NotFound";
-import Profile from "../pages/userprofile/Profile";
-import VerifyEmail from "../pages/auth/VerifyEmail";
 import PrivateRoute from "./PrivateRoute";
-import ForgotPassword from "../pages/auth/ForgotPassword";
-import Cart from "../pages/cart/cart";
-import ChatsPage from "../pages/Chatspage";
-import TicketDetailsPage from "../pages/tickets/TicketDetails";
-import Tickets from "../pages/Staff/Tickets";
-import Static from "../pages/Staff/Static";
-import Category from "../pages/Staff/Category";
-import StaffLayout from "../layout/StaffLayout";
-import CreateTicket from "../pages/User/Tickets/CreateTicket";
-import MyTicketsPage from "../pages/User/Tickets/MyTickets";
-import EventsPage from "../pages/tickets/Events/Event";
-import EventDetails from "../pages/tickets/Events/EventDetails";
-import Checkout from "../pages/checkout/Checkout";
-import OrderConfirmation from "../pages/order-confirmation/orderconfirmation";
-import ResetPassword from "../pages/auth/ResetPassword";
-import CreateEventPage from "../pages/CreateEvent/CreateEvent";
-import MyEvents from "../pages/tickets/Events/MyEvents";
-import EditEvent from "../pages/tickets/Events/EditEvent";
-import MenteeGathering from "../pages/mentee-gathering/MenteeGathering";
-import MissUniverseEvent from "../pages/miss-universe-event/MissUniverseEvent";
-import CriticalThinkingEvent from "../pages/critical-thinking-event/CriticalThinkingEvent";
-import ManagerLayout from "../layout/ManagerLayout";
-import ManagerDashboard from "../pages/Manager/Dashboard";
-import ManagerCategory from "../pages/Manager/Category";
-import ManagerEvent from "../pages/Manager/Event";
-import ManagerTicket from "../pages/Manager/Ticket";
-import ManagerAccount from "../pages/Manager/Account";
-import ManagerMessage from "../pages/Manager/Message";
-import ManagerReport from "../pages/Manager/Report";
-import ManagerSetting from "../pages/Manager/Setting";
+
+// Lazy loaded components
+const Home = lazy(() => import("../pages/home/Home"));
+const SignUp = lazy(() => import("../pages/auth/SignUp"));
+const Login = lazy(() => import("../pages/auth/Login"));
+const About = lazy(() => import("../pages/About/About"));
+const Ticket = lazy(() => import("../pages/tickets"));
+const Profile = lazy(() => import("../pages/userprofile/Profile"));
+const VerifyEmail = lazy(() => import("../pages/auth/VerifyEmail"));
+const ForgotPassword = lazy(() => import("../pages/auth/ForgotPassword"));
+const Cart = lazy(() => import("../pages/cart/cart"));
+const ChatsPage = lazy(() => import("../pages/Chatspage"));
+const TicketDetailsPage = lazy(() => import("../pages/tickets/TicketDetails"));
+const Tickets = lazy(() => import("../pages/Staff/Tickets"));
+const Static = lazy(() => import("../pages/Staff/Static"));
+const Category = lazy(() => import("../pages/Staff/Category"));
+const StaffLayout = lazy(() => import("../layout/StaffLayout"));
+const CreateTicket = lazy(() => import("../pages/User/Tickets/CreateTicket"));
+const MyTicketsPage = lazy(() => import("../pages/User/Tickets/MyTickets"));
+const EventsPage = lazy(() => import("../pages/tickets/Events/Event"));
+const EventDetails = lazy(() => import("../pages/tickets/Events/EventDetails"));
+const Checkout = lazy(() => import("../pages/checkout/Checkout"));
+const OrderConfirmation = lazy(() =>
+  import("../pages/order-confirmation/orderconfirmation"),
+);
+const ResetPassword = lazy(() => import("../pages/auth/ResetPassword"));
+const CreateEventPage = lazy(() => import("../pages/CreateEvent/CreateEvent"));
+const MyEvents = lazy(() => import("../pages/tickets/Events/MyEvents"));
+const EditEvent = lazy(() => import("../pages/tickets/Events/EditEvent"));
+const MenteeGathering = lazy(() =>
+  import("../pages/mentee-gathering/MenteeGathering"),
+);
+const MissUniverseEvent = lazy(() =>
+  import("../pages/miss-universe-event/MissUniverseEvent"),
+);
+const CriticalThinkingEvent = lazy(() =>
+  import("../pages/critical-thinking-event/CriticalThinkingEvent"),
+);
+const ManagerLayout = lazy(() => import("../layout/ManagerLayout"));
+const ManagerDashboard = lazy(() => import("../pages/Manager/Dashboard"));
+const ManagerCategory = lazy(() => import("../pages/Manager/Category"));
+const ManagerEvent = lazy(() => import("../pages/Manager/Event"));
+const ManagerTicket = lazy(() => import("../pages/Manager/Ticket"));
+const ManagerAccount = lazy(() => import("../pages/Manager/Account"));
+const ManagerMessage = lazy(() => import("../pages/Manager/Message"));
+const ManagerReport = lazy(() => import("../pages/Manager/Report"));
+const ManagerSetting = lazy(() => import("../pages/Manager/Setting"));
+
+// Loading component
+const LoadingFallback = () => (
+  <div className="flex h-screen w-full items-center justify-center">
+    <div className="h-16 w-16 animate-spin rounded-full border-4 border-solid border-orange-500 border-t-transparent"></div>
+  </div>
+);
+
+// Add display name for the component
+LoadingFallback.displayName = "LoadingFallback";
+
 const ROLES = {
   ADMIN: "ADMIN",
   STAFF: "STAFF",
@@ -48,57 +70,63 @@ const ROLES = {
   MANAGER: "MANAGER",
 };
 
+// Wrap component with Suspense
+const withSuspense = (Component) => {
+  const SuspenseWrapper = (props) => (
+    <Suspense fallback={<LoadingFallback />}>
+      <Component {...props} />
+    </Suspense>
+  );
+  SuspenseWrapper.displayName = `withSuspense(${
+    Component.displayName || Component.name || "Component"
+  })`;
+  return SuspenseWrapper;
+};
+
 const publicRoutes = [
-  { index: true, element: <Home /> },
-  { path: "login", element: <Login /> },
-  { path: "signup", element: <SignUp /> },
-  { path: "about", element: <About /> },
-  { path: "verify-email", element: <VerifyEmail /> },
-  { path: "forgot-password", element: <ForgotPassword /> },
-  { path: "reset-password", element: <ResetPassword /> },
-  { path: "mentee-gathering", element: <MenteeGathering /> },
-  { path: "miss-universe-event", element: <MissUniverseEvent /> },
+  { index: true, element: withSuspense(Home)() },
+  { path: "login", element: withSuspense(Login)() },
+  { path: "signup", element: withSuspense(SignUp)() },
+  { path: "about", element: withSuspense(About)() },
+  { path: "verify-email", element: withSuspense(VerifyEmail)() },
+  { path: "forgot-password", element: withSuspense(ForgotPassword)() },
+  { path: "reset-password", element: withSuspense(ResetPassword)() },
+  { path: "mentee-gathering", element: withSuspense(MenteeGathering)() },
+  { path: "miss-universe-event", element: withSuspense(MissUniverseEvent)() },
   {
     path: "/critical-thinking-event",
-    element: <CriticalThinkingEvent />,
+    element: withSuspense(CriticalThinkingEvent)(),
   },
   {
     path: "chat",
     children: [
-      { index: true, element: <ChatsPage /> },
-      { path: ":userId", element: <ChatsPage /> },
+      { index: true, element: withSuspense(ChatsPage)() },
+      { path: ":userId", element: withSuspense(ChatsPage)() },
     ],
   },
-  { path: "tickets", element: <Ticket /> },
-  { path: "events", element: <EventsPage /> },
-  { path: "events/:eventId", element: <EventDetails /> },
+  { path: "tickets", element: withSuspense(Ticket)() },
+  { path: "events", element: withSuspense(EventsPage)() },
+  { path: "events/:eventId", element: withSuspense(EventDetails)() },
 ];
 
 const privateRoutes = [
-  { path: "tickets/:ticketId", element: <TicketDetailsPage /> },
-  { path: "create-ticket", element: <CreateTicket /> },
-  { path: "profile", element: <Profile /> },
-  { path: "cart", element: <Cart /> },
-  // {
-  //   path: "chat",
-  //   children: [
-  //     { index: true, element: <ChatsPage /> },
-  //     { path: ":userId", element: <ChatsPage /> },
-  //   ],
-  // },
-  { path: "my-tickets", element: <MyTicketsPage /> },
-  { path: "checkout", element: <Checkout /> },
+  { path: "tickets/:ticketId", element: withSuspense(TicketDetailsPage)() },
+  { path: "create-ticket", element: withSuspense(CreateTicket)() },
+  { path: "profile", element: withSuspense(Profile)() },
+  { path: "cart", element: withSuspense(Cart)() },
+  { path: "my-tickets", element: withSuspense(MyTicketsPage)() },
+  { path: "checkout", element: withSuspense(Checkout)() },
   {
     path: "order-confirmation/:orderId",
-    element: <OrderConfirmation />,
+    element: withSuspense(OrderConfirmation)(),
   },
 ];
 
 // Routes only for organization users (non-members)
 const organizationRoutes = [
-  { path: "create-event", element: <CreateEventPage /> },
-  { path: "my-events", element: <MyEvents /> },
-  { path: "events/edit/:eventId", element: <EditEvent /> },
+  { path: "create-event", element: withSuspense(CreateEventPage)() },
+  { path: "my-events", element: withSuspense(MyEvents)() },
+  { path: "events/edit/:eventId", element: withSuspense(EditEvent)() },
   { path: "edit-event/:id", element: <div>Edit Event Page (Coming soon)</div> },
   {
     path: "event-tickets/:id",
@@ -133,17 +161,17 @@ export const router = createBrowserRouter([
     element: <PrivateRoute allowedRoles={[ROLES.MANAGER]} />,
     children: [
       {
-        element: <ManagerLayout />,
+        element: withSuspense(ManagerLayout)(),
         children: [
-          { path: "", element: <ManagerDashboard /> },
-          { path: "dashboard", element: <ManagerDashboard /> },
-          { path: "category", element: <ManagerCategory /> },
-          { path: "event", element: <ManagerEvent /> },
-          { path: "account", element: <ManagerAccount /> },
-          { path: "report", element: <ManagerReport /> },
-          { path: "ticket", element: <ManagerTicket /> },
-          { path: "message", element: <ManagerMessage /> },
-          { path: "setting", element: <ManagerSetting /> },
+          { path: "", element: withSuspense(ManagerDashboard)() },
+          { path: "dashboard", element: withSuspense(ManagerDashboard)() },
+          { path: "category", element: withSuspense(ManagerCategory)() },
+          { path: "event", element: withSuspense(ManagerEvent)() },
+          { path: "account", element: withSuspense(ManagerAccount)() },
+          { path: "report", element: withSuspense(ManagerReport)() },
+          { path: "ticket", element: withSuspense(ManagerTicket)() },
+          { path: "message", element: withSuspense(ManagerMessage)() },
+          { path: "setting", element: withSuspense(ManagerSetting)() },
         ],
       },
     ],
@@ -153,11 +181,11 @@ export const router = createBrowserRouter([
     element: <PrivateRoute allowedRoles={[ROLES.STAFF]} />,
     children: [
       {
-        element: <StaffLayout />,
+        element: withSuspense(StaffLayout)(),
         children: [
-          { path: "tickets", element: <Tickets /> },
-          { path: "static", element: <Static /> },
-          { path: "category", element: <Category /> },
+          { path: "tickets", element: withSuspense(Tickets)() },
+          { path: "static", element: withSuspense(Static)() },
+          { path: "category", element: withSuspense(Category)() },
         ],
       },
     ],
