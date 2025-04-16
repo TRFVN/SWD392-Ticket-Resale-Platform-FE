@@ -45,7 +45,7 @@ export const getTicketByIdApi = async (ticketId) => {
 
 export const GetUserTicket = async () => {
   try {
-    const rs = await axiosInstance.get("/Tickets/user");
+    const rs = await axiosInstance.get("/Tickets/customer");
     if (rs.status === 200) {
       return rs.data.result;
     } else {

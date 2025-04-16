@@ -13,7 +13,7 @@ export const useTickets = (type = "all") => {
         let response;
 
         if (type === "user") {
-          response = await axiosInstance.get("api/Tickets/user");
+          response = await axiosInstance.get("api/Tickets/customer");
         } else {
           response = await axiosInstance.get("api/tickets");
         }
@@ -41,7 +41,7 @@ export const useTickets = (type = "all") => {
     setLoading(true);
     try {
       const response = await axiosInstance.get(
-        type === "user" ? "/Tickets/user" : "/tickets",
+        type === "user" ? "/Tickets/customer" : "/tickets",
       );
 
       if (response.status === 200 && response.data.isSuccess) {
@@ -71,7 +71,7 @@ export const useTickets = (type = "all") => {
 // Separate utility function for one-off user ticket fetching
 export const getUserTickets = async () => {
   try {
-    const response = await axiosInstance.get("/Tickets/user");
+    const response = await axiosInstance.get("/Tickets/customer");
     if (response.status === 200) {
       return response.data.result;
     } else {
